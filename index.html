@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,6 +13,7 @@
             gap: 10px;
             margin-top: 15px;
         }
+
         .btn-historial {
             background-color: #64748b;
             color: white;
@@ -22,12 +24,15 @@
             font-weight: bold;
             transition: background 0.3s;
         }
+
         .btn-historial:hover {
             background-color: #475569;
         }
+
         .oculto {
             display: none;
         }
+
         .badge-devuelto {
             background-color: #d1fae5;
             color: #065f46;
@@ -36,6 +41,7 @@
             font-size: 0.85em;
             font-weight: bold;
         }
+
         .badge-uso {
             background-color: #fee2e2;
             color: #991b1b;
@@ -46,6 +52,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <div class="container">
@@ -53,7 +60,7 @@
             <h1>🖥️ RoomControl</h1>
             <p>Control de Préstamo de Equipamiento Informático</p>
         </header>
-        
+
         <div class="card">
             <h2>Registrar Nuevo Préstamo</h2>
             <form id="form-prestamo">
@@ -64,12 +71,29 @@
                     </select>
                 </div>
 
-                <div class="form-group">
-                    <label for="equipo">Equipo a prestar:</label>
-                    <select id="equipo" required>
-                        <option value="">-- Seleccionar Equipo --</option>
-                    </select>
-                </div>
+              <div class="form-group">
+            <label>Seleccionar Equipo:</label>
+            <button type="button" id="btn-abrir-modal" style="width: 100%; background-color: #2563eb; color: white; border: none; padding: 12px; border-radius: 6px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 5px; margin-bottom: 15px;">
+                Cambiar / Seleccionar Equipo
+            </button>
+        </div>
+
+        <div id="modal-equipos" class="modal oculto">
+            <div class="modal-contenido">
+                <h3>Seleccionar Equipos</h3>
+                <div id="contenedor-equipos" class="grilla-equipos"></div>
+                
+                <button type="button" id="btn-confirmar-seleccion-modal" style="width: 100%; background-color: #2563eb; color: white; border: none; padding: 12px; border-radius: 6px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 15px; margin-bottom: 5px;">
+                    Seleccionar
+                </button>
+                
+                <button type="button" class="btn-historial" onclick="cerrarModal()" style="width: 100%;">Cancelar / Cerrar</button>
+            </div>
+        </div>
+
+        <input type="hidden" id="input-equipo-oculto">
+
+                <input type="hidden" id="input-equipo-oculto" required>
 
                 <div class="form-group">
                     <label for="observaciones">Observaciones / Ubicación:</label>
@@ -77,8 +101,11 @@
                 </div>
 
                 <div class="btn-group">
-                    <button type="submit" class="btn-guardar" style="flex: 2;">Confirmar Préstamo</button>
-                    <button type="button" id="btn-ver-registros" class="btn-historial" style="flex: 1;">📅 Registros Diarios</button>
+                   <button type="button" id="btn-registrar-prestamo" class="btn-guardar">
+    Confirmar Préstamo
+</button>
+                    <button type="button" id="btn-ver-registros" class="btn-historial" style="flex: 1;">📅 Registros
+                        Diarios</button>
                 </div>
             </form>
         </div>
@@ -97,7 +124,7 @@
                         </tr>
                     </thead>
                     <tbody id="tabla-prestamos">
-                        </tbody>
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -116,7 +143,7 @@
                         </tr>
                     </thead>
                     <tbody id="tabla-registros-diarios">
-                        </tbody>
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -125,4 +152,5 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="src/app.js"></script>
 </body>
+
 </html>
