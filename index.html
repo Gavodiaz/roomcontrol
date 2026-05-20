@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RoomControl - Gestión de Equipamiento</title>
+    <link rel="stylesheet" href="sass/style.css">
+    <style>
+        /* Unos pequeños estilos rápidos para acomodar el botón nuevo y la sección oculta */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .btn-historial {
+            background-color: #64748b;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        .btn-historial:hover {
+            background-color: #475569;
+        }
+        .oculto {
+            display: none;
+        }
+        .badge-devuelto {
+            background-color: #d1fae5;
+            color: #065f46;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+        .badge-uso {
+            background-color: #fee2e2;
+            color: #991b1b;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header class="app-header">
+            <h1>🖥️ RoomControl</h1>
+            <p>Control de Préstamo de Equipamiento Informático</p>
+        </header>
+        
+        <div class="card">
+            <h2>Registrar Nuevo Préstamo</h2>
+            <form id="form-prestamo">
+                <div class="form-group">
+                    <label for="docente">Seleccionar Docente:</label>
+                    <select id="docente" required>
+                        <option value="">-- Cargando docentes... --</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="equipo">Equipo a prestar:</label>
+                    <select id="equipo" required>
+                        <option value="">-- Seleccionar Equipo --</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="observaciones">Observaciones / Ubicación:</label>
+                    <input type="text" id="observaciones" placeholder="Ej: Aula 4, 2do módulo">
+                </div>
+
+                <div class="btn-group">
+                    <button type="submit" class="btn-guardar" style="flex: 2;">Confirmar Préstamo</button>
+                    <button type="button" id="btn-ver-registros" class="btn-historial" style="flex: 1;">📅 Registros Diarios</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>Equipos en Uso</h2>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Docente</th>
+                            <th>Equipo</th>
+                            <th>Fecha / Hora</th>
+                            <th>Observaciones</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-prestamos">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="seccion-registros-diarios" class="card oculto">
+            <h2>Movimientos del Día de Hoy</h2>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Docente</th>
+                            <th>Equipo</th>
+                            <th>Salida</th>
+                            <th>Devolución</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-registros-diarios">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="src/app.js"></script>
+</body>
+</html>
