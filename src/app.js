@@ -1,6 +1,21 @@
 // app.js
-import { renderDocentes, renderEquipos, renderTablaPrestamos, renderHistorialDiario, abrirModal, cerrarModal } from './modules/ui.js';
-import { insertarPrestamoCabecera, insertarPrestamoDetalle, actualizarEstadoEquipo, registrarFechaDevolucion, getDetallesDePrestamo, devolverEquipoIndividual, agregarEquipoAlDetalle } from './modules/api.js';
+import { renderDocentes, 
+    renderEquipos, 
+    renderTablaPrestamos, 
+    renderHistorialDiario, 
+    abrirModal, 
+    cerrarModal,
+    renderHistorialEnModal
+} from './modules/ui.js';
+import { insertarPrestamoCabecera, 
+    insertarPrestamoDetalle, 
+    actualizarEstadoEquipo,
+    registrarFechaDevolucion, 
+    getDetallesDePrestamo,
+    devolverEquipoIndividual,
+    agregarEquipoAlDetalle,
+    getPrestamosPorFecha
+    } from './modules/api.js';
 
 // Un objeto "estado" temporal para compartir la selección de equipos entre el modal y el guardado
 const appState = {
@@ -201,3 +216,39 @@ document.getElementById('btn-ver-registros').addEventListener('click', async () 
     seccionDiaria.classList.remove('oculto');
     await renderHistorialDiario();
 });
+
+
+// CONTROL DEL MODAL DE HISTORIAL DIARIO
+const modalHistorial = document.getElementById('modal-historial');
+const inputFecha = document.getElementById('fecha-busqueda');
+
+// 1. Abrir el modal al hacer clic en Registros Diarios
+document.getElementById('btn-ver-registros').addEventListener('click', async () => {
+    // Ponemos por defecto la fecha de hoy en el calendario (formato YYYY-MM-DD)
+    if (!inputFecha.value) {
+        const hoy = new Date().toISOString().split('T')[0];
+        inputFecha.value = hoy;
+    }
+    
+    // Mostramos el modal usando Flexbox para centrarlo
+    modalHistorial.style.display = 'flex';
+    
+    // Cargamos los datos del día
+    await cargarHistorialPorFecha(inputFecha.value);
+});
+
+// 2. Escuchar cuando el preceptor cambia la fecha en el calendario
+inputFecha.addEventListener('change', async (e) => {
+    await cargarHistorialPorFecha(e.target.value);
+});
+
+// 3. Cerrar el modal al tocar la "X"
+document.getElementById('btn-cerrar-historial').addEventListener('click', () => {
+    modalHistorial.style.display = 'none';
+});
+
+// Función interna auxiliar para coordinar la búsqueda y el dibujado
+async function cargarHistorialPorFecha(fecha) {
+    const registros = await getPrestamosPorFecha(fecha);
+    renderHistorialEnModal(registros);
+}

@@ -129,3 +129,34 @@ export async function agregarEquipoAlDetalle(prestamoId, equipoId) {
     if (error) throw error;
     return data;
 }
+
+//Consulta que trae los registros por fecha (boton registros)
+
+export async function getPrestamosPorFecha(fechaFormatoISO) {
+    // fechaFormatoISO viene como "YYYY-MM-DD" desde el input date
+    const inicioDia = `${fechaFormatoISO}T00:00:00.000Z`;
+    const finDia = `${fechaFormatoISO}T23:59:59.999Z`;
+
+    const { data, error } = await supabaseClient
+        .from('prestamos')
+        .select(`
+            id,
+            fecha_salida,
+            fecha_devolucion,
+            observaciones,
+            usuarios ( nombre_completo ),
+            detalle_prestamos (
+                fecha_devolucion,
+                equipos ( nombre )
+            )
+        `)
+        .gte('fecha_salida', inicioDia)
+        .lte('fecha_salida', finDia)
+        .order('fecha_salida', { ascending: false });
+
+    if (error) {
+        console.error("Error al traer historial:", error);
+        return [];
+    }
+    return data;
+}

@@ -27,7 +27,7 @@ export async function renderEquipos(state) {
     try {
         const equipos = await getEquipos(); // Le pedimos los equipos a api.js
         contenedor.innerHTML = '';
-        
+
         // Reiniciamos las selecciones en el estado temporal
         state.idsSeleccionados = [];
         state.nombresSeleccionados = [];
@@ -46,7 +46,7 @@ export async function renderEquipos(state) {
             btn.textContent = eq.nombre;
             btn.type = "button";
             btn.className = `btn-equipo ${eq.estado.toLowerCase()}`;
-            
+
             if (eq.estado.toLowerCase() === 'disponible') {
                 btn.addEventListener('click', () => {
                     if (btn.classList.contains('seleccionado')) {
@@ -76,13 +76,13 @@ export async function renderTablaPrestamos() {
     if (!tabla) return;
 
     // FORZAMOS LA LIMPIEZA TOTAL: Esto asegura que no quede nada de la ejecución anterior
-    tabla.innerHTML = ''; 
+    tabla.innerHTML = '';
 
     try {
         const listaPrestamos = await getPrestamosActivos();
-    
-    // 2. Limpiamos la tabla ANTES de empezar a iterar
-    tabla.innerHTML = '';
+
+        // 2. Limpiamos la tabla ANTES de empezar a iterar
+        tabla.innerHTML = '';
 
         if (listaPrestamos.length === 0) {
             tabla.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #64748b;">No hay equipos prestados en este momento.</td></tr>`;
@@ -91,26 +91,26 @@ export async function renderTablaPrestamos() {
 
         // Armamos las filas de la tabla mezclando la cabecera y el lote de equipos
         console.log("Limpiando tabla. ¿Cuántos hijos tiene ahora?:", tabla.children.length);
-      for (const prestamo of listaPrestamos) {
-        const detalles = await getDetallesDePrestamo(prestamo.id);
-        console.log(`Préstamo ID ${prestamo.id} - Detalles que llegan a la UI:`, detalles);
-        // Mapeamos TODOS los detalles, decidiendo qué mostrar para cada uno
-       // Mapeamos los detalles dándole formato de Chips/Etiquetas horizontales con Flexbox
-        let equiposMostrados = `<div style="display: flex; flex-wrap: wrap; gap: 6px; max-width: 450px; justify-content: flex-start; vertical-align: middle;">`;
+        for (const prestamo of listaPrestamos) {
+            const detalles = await getDetallesDePrestamo(prestamo.id);
+            console.log(`Préstamo ID ${prestamo.id} - Detalles que llegan a la UI:`, detalles);
+            // Mapeamos TODOS los detalles, decidiendo qué mostrar para cada uno
+            // Mapeamos los detalles dándole formato de Chips/Etiquetas horizontales con Flexbox
+            let equiposMostrados = `<div style="display: flex; flex-wrap: wrap; gap: 6px; max-width: 450px; justify-content: flex-start; vertical-align: middle;">`;
 
-        if (detalles && detalles.length > 0) {
-            equiposMostrados += detalles.map(d => {
-                // Si TIENE fecha de devolución, lo dejamos tachado de forma discreta o lo ocultás si preferís
-                if (d.fecha_devolucion) {
-                    return `
+            if (detalles && detalles.length > 0) {
+                equiposMostrados += detalles.map(d => {
+                    // Si TIENE fecha de devolución, lo dejamos tachado de forma discreta o lo ocultás si preferís
+                    if (d.fecha_devolucion) {
+                        return `
                         <div style="display: inline-flex; align-items: center; background-color: #e9ecef; border: 1px dashed #ced4da; border-radius: 16px; padding: 4px 10px; font-size: 12px; color: #6c757d; text-decoration: line-through; opacity: 0.7; white-space: nowrap;">
                             <span>${d.equipos?.nombre || 'Equipo'}</span>
                             <span style="font-size: 10px; margin-left: 5px; font-style: italic; text-decoration: none;">(Devuelto)</span>
                         </div>
                     `;
-                } else {
-                    // Si NO tiene fecha, dibujamos la etiqueta activa con la ✕ roja minimalista
-                    return `
+                    } else {
+                        // Si NO tiene fecha, dibujamos la etiqueta activa con la ✕ roja minimalista
+                        return `
                         <div style="display: inline-flex; align-items: center; background-color: #f1f3f5; border: 1px solid #ced4da; border-radius: 16px; padding: 4px 10px; font-size: 12px; font-weight: bold; color: #495057; white-space: nowrap;">
                             <span>${d.equipos?.nombre || 'Equipo'}</span>
                             <button class="btn-devolver-uno" 
@@ -122,19 +122,19 @@ export async function renderTablaPrestamos() {
                             </button>
                         </div>
                     `;
-                }
-            }).join('');
-        } else {
-            equiposMostrados += `<span style="color: #6c757d; font-style: italic;">Sin equipos</span>`;
-        }
+                    }
+                }).join('');
+            } else {
+                equiposMostrados += `<span style="color: #6c757d; font-style: italic;">Sin equipos</span>`;
+            }
 
-        equiposMostrados += `</div>`;
+            equiposMostrados += `</div>`;
 
-        // Creamos la fila siempre
-        const fila = document.createElement('tr');
-        const fechaFormateada = new Date(prestamo.fecha_salida).toLocaleString('es-AR');
-        
-       fila.innerHTML = `
+            // Creamos la fila siempre
+            const fila = document.createElement('tr');
+            const fechaFormateada = new Date(prestamo.fecha_salida).toLocaleString('es-AR');
+
+            fila.innerHTML = `
             <td style="vertical-align: middle;">${prestamo.usuarios?.nombre_completo || 'N/A'}</td>
             <td style="vertical-align: middle;">${equiposMostrados}</td>
             <td style="vertical-align: middle; white-space: nowrap;">${fechaFormateada}</td>
@@ -154,8 +154,8 @@ export async function renderTablaPrestamos() {
                 </div>
             </td>
         `;
-        tabla.appendChild(fila);
-    }
+            tabla.appendChild(fila);
+        }
     } catch (err) {
         console.error("Error UI Tabla Préstamos:", err);
         tabla.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red;">Error de sincronización.</td></tr>';
@@ -166,13 +166,13 @@ export async function renderTablaPrestamos() {
 export async function renderHistorialDiario() {
     const tablaDiaria = document.getElementById('tabla-registros-diarios');
     if (!tablaDiaria) return;
-    
+
     tablaDiaria.innerHTML = '<tr><td colspan="5" style="text-align:center;">Buscando movimientos de hoy...</td></tr>';
 
     try {
         const hoy = new Date();
         const stringInicioHoy = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}T00:00:00`;
-        
+
         const registrosHoy = await getRegistrosDelDia(stringInicioHoy);
         tablaDiaria.innerHTML = '';
 
@@ -184,11 +184,11 @@ export async function renderHistorialDiario() {
         registrosHoy.forEach(reg => {
             const fila = document.createElement('tr');
             const horaSalida = new Date(reg.fecha_salida).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
-            const horaDevolucion = reg.fecha_devolucion 
+            const horaDevolucion = reg.fecha_devolucion
                 ? new Date(reg.fecha_devolucion).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })
                 : '—';
-            const etiquetaEstado = reg.fecha_devolucion 
-                ? '<span class="badge-devuelto">Devuelto</span>' 
+            const etiquetaEstado = reg.fecha_devolucion
+                ? '<span class="badge-devuelto">Devuelto</span>'
                 : '<span class="badge-uso">En Uso</span>';
 
             fila.innerHTML = `
@@ -213,4 +213,72 @@ export function abrirModal() {
 
 export function cerrarModal() {
     document.getElementById('modal-equipos').classList.add('oculto');
+}
+
+
+
+
+//Funcion que renderiza la tabla de historial (boton historial)
+export function renderHistorialEnModal(prestamos) {
+    const cuerpoTabla = document.getElementById('tabla-historial-cuerpo');
+    cuerpoTabla.innerHTML = '';
+
+    if (!prestamos || prestamos.length === 0) {
+        cuerpoTabla.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #6c757d; font-style: italic; padding: 20px;">No se registraron préstamos en la fecha seleccionada.</td></tr>`;
+        return;
+    }
+
+    prestamos.forEach(p => {
+        const fila = document.createElement('tr');
+
+        // Formateamos la hora de salida
+        const horaSalida = new Date(p.fecha_salida).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+
+        // Procesamos los equipos como chips compactos (gris oscuro si se devolvió, rojo si quedó pendiente)
+        let chipsEquipos = `<div style="display: flex; flex-wrap: wrap; gap: 4px;">`;
+        let todasLasDevoluciones = [];
+
+        if (p.detalle_prestamos && p.detalle_prestamos.length > 0) {
+            p.detalle_prestamos.forEach(d => {
+                const colorBorde = d.fecha_devolucion ? '#ced4da' : '#ffc107';
+                const colorTexto = d.fecha_devolucion ? '#6c757d' : '#856404';
+                const estiloTachado = d.fecha_devolucion ? 'text-decoration: line-through;' : '';
+
+                if (d.fecha_devolucion) {
+                    todasLasDevoluciones.push(new Date(d.fecha_devolucion));
+                }
+
+                chipsEquipos += `
+                    <div style="display: inline-flex; background-color: #f8f9fa; border: 1px solid ${colorBorde}; border-radius: 12px; padding: 2px 8px; font-size: 11px; color: ${colorTexto}; ${estiloTachado}">
+                        ${d.equipos?.nombre || 'Equipo'}
+                    </div>
+                `;
+            });
+        }
+        chipsEquipos += `</div>`;
+
+        // Calculamos hora general de cierre de lote (agarramos la última devolución como referencia)
+        let horaDevolucionTotal = `<span style="color: #dc3545; font-weight: bold;">Incompleto</span>`;
+        if (p.detalle_prestamos && p.detalle_prestamos.every(d => d.fecha_devolucion) && p.detalle_prestamos.length > 0) {
+            // Si el formato nuevo de lotes tiene todas las devoluciones hechas
+            const todasLasDevoluciones = p.detalle_prestamos.map(d => new Date(d.fecha_devolucion));
+            const ultimaDevo = new Date(Math.max(...todasLasDevoluciones));
+            horaDevolucionTotal = ultimaDevo.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }) + ' hs';
+        }
+        // 🚀 EL SALVAVIDAS: Si lo anterior dio incompleto pero la tabla principal TIENE fecha_devolucion
+        else if (p.fecha_devolucion) {
+            const dateDevo = new Date(p.fecha_devolucion);
+            horaDevolucionTotal = dateDevo.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }) + ' hs';
+        }
+
+        fila.innerHTML = `
+            <td>${p.usuarios?.nombre_completo || 'N/A'}</td>
+            <td>${chipsEquipos}</td>
+            <td>${horaSalida} hs</td>
+            <td>${horaDevolucionTotal}</td>
+            <td style="color: #6c757d; font-size: 13px;">${p.observaciones || '-'}</td>
+        `;
+
+        cuerpoTabla.appendChild(fila);
+    });
 }
