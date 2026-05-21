@@ -114,3 +114,18 @@ export async function devolverEquipoIndividual(prestamoId, equipoId) {
     if (error) throw error;
 }
 
+//Agrega equipos parciales al lote 
+export async function agregarEquipoAlDetalle(prestamoId, equipoId) {
+    const { data, error } = await supabaseClient
+        .from('detalle_prestamos')
+        .insert([
+            { 
+                prestamo_id: prestamoId, 
+                equipo_id: equipoId,
+                fecha_devolucion: null // Entra activo listo para usar
+            }
+        ]);
+
+    if (error) throw error;
+    return data;
+}

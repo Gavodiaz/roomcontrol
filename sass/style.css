@@ -17,7 +17,8 @@ body {
 }
 
 .container {
-    max-width: 900px;
+    width: 95%;
+    max-width: 1400px; /* Al subirlo a 1400px, la pantalla gana un 55% más de espacio horizontal */
     margin: 0 auto;
 }
 

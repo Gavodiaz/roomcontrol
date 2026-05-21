@@ -1,12 +1,13 @@
 // app.js
 import { renderDocentes, renderEquipos, renderTablaPrestamos, renderHistorialDiario, abrirModal, cerrarModal } from './modules/ui.js';
-import { insertarPrestamoCabecera, insertarPrestamoDetalle, actualizarEstadoEquipo, registrarFechaDevolucion, getDetallesDePrestamo, devolverEquipoIndividual } from './modules/api.js';
+import { insertarPrestamoCabecera, insertarPrestamoDetalle, actualizarEstadoEquipo, registrarFechaDevolucion, getDetallesDePrestamo, devolverEquipoIndividual, agregarEquipoAlDetalle } from './modules/api.js';
 
 // Un objeto "estado" temporal para compartir la selección de equipos entre el modal y el guardado
 const appState = {
     idsSeleccionados: [],
     nombresSeleccionados: []
 };
+let prestamoSeleccionadoId = null;
 
 // 1. INICIALIZACIÓN: Cuando se abre la página, mandamos a pintar todo
 document.addEventListener('DOMContentLoaded', async () => {
@@ -20,25 +21,62 @@ document.getElementById('btn-abrir-modal').addEventListener('click', abrirModal)
 
 // Cancelar/Cerrar del Modal (Limpiamos cualquier onclick viejo del HTML)
 document.querySelector('.btn-historial[onclick="cerrarModal()"]')?.removeAttribute('onclick'); 
-document.querySelector('.btn-historial')?.addEventListener('click', cerrarModal);
+document.querySelector('.btn-historial')?.addEventListener('click', () => {
+    // 🔍 ¡ESTE ES EL DETALLE!: Si cierran el modal tocando "Cancelar", limpiamos la memoria
+    prestamoSeleccionadoId = null; 
+    appState.idsSeleccionados = [];
+    appState.nombresSeleccionados = [];
+    cerrarModal(); // Ejecuta la función visual original que viene de ui.js
+});
 
 // Confirmar la selección adentro del modal
-document.getElementById('btn-confirmar-seleccion-modal').addEventListener('click', () => {
+document.getElementById('btn-confirmar-seleccion-modal').addEventListener('click', async () => {
     if (appState.idsSeleccionados.length === 0) {
         alert("Por favor, selecciona al menos un equipo antes de confirmar.");
         return;
     }
-    
-    // Guardamos los IDs en el input oculto separados por comas
-    document.getElementById('input-equipo-oculto').value = appState.idsSeleccionados.join(',');
-    
-    const botonAfuera = document.getElementById('btn-abrir-modal');
-    if (appState.nombresSeleccionados.length <= 2) {
-        botonAfuera.textContent = `Equipos: ${appState.nombresSeleccionados.join(', ')}`;
+
+    // 🔍 ¡EL CAMBIO CLAVE!: Evaluamos si venimos de presionar el botón "Agregar" de la tabla
+    if (prestamoSeleccionadoId !== null) {
+        try {
+            // Recorremos los equipos tildados e insertamos directo uno por uno en Supabase
+            for (const equipoId of appState.idsSeleccionados) {
+                await agregarEquipoAlDetalle(prestamoSeleccionadoId, equipoId);
+                // Cambiamos el estado del equipo en el inventario a 'Prestado'
+                await actualizarEstadoEquipo(equipoId, 'Prestado');
+            }
+
+            alert("¡Equipo(s) agregado(s) con éxito al lote!");
+
+            // Limpiamos el estado para que no interfiera en futuros préstamos
+            prestamoSeleccionadoId = null;
+            appState.idsSeleccionados = [];
+            appState.nombresSeleccionados = [];
+
+            // Cerramos el modal usando tu función nativa
+            cerrarModal(); 
+
+            // Refrescamos la tabla para que impacte el cambio visual en la pantalla al instante
+            await renderTablaPrestamos();
+            await renderEquipos(appState);
+
+        } catch (error) {
+            console.error("Error al agregar el equipo parcial:", error);
+            alert("Hubo un error al agregar el equipo a la base de datos.");
+        }
     } else {
-        botonAfuera.textContent = `Equipos: (${appState.idsSeleccionados.length}) seleccionados`;
+        // --- CASO NORMAL: TU CÓDIGO VIEJO DE SIEMPRE PARA PRÉSTAMO NUEVO ---
+        // Guardamos los IDs en el input oculto separados por comas
+        document.getElementById('input-equipo-oculto').value = appState.idsSeleccionados.join(',');
+
+        if (appState.nombresSeleccionados.length <= 2) {
+            document.getElementById('btn-abrir-modal').textContent = `Equipos: ${appState.nombresSeleccionados.join(', ')}`;
+        } else {
+            document.getElementById('btn-abrir-modal').textContent = `Equipos: (${appState.idsSeleccionados.length}) seleccionados`;
+        }
+        
+        cerrarModal();
     }
-    cerrarModal();
 });
 
 // 3. EVENTO PARA GUARDAR EL PRÉSTAMO (Clic en Registrar)
@@ -87,7 +125,6 @@ if (btnRegistrar) {
     });
 }
 
-
 // 4. ESCUCHADOR DE DEVOLUCIONES (Captura el clic en los botones de la tabla)
 document.getElementById('tabla-prestamos').addEventListener('click', async (e) => {
     
@@ -133,6 +170,21 @@ document.getElementById('tabla-prestamos').addEventListener('click', async (e) =
                 alert("No se pudo procesar la devolución.");
             }
         }
+        return;
+    }
+
+    // Caso C agregar un equipo parcial al registro (botón agregar)
+    else if (e.target && e.target.classList.contains('btn-agregar-parcial')) {
+        const prestamoId = e.target.getAttribute('data-id');
+        
+        // 1. Guardamos el ID del préstamo en la variable global
+        prestamoSeleccionadoId = prestamoId;
+        
+        // 2. Ejecutamos la función que lee Supabase y dibuja los cuadraditos disponibles
+        await renderEquipos(appState);
+        
+        // 3. ¡Ejecutamos tu función nativa para abrir la ventana emergente!
+        abrirModal();
     }
 });
 

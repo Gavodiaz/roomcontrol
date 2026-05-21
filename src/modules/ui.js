@@ -95,40 +95,63 @@ export async function renderTablaPrestamos() {
         const detalles = await getDetallesDePrestamo(prestamo.id);
         console.log(`Préstamo ID ${prestamo.id} - Detalles que llegan a la UI:`, detalles);
         // Mapeamos TODOS los detalles, decidiendo qué mostrar para cada uno
-        let equiposMostrados = detalles.map(d => {
-            // Si TIENE fecha de devolución, ocultamos el botón y lo marcamos
-            if (d.fecha_devolucion) {
-                return `
-                    <span style="display:block; margin-bottom:5px; color: #888;">
-                        <s>${d.equipos?.nombre}</s> <em>(Devuelto)</em>
-                    </span>
-                `;
-            } else {
-                // Si NO tiene fecha, dibujamos el equipo con su botón normal
-                return `
-                    <span style="display:block; margin-bottom:5px;">
-                        ${d.equipos?.nombre} 
-                        <button class="btn-devolver-uno" 
-                                data-prestamo="${prestamo.id}" 
-                                data-equipo="${d.equipo_id}">
-                            Devolver
-                        </button>
-                    </span>
-                `;
-            }
-        }).join('');
+       // Mapeamos los detalles dándole formato de Chips/Etiquetas horizontales con Flexbox
+        let equiposMostrados = `<div style="display: flex; flex-wrap: wrap; gap: 6px; max-width: 450px; justify-content: flex-start; vertical-align: middle;">`;
+
+        if (detalles && detalles.length > 0) {
+            equiposMostrados += detalles.map(d => {
+                // Si TIENE fecha de devolución, lo dejamos tachado de forma discreta o lo ocultás si preferís
+                if (d.fecha_devolucion) {
+                    return `
+                        <div style="display: inline-flex; align-items: center; background-color: #e9ecef; border: 1px dashed #ced4da; border-radius: 16px; padding: 4px 10px; font-size: 12px; color: #6c757d; text-decoration: line-through; opacity: 0.7; white-space: nowrap;">
+                            <span>${d.equipos?.nombre || 'Equipo'}</span>
+                            <span style="font-size: 10px; margin-left: 5px; font-style: italic; text-decoration: none;">(Devuelto)</span>
+                        </div>
+                    `;
+                } else {
+                    // Si NO tiene fecha, dibujamos la etiqueta activa con la ✕ roja minimalista
+                    return `
+                        <div style="display: inline-flex; align-items: center; background-color: #f1f3f5; border: 1px solid #ced4da; border-radius: 16px; padding: 4px 10px; font-size: 12px; font-weight: bold; color: #495057; white-space: nowrap;">
+                            <span>${d.equipos?.nombre || 'Equipo'}</span>
+                            <button class="btn-devolver-uno" 
+                                    data-prestamo="${d.prestamo_id}" 
+                                    data-equipo="${d.equipo_id}" 
+                                    style="background: none; border: none; color: #dc3545; font-weight: bold; margin-left: 8px; cursor: pointer; font-size: 13px; padding: 0 2px; line-height: 1;"
+                                    title="Devolver este equipo">
+                                ✕
+                            </button>
+                        </div>
+                    `;
+                }
+            }).join('');
+        } else {
+            equiposMostrados += `<span style="color: #6c757d; font-style: italic;">Sin equipos</span>`;
+        }
+
+        equiposMostrados += `</div>`;
 
         // Creamos la fila siempre
         const fila = document.createElement('tr');
         const fechaFormateada = new Date(prestamo.fecha_salida).toLocaleString('es-AR');
         
        fila.innerHTML = `
-            <td>${prestamo.usuarios?.nombre_completo || 'N/A'}</td>
-            <td>${equiposMostrados}</td>
-            <td>${fechaFormateada}</td>
-            <td>${prestamo.observaciones || 'Sin observaciones'}</td>
-            <td>
-                <button class="btn-devolver" data-id="${prestamo.id}">Cerrar Lote</button>
+            <td style="vertical-align: middle;">${prestamo.usuarios?.nombre_completo || 'N/A'}</td>
+            <td style="vertical-align: middle;">${equiposMostrados}</td>
+            <td style="vertical-align: middle; white-space: nowrap;">${fechaFormateada}</td>
+            
+            <td style="vertical-align: middle;">
+                <div style="display: flex; flex-direction: column; gap: 6px; justify-content: center; align-items: center; min-width: 110px;">
+                    <button class="btn-agregar-parcial"
+                            data-id="${prestamo.id}"
+                            style="background-color: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; text-align: center;">
+                        Agregar
+                    </button>
+                    <button class="btn-devolver"
+                            data-id="${prestamo.id}"
+                            style="background-color: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; text-align: center;">
+                        Cerrar Lote
+                    </button>
+                </div>
             </td>
         `;
         tabla.appendChild(fila);
