@@ -5,7 +5,8 @@ import { renderDocentes,
     renderHistorialDiario, 
     abrirModal, 
     cerrarModal,
-    renderHistorialEnModal
+    renderHistorialEnModal,
+    renderTablaProfesores
 } from './modules/ui.js';
 import { insertarPrestamoCabecera, 
     insertarPrestamoDetalle, 
@@ -14,7 +15,11 @@ import { insertarPrestamoCabecera,
     getDetallesDePrestamo,
     devolverEquipoIndividual,
     agregarEquipoAlDetalle,
-    getPrestamosPorFecha
+    getPrestamosPorFecha,
+    getUsuarios, 
+    insertUsuario, 
+    updateUsuario, 
+    deleteUsuario
     } from './modules/api.js';
 
 // Un objeto "estado" temporal para compartir la selección de equipos entre el modal y el guardado
@@ -252,3 +257,141 @@ async function cargarHistorialPorFecha(fecha) {
     const registros = await getPrestamosPorFecha(fecha);
     renderHistorialEnModal(registros);
 }
+
+
+// =========================================================================
+// LÓGICA PARA EL ABM DE PROFESORES
+// =========================================================================
+
+// 1. Captura de Elementos del DOM
+const modalProfes = document.getElementById('modal-profesores');
+const btnGestionarProfes = document.getElementById('btn-gestionar-profes');
+const btnCloseModalProfes = document.getElementById('close-modal-profes');
+const formProfesor = document.getElementById('form-profesor');
+const btnCancelarEdicion = document.getElementById('btn-cancelar-edicion');
+
+const inputProfeId = document.getElementById('profe-id');
+const inputProfeNombre = document.getElementById('profe-nombre');
+const inputProfeEmail = document.getElementById('profe-email');
+const inputProfeDni = document.getElementById('profe-dni');
+const inputProfeCelular = document.getElementById('profe-celular');
+const formTituloProfe = document.getElementById('form-titulo-profe');
+
+// 2. Función auxiliar para recargar la lista y refrescar la tabla
+async function cargarYMostrarProfesores() {
+    const profesores = await getUsuarios();
+    renderTablaProfesores(profesores);
+}
+
+// 3. Abrir el Modal al hacer clic en "Gestionar Profesores"
+if (btnGestionarProfes) {
+    btnGestionarProfes.addEventListener('click', () => {
+        modalProfes.style.display = 'block';
+        resetearFormularioProfe();
+        cargarYMostrarProfesores(); // Trae los profes frescos de Supabase
+    });
+}
+
+// 4. Cerrar el Modal
+if (btnCloseModalProfes) {
+    btnCloseModalProfes.addEventListener('click', () => {
+        modalProfes.style.display = 'none';
+    });
+}
+
+// 5. Escuchar el envío del Formulario (Alta o Modificación)
+if (formProfesor) {
+    formProfesor.addEventListener('submit', async (e) => {
+        e.preventDefault(); // Evita que la página se recargue
+
+        const idActual = inputProfeId.value;
+        const datosProfe = {
+            nombre_completo: inputProfeNombre.value.trim(),
+            email: inputProfeEmail.value.trim() || null,
+            dni: inputProfeDni.value.trim() || null,
+            celular: inputProfeCelular.value.trim() || null
+        };
+
+        try {
+            if (idActual) {
+                // ✏️ MODO MODIFICACIÓN: Si el ID oculto tiene valor, actualizamos
+                await updateUsuario(idActual, datosProfe);
+                alert("¡Profesor actualizado con éxito!");
+            } else {
+                // ➕ MODO ALTA: Si no hay ID, es un profesor nuevo
+                await insertUsuario(datosProfe);
+                alert("¡Profesor registrado con éxito!");
+            }
+
+            resetearFormularioProfe();
+            await cargarYMostrarProfesores(); // Recarga la tabla con los cambios
+            
+            // Opcional: Si en tu pantalla principal tenés un select de profesores para los préstamos,
+            // acá podrías llamar a la función que lo llena para que aparezca el nuevo profe al instante.
+
+        } catch (error) {
+            alert("Hubo un error al guardar los datos del profesor.");
+            console.error(error);
+        }
+    });
+}
+
+// 6. Escuchar los clics de la Tabla (Editar y Borrar usando Delegación de Eventos)
+const cuerpoTablaProfes = document.getElementById('tabla-profesores-cuerpo');
+if (cuerpoTablaProfes) {
+    cuerpoTablaProfes.addEventListener('click', async (e) => {
+        
+        // BOTÓN EDITAR ✏️
+        const btnEditar = e.target.closest('.btn-editar-profe');
+        if (btnEditar) {
+            // Pasamos los atributos 'data-' del botón al formulario arriba
+            inputProfeId.value = btnEditar.dataset.id;
+            inputProfeNombre.value = btnEditar.dataset.nombre;
+            inputProfeEmail.value = btnEditar.dataset.email;
+            inputProfeDni.value = btnEditar.dataset.dni;
+            inputProfeCelular.value = btnEditar.dataset.celular;
+
+            // Cambiamos el aspecto del formulario para avisar que estamos editando
+            formTituloProfe.textContent = "Modificar Datos del Profesor";
+            btnCancelarEdicion.style.display = 'inline-block';
+            inputProfeNombre.focus();
+        }
+
+        // BOTÓN BORRAR 🗑️
+        const btnBorrar = e.target.closest('.btn-borrar-profe');
+        if (btnBorrar) {
+            const id = btnBorrar.dataset.id;
+            const nombre = btnBorrar.dataset.nombre;
+
+            // Confirmación de seguridad
+            const confirmar = confirm(`¿Estás seguro de que querés eliminar al ${nombre} de la base de datos?`);
+            if (confirmar) {
+                try {
+                    await deleteUsuario(id);
+                    alert("Profesor eliminado correctamente.");
+                    await cargarYMostrarProfesores(); // Refrescamos la tabla
+                } catch (error) {
+                    alert("No se pudo eliminar al profesor. Comprobá que no tenga préstamos asociados.");
+                    console.error(error);
+                }
+            }
+        }
+    });
+}
+
+// 7. Botón Cancelar Edición
+if (btnCancelarEdicion) {
+    btnCancelarEdicion.addEventListener('click', () => {
+        resetearFormularioProfe();
+    });
+}
+
+// 8. Función para limpiar el formulario y volver a modo Alta
+function resetearFormularioProfe() {
+    formProfesor.reset();
+    inputProfeId.value = '';
+    formTituloProfe.textContent = "Registrar Nuevo Profesor";
+    btnCancelarEdicion.style.display = 'none';
+}
+
+

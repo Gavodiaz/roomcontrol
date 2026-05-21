@@ -71,27 +71,30 @@
                     </select>
                 </div>
 
-              <div class="form-group">
-            <label>Seleccionar Equipo:</label>
-            <button type="button" id="btn-abrir-modal" style="width: 100%; background-color: #2563eb; color: white; border: none; padding: 12px; border-radius: 6px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 5px; margin-bottom: 15px;">
-                Cambiar / Seleccionar Equipo
-            </button>
-        </div>
+                <div class="form-group">
+                    <label>Seleccionar Equipo:</label>
+                    <button type="button" id="btn-abrir-modal"
+                        style="width: 100%; background-color: #2563eb; color: white; border: none; padding: 12px; border-radius: 6px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 5px; margin-bottom: 15px;">
+                        Cambiar / Seleccionar Equipo
+                    </button>
+                </div>
 
-        <div id="modal-equipos" class="modal oculto">
-            <div class="modal-contenido">
-                <h3>Seleccionar Equipos</h3>
-                <div id="contenedor-equipos" class="grilla-equipos"></div>
-                
-                <button type="button" id="btn-confirmar-seleccion-modal" style="width: 100%; background-color: #2563eb; color: white; border: none; padding: 12px; border-radius: 6px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 15px; margin-bottom: 5px;">
-                    Seleccionar
-                </button>
-                
-                <button type="button" class="btn-historial" onclick="cerrarModal()" style="width: 100%;">Cancelar / Cerrar</button>
-            </div>
-        </div>
+                <div id="modal-equipos" class="modal oculto">
+                    <div class="modal-contenido">
+                        <h3>Seleccionar Equipos</h3>
+                        <div id="contenedor-equipos" class="grilla-equipos"></div>
 
-        <input type="hidden" id="input-equipo-oculto">
+                        <button type="button" id="btn-confirmar-seleccion-modal"
+                            style="width: 100%; background-color: #2563eb; color: white; border: none; padding: 12px; border-radius: 6px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 15px; margin-bottom: 5px;">
+                            Seleccionar
+                        </button>
+
+                        <button type="button" class="btn-historial" onclick="cerrarModal()"
+                            style="width: 100%;">Cancelar / Cerrar</button>
+                    </div>
+                </div>
+
+                <input type="hidden" id="input-equipo-oculto">
 
                 <input type="hidden" id="input-equipo-oculto" required>
 
@@ -101,11 +104,14 @@
                 </div>
 
                 <div class="btn-group">
-                   <button type="button" id="btn-registrar-prestamo" class="btn-guardar">
-    Confirmar Préstamo
-</button>
+                    <button type="button" id="btn-registrar-prestamo" class="btn-guardar">
+                        Confirmar Préstamo
+                    </button>
                     <button type="button" id="btn-ver-registros" class="btn-historial" style="flex: 1;">📅 Registros
                         Diarios</button>
+                    <button id="btn-gestionar-profes" class="btn-historial" style="flex:1;">
+                        👤 Gestionar Profesores
+                    </button>
                 </div>
             </form>
         </div>
@@ -150,33 +156,103 @@
 
     <!--caja del modal oculta por defecto y la tabla donde van a caer los registros históricos.-->
 
-    <div id="modal-historial" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center;">
-    <div class="card" style="background-color: white; padding: 24px; border-radius: 12px; width: 90%; max-width: 1000px; max-height: 85vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
-        
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #f1f3f5; padding-bottom: 10px;">
-            <h3 style="margin: 0; color: #333;">📋 Historial de Préstamos Pasados</h3>
-            <button id="btn-cerrar-historial" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #6c757d;">&times;</button>
-        </div>
+    <div id="modal-historial"
+        style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center;">
+        <div class="card"
+            style="background-color: white; padding: 24px; border-radius: 12px; width: 90%; max-width: 1000px; max-height: 85vh; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
 
-        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px; background-color: #f8f9fa; padding: 12px; border-radius: 8px;">
-            <label for="fecha-busqueda" style="font-weight: bold; color: #495057;">Seleccionar Día:</label>
-            <input type="date" id="fecha-busqueda" style="padding: 6px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 14px;">
-        </div>
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #f1f3f5; padding-bottom: 10px;">
+                <h3 style="margin: 0; color: #333;">📋 Historial de Préstamos Pasados</h3>
+                <button id="btn-cerrar-historial"
+                    style="background: none; border: none; font-size: 24px; cursor: pointer; color: #6c757d;">&times;</button>
+            </div>
 
-        <div class="table-responsive">
-            <table>
-                <thead style="background-color: #f1f3f5;">
-                    <tr>
-                        <th>Docente</th>
-                        <th>Equipos Prestados</th>
-                        <th>Salida (Hora)</th>
-                        <th>Devolución (Hora)</th>
-                        <th>Observaciones</th>
-                    </tr>
-                </thead>
-                <tbody id="tabla-historial-cuerpo">
+            <div
+                style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px; background-color: #f8f9fa; padding: 12px; border-radius: 8px;">
+                <label for="fecha-busqueda" style="font-weight: bold; color: #495057;">Seleccionar Día:</label>
+                <input type="date" id="fecha-busqueda"
+                    style="padding: 6px 12px; border: 1px solid #ced4da; border-radius: 4px; font-size: 14px;">
+            </div>
+
+            <div class="table-responsive">
+                <table>
+                    <thead style="background-color: #f1f3f5;">
+                        <tr>
+                            <th>Docente</th>
+                            <th>Equipos Prestados</th>
+                            <th>Salida (Hora)</th>
+                            <th>Devolución (Hora)</th>
+                            <th>Observaciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-historial-cuerpo">
                     </tbody>
-            </table>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div id="modal-profesores" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4);">
+    
+    <div class="modal-content" style="background-color: #ffffff; margin: 5% auto; padding: 20px; border: 1px solid #888; width: 90%; max-width: 700px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); color: #333333;">
+        
+        <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eeeeee; padding-bottom: 10px; margin-bottom: 15px;">
+            <h3 style="margin: 0; color: #1e3a8a;">👤 Gestión de Profesores (ABM)</h3>
+            <span id="close-modal-profes" class="close-btn" style="font-size: 28px; font-weight: bold; cursor: pointer; color: #aaa;">&times;</span>
+        </div>
+        
+        <div class="modal-body">
+            <form id="form-profesor" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #dee2e6;">
+                <h4 id="form-titulo-profe" style="margin-top:0; color:#333; margin-bottom: 12px;">Registrar Nuevo Profesor</h4>
+                
+                <input type="hidden" id="profe-id" value="">
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                    <div>
+                        <label style="font-size: 13px; font-weight: bold; color: #333;">Nombre Completo:</label>
+                        <input type="text" id="profe-nombre" required style="width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;" placeholder="Ej: Prof. Juan Pérez">
+                    </div>
+                    <div>
+                        <label style="font-size: 13px; font-weight: bold; color: #333;">Email:</label>
+                        <input type="email" id="profe-email" style="width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;" placeholder="juan.perez@escuela.edu.ar">
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                    <div>
+                        <label style="font-size: 13px; font-weight: bold; color: #333;">DNI:</label>
+                        <input type="text" id="profe-dni" style="width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;" placeholder="Sin puntos ni espacios">
+                    </div>
+                    <div>
+                        <label style="font-size: 13px; font-weight: bold; color: #333;">Celular / Teléfono:</label>
+                        <input type="text" id="profe-celular" style="width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;" placeholder="Ej: 261153456789">
+                    </div>
+                </div>
+
+                <div style="text-align: right;">
+                    <button type="button" id="btn-cancelar-edicion" style="display:none; background:#6c757d; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; margin-right:5px;">Cancelar</button>
+                    <button type="submit" id="btn-guardar-profe" style="background:#0d6efd; color:white; border:none; padding:6px 15px; border-radius:4px; cursor:pointer; font-weight:bold;">Guardar Profesor</button>
+                </div>
+            </form>
+
+            <h4 style="color: #333; margin-bottom: 8px;">Profesores Registrados</h4>
+            <div style="max-height: 220px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 4px; background-color: #ffffff;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 14px; background-color: #ffffff;">
+                    <thead style="background: #e9ecef; color: #333; position: sticky; top: 0; z-index: 10;">
+                        <tr>
+                            <th style="padding: 10px; text-align: left; border-bottom: 2px solid #dee2e6; background: #e9ecef;">Nombre</th>
+                            <th style="padding: 10px; text-align: left; border-bottom: 2px solid #dee2e6; background: #e9ecef;">DNI</th>
+                            <th style="padding: 10px; text-align: left; border-bottom: 2px solid #dee2e6; background: #e9ecef;">Celular</th>
+                            <th style="padding: 10px; text-align: center; border-bottom: 2px solid #dee2e6; background: #e9ecef;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-profesores-cuerpo" style="background-color: #ffffff; color: #333333;">
+                        </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
@@ -188,4 +264,3 @@
 </body>
 
 </html>
-

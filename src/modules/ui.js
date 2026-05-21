@@ -282,3 +282,49 @@ export function renderHistorialEnModal(prestamos) {
         cuerpoTabla.appendChild(fila);
     });
 }
+
+
+/**
+ * PINTAR LA TABLA DE PROFESORES EN EL MODAL ABM
+ * @param {Array} usuarios - Lista de docentes traídos de la base de datos
+ */
+export function renderTablaProfesores(usuarios) {
+    const cuerpoTabla = document.getElementById('tabla-profesores-cuerpo');
+    cuerpoTabla.innerHTML = '';
+
+    if (!usuarios || usuarios.length === 0) {
+        cuerpoTabla.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #6c757d; padding: 15px;">No hay profesores registrados.</td></tr>`;
+        return;
+    }
+
+    usuarios.forEach(user => {
+        const fila = document.createElement('tr');
+        fila.style.borderBottom = '1px solid #dee2e6';
+
+        // Armamos las celdas con los datos correspondientes (si son NULL ponemos un guion)
+        fila.innerHTML = `
+            <td style="padding: 8px; font-weight: 500;">${user.nombre_completo}</td>
+            <td style="padding: 8px; color: #495057;">${user.dni || '-'}</td>
+            <td style="padding: 8px; color: #495057;">${user.celular || '-'}</td>
+            <td style="padding: 8px; text-align: center;">
+                <button class="btn-editar-profe" 
+                        data-id="${user.id}" 
+                        data-nombre="${user.nombre_completo}" 
+                        data-email="${user.email || ''}" 
+                        data-dni="${user.dni || ''}" 
+                        data-celular="${user.celular || ''}" 
+                        style="background: #ffc107; color: #212529; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; margin-right: 5px; font-size: 12px;">
+                    ✏️
+                </button>
+                <button class="btn-borrar-profe" 
+                        data-id="${user.id}" 
+                        data-nombre="${user.nombre_completo}" 
+                        style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                    🗑️
+                </button>
+            </td>
+        `;
+
+        cuerpoTabla.appendChild(fila);
+    });
+}

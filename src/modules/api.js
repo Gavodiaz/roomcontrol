@@ -160,3 +160,85 @@ export async function getPrestamosPorFecha(fechaFormatoISO) {
     }
     return data;
 }
+
+
+// =========================================================================
+// ABM DE USUARIOS / PROFESORES (Con supabaseClient)
+// =========================================================================
+
+/**
+ * 1. LEER (Obtener todos los profesores ordenados por nombre)
+ */
+export async function getUsuarios() {
+    const { data, error } = await supabaseClient
+        .from('usuarios')
+        .select('id, nombre_completo, email, rol, dni, celular')
+        .order('nombre_completo', { ascending: true });
+
+    if (error) {
+        console.error("Error al obtener usuarios:", error);
+        return [];
+    }
+    return data;
+}
+
+/**
+ * 2. ALTA (Insertar un nuevo profesor)
+ */
+export async function insertUsuario(usuarioData) {
+    const { data, error } = await supabaseClient
+        .from('usuarios')
+        .insert([{
+            nombre_completo: usuarioData.nombre_completo,
+            email: usuarioData.email,
+            dni: usuarioData.dni,
+            celular: usuarioData.celular,
+            rol: usuarioData.rol || 'Docente'
+        }])
+        .select();
+
+    if (error) {
+        console.error("Error al crear usuario:", error);
+        throw error;
+    }
+    return data[0];
+}
+
+/**
+ * 3. MODIFICACIÓN (Actualizar un profesor existente)
+ */
+export async function updateUsuario(id, usuarioData) {
+    const { data, error } = await supabaseClient
+        .from('usuarios')
+        .update({
+            nombre_completo: usuarioData.nombre_completo,
+            email: usuarioData.email,
+            dni: usuarioData.dni,
+            celular: usuarioData.celular,
+            rol: usuarioData.rol || 'Docente'
+        })
+        .eq('id', id)
+        .select();
+
+    if (error) {
+        console.error("Error al actualizar usuario:", error);
+        throw error;
+    }
+    return data[0];
+}
+
+/**
+ * 4. BAJA (Eliminar un profesor por ID)
+ */
+export async function deleteUsuario(id) {
+    const { error } = await supabaseClient
+        .from('usuarios')
+        .delete()
+        .eq('id', id);
+
+    if (error) {
+        console.error("Error al eliminar usuario:", error);
+        throw error;
+    }
+    return true;
+}
