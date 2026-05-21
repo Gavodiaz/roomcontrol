@@ -74,12 +74,15 @@ export async function renderEquipos(state) {
 export async function renderTablaPrestamos() {
     const tabla = document.getElementById('tabla-prestamos');
     if (!tabla) return;
-    
-    tabla.innerHTML = '<tr><td colspan="5" style="text-align:center;">Actualizando datos de RoomControl...</td></tr>';
+
+    // FORZAMOS LA LIMPIEZA TOTAL: Esto asegura que no quede nada de la ejecución anterior
+    tabla.innerHTML = ''; 
 
     try {
         const listaPrestamos = await getPrestamosActivos();
-        tabla.innerHTML = '';
+    
+    // 2. Limpiamos la tabla ANTES de empezar a iterar
+    tabla.innerHTML = '';
 
         if (listaPrestamos.length === 0) {
             tabla.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #64748b;">No hay equipos prestados en este momento.</td></tr>`;
@@ -87,28 +90,49 @@ export async function renderTablaPrestamos() {
         }
 
         // Armamos las filas de la tabla mezclando la cabecera y el lote de equipos
-        for (const prestamo of listaPrestamos) {
-            const detalles = await getDetallesDePrestamo(prestamo.id);
-            let equiposMostrados = "Sin equipos";
-
-            if (detalles && detalles.length > 0) {
-                equiposMostrados = detalles.map(d => d.equipos?.nombre).filter(n => n).join(', ');
+        console.log("Limpiando tabla. ¿Cuántos hijos tiene ahora?:", tabla.children.length);
+      for (const prestamo of listaPrestamos) {
+        const detalles = await getDetallesDePrestamo(prestamo.id);
+        console.log(`Préstamo ID ${prestamo.id} - Detalles que llegan a la UI:`, detalles);
+        // Mapeamos TODOS los detalles, decidiendo qué mostrar para cada uno
+        let equiposMostrados = detalles.map(d => {
+            // Si TIENE fecha de devolución, ocultamos el botón y lo marcamos
+            if (d.fecha_devolucion) {
+                return `
+                    <span style="display:block; margin-bottom:5px; color: #888;">
+                        <s>${d.equipos?.nombre}</s> <em>(Devuelto)</em>
+                    </span>
+                `;
+            } else {
+                // Si NO tiene fecha, dibujamos el equipo con su botón normal
+                return `
+                    <span style="display:block; margin-bottom:5px;">
+                        ${d.equipos?.nombre} 
+                        <button class="btn-devolver-uno" 
+                                data-prestamo="${prestamo.id}" 
+                                data-equipo="${d.equipo_id}">
+                            Devolver
+                        </button>
+                    </span>
+                `;
             }
+        }).join('');
 
-            const fila = document.createElement('tr');
-            const fechaFormateada = new Date(prestamo.fecha_salida).toLocaleString('es-AR');
-            
-            fila.innerHTML = `
-                <td><strong>${prestamo.usuarios?.nombre_completo || 'Desconocido'}</strong></td>
-                <td style="color: #1e40af; font-weight: 600;">${equiposMostrados}</td>
-                <td>${fechaFormateada}</td>
-                <td><small>${prestamo.observaciones || 'Sin observaciones'}</small></td>
-                <td>
-                    <button class="btn-devolver" data-id="${prestamo.id}">Devolver</button>
-                </td>
-            `;
-            tabla.appendChild(fila);
-        }
+        // Creamos la fila siempre
+        const fila = document.createElement('tr');
+        const fechaFormateada = new Date(prestamo.fecha_salida).toLocaleString('es-AR');
+        
+       fila.innerHTML = `
+            <td>${prestamo.usuarios?.nombre_completo || 'N/A'}</td>
+            <td>${equiposMostrados}</td>
+            <td>${fechaFormateada}</td>
+            <td>${prestamo.observaciones || 'Sin observaciones'}</td>
+            <td>
+                <button class="btn-devolver" data-id="${prestamo.id}">Cerrar Lote</button>
+            </td>
+        `;
+        tabla.appendChild(fila);
+    }
     } catch (err) {
         console.error("Error UI Tabla Préstamos:", err);
         tabla.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red;">Error de sincronización.</td></tr>';

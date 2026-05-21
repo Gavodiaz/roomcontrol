@@ -1,6 +1,6 @@
 // app.js
 import { renderDocentes, renderEquipos, renderTablaPrestamos, renderHistorialDiario, abrirModal, cerrarModal } from './modules/ui.js';
-import { insertarPrestamoCabecera, insertarPrestamoDetalle, actualizarEstadoEquipo, registrarFechaDevolucion, getDetallesDePrestamo } from './modules/api.js';
+import { insertarPrestamoCabecera, insertarPrestamoDetalle, actualizarEstadoEquipo, registrarFechaDevolucion, getDetallesDePrestamo, devolverEquipoIndividual } from './modules/api.js';
 
 // Un objeto "estado" temporal para compartir la selección de equipos entre el modal y el guardado
 const appState = {
@@ -87,32 +87,51 @@ if (btnRegistrar) {
     });
 }
 
+
 // 4. ESCUCHADOR DE DEVOLUCIONES (Captura el clic en los botones de la tabla)
 document.getElementById('tabla-prestamos').addEventListener('click', async (e) => {
+    
+    // A) CASO: Devolver UN solo equipo (Botón nuevo)
+    if (e.target && e.target.classList.contains('btn-devolver-uno')) {
+        const pId = e.target.getAttribute('data-prestamo');
+        const eId = e.target.getAttribute('data-equipo');
+        
+        if(confirm("¿Seguro querés devolver esta máquina específica?")) {
+            try {
+                await devolverEquipoIndividual(pId, eId);
+                alert("Equipo devuelto al inventario.");
+                await renderEquipos(appState);
+                await renderTablaPrestamos();
+            } catch (err) {
+                console.error("Error al devolver individual:", err);
+                alert("No se pudo procesar la devolución.");
+            }
+        }
+        return; // IMPORTANTE: Cortamos acá para que no siga al otro botón
+    }
+
+    // B) CASO: Devolver TODO el lote (Botón viejo)
     if (e.target && e.target.classList.contains('btn-devolver')) {
         const idPrestamo = e.target.getAttribute('data-id');
         
-        try {
-            // Buscamos los equipos que pertenecen a este lote
-            const detalles = await getDetallesDePrestamo(idPrestamo);
-            
-            // Ponemos la fecha de devolución en la cabecera
-            await registrarFechaDevolucion(idPrestamo);
+        if(confirm("¿Seguro querés cerrar todo el préstamo y devolver todas las máquinas?")) {
+            try {
+                const detalles = await getDetallesDePrestamo(idPrestamo);
+                await registrarFechaDevolucion(idPrestamo);
 
-            // Liberamos todas las máquinas involucradas
-            if (detalles && detalles.length > 0) {
-                for (const d of detalles) {
-                    await actualizarEstadoEquipo(d.equipo_id, 'Disponible');
+                if (detalles && detalles.length > 0) {
+                    for (const d of detalles) {
+                        await actualizarEstadoEquipo(d.equipo_id, 'Disponible');
+                    }
                 }
+                
+                alert("¡Lote de equipos devuelto y disponible!");
+                await renderEquipos(appState);
+                await renderTablaPrestamos();
+            } catch (err) {
+                console.error("Error en devolución total:", err);
+                alert("No se pudo procesar la devolución.");
             }
-
-            // Actualizamos la pantalla al instante
-            await renderEquipos(appState);
-            await renderTablaPrestamos();
-            alert("¡Lote de equipos devuelto y disponible en el inventario!");
-        } catch (err) {
-            console.error("Error en devolución:", err);
-            alert("No se pudo procesar la devolución.");
         }
     }
 });

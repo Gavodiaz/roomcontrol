@@ -47,17 +47,14 @@ export async function actualizarEstadoEquipo(equipoId, nuevoEstado) {
 }
 
 // 6. Traer los préstamos activos que figuran en la tabla principal (sin devolver)
+// En api.js
 export async function getPrestamosActivos() {
     const { data, error } = await supabaseClient
         .from('prestamos')
-        .select(`
-            id,
-            fecha_salida,
-            observaciones,
-            usuarios ( nombre_completo )
-        `)
-        .is('fecha_devolucion', null)
-        .order('fecha_salida', { ascending: false });
+        // El secreto está acá: además de traer todo (*), le pedimos el nombre de la tabla usuarios
+        .select('*, usuarios(nombre_completo)') 
+        .is('fecha_devolucion', null); // O la lógica de activos que estés usando
+        
     if (error) throw error;
     return data;
 }
@@ -66,8 +63,9 @@ export async function getPrestamosActivos() {
 export async function getDetallesDePrestamo(prestamoId) {
     const { data, error } = await supabaseClient
         .from('detalle_prestamos')
-        .select('equipo_id, equipos ( nombre )')
+        .select('*, equipos(nombre)') // <-- El asterisco '*' se asegura de traer TODO (incluyendo fecha_devolucion)
         .eq('prestamo_id', prestamoId);
+
     if (error) throw error;
     return data;
 }
@@ -98,3 +96,21 @@ export async function getRegistrosDelDia(stringInicioHoy) {
     if (error) throw error;
     return data;
 }
+
+
+
+//Función que devuelve el equipo parcial en el sector quipos en uso
+export async function devolverEquipoIndividual(prestamoId, equipoId) {
+    // 1. Liberamos el equipo en inventario
+    await actualizarEstadoEquipo(equipoId, 'Disponible');
+    
+    // 2. En lugar de borrar, marcamos la fecha de devolución
+    const { error } = await supabaseClient
+        .from('detalle_prestamos')
+        .update({ fecha_devolucion: new Date().toISOString() }) // Guardamos el momento exacto
+        .eq('prestamo_id', prestamoId)
+        .eq('equipo_id', equipoId);
+        
+    if (error) throw error;
+}
+
