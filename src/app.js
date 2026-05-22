@@ -6,7 +6,8 @@ import { renderDocentes,
     abrirModal, 
     cerrarModal,
     renderHistorialEnModal,
-    renderTablaProfesores
+    renderTablaProfesores,
+    mostrarNotificacion
 } from './modules/ui.js';
 import { insertarPrestamoCabecera, 
     insertarPrestamoDetalle, 
@@ -51,6 +52,14 @@ document.querySelector('.btn-historial')?.addEventListener('click', () => {
 
 // Confirmar la selección adentro del modal
 document.getElementById('btn-confirmar-seleccion-modal').addEventListener('click', async () => {
+
+if (!appState.idsSeleccionados || appState.idsSeleccionados.length === 0) {
+    // 🎯 Agregamos 'error' al final para que pinte rojo
+    mostrarNotificacion("❌ Por favor, selecciona al menos un equipo antes de confirmar.", 'error');
+    return; 
+}
+
+
     if (appState.idsSeleccionados.length === 0) {
         alert("Por favor, selecciona al menos un equipo antes de confirmar.");
         return;
@@ -100,23 +109,75 @@ document.getElementById('btn-confirmar-seleccion-modal').addEventListener('click
 });
 
 // 3. EVENTO PARA GUARDAR EL PRÉSTAMO (Clic en Registrar)
+
 const btnRegistrar = document.getElementById('btn-registrar-prestamo');
+
 if (btnRegistrar) {
     btnRegistrar.addEventListener('click', async () => {
-        const usuarioId = document.getElementById('docente').value;
-        const equiposTexto = document.getElementById('input-equipo-oculto').value; 
-        const observaciones = document.getElementById('observaciones').value || "Sin observaciones";
+        
+        const inputDocente = document.getElementById('docente');
+        const datalistProfes = document.getElementById('lista-docentes');
+        let usuarioId = null;
 
-        if (!usuarioId || !equiposTexto) {
-            alert("Por favor, seleccione un docente y al menos un equipo.");
+        if (inputDocente && datalistProfes) {
+            const valorEscrito = inputDocente.value.trim().toLowerCase();
+            const opciones = datalistProfes.options;
+            
+            for (let i = 0; i < opciones.length; i++) {
+                if (opciones[i].value.trim().toLowerCase() === valorEscrito) {
+                    usuarioId = opciones[i].dataset.id;
+                    break;
+                }
+            }
+        }
+
+       const inputEquiposOculto = document.getElementById('input-equipo-oculto');
+        const inputObservaciones = document.getElementById('observaciones');
+        
+        const equiposTexto = inputEquiposOculto ? inputEquiposOculto.value : '';
+        const observaciones = inputObservaciones ? inputObservaciones.value.trim() : '';
+
+        // =========================================================================
+        // 🎯 CONTROL DE SEGURIDAD 1: EL DOCENTE
+        // =========================================================================
+        if (!usuarioId) {
+            mostrarNotificacion("❌ Por favor, seleccione un docente válido de la lista antes de confirmar.", 'error');
             return;
         }
 
+        // =========================================================================
+        // 🎯 CONTROL DE SEGURIDAD 2: LOS EQUIPOS
+        // =========================================================================
+        if (!equiposTexto) {
+            mostrarNotificacion("❌ Por favor, seleccione al menos un equipo antes de confirmar.", 'error');
+            return;
+        }
+
+        // =========================================================================
+        // 🎯 CONTROL DE SEGURIDAD 3: EL CURSO (¡Acá va el bloque nuevo!)
+        // =========================================================================
+        const datalistCursos = document.getElementById('lista-cursos');
+        let cursoValido = false;
+
+        if (datalistCursos && observaciones) {
+            const opcionesCursos = datalistCursos.options;
+            for (let i = 0; i < opcionesCursos.length; i++) {
+                if (opcionesCursos[i].value.toLowerCase() === observaciones.toLowerCase()) {
+                    cursoValido = true;
+                    break;
+                }
+            }
+        }
+
+        if (!cursoValido) {
+            mostrarNotificacion("❌ Por favor, seleccione un curso válido de la lista desplegable.", 'error');
+            return; // Frena acá si el curso no es correcto
+        }
         const arrayEquiposIds = equiposTexto.split(',');
 
         try {
             const primerEquipoId = parseInt(arrayEquiposIds[0]);
-            
+
             // PASO 1: Insertar la Cabecera del préstamo
             const prestamoId = await insertarPrestamoCabecera(usuarioId, primerEquipoId);
 
@@ -125,26 +186,44 @@ if (btnRegistrar) {
                 const equipoIdNum = parseInt(equipoIdStr);
                 await insertarPrestamoDetalle(prestamoId, equipoIdNum);
                 await actualizarEstadoEquipo(equipoIdNum, 'Prestado');
+                await renderTablaPrestamos();
             }
 
-            alert("¡Préstamo y sus detalles registrados con éxito!");
+           // =========================================================================
+            // 🎉 AVISO DE ÉXITO Y LIMPIEZA TOTAL (INCLUYENDO MODAL)
+            // =========================================================================
             
-            // Limpiamos los campos del formulario
-            document.getElementById('form-prestamo').reset();
-            document.getElementById('input-equipo-oculto').value = "";
-            document.getElementById('btn-abrir-modal').textContent = "Cambiar / Seleccionar Equipo";
-            
-            // Le decimos a la UI que vuelva a dibujar las tablas actualizadas
-            await renderEquipos(appState);
-            await renderTablaPrestamos();
+            // 1. Avisamos que se guardó todo joya
+            mostrarNotificacion("✅ ¡Préstamo registrado con éxito!");
 
-        } catch (err) {
-            console.error("Error al registrar préstamo:", err);
-            alert("Ocurrió un error inesperado al guardar.");
+            // 2. Limpiamos los campos visuales del formulario principal
+            if (inputDocente) inputDocente.value = '';
+            if (inputObservaciones) inputObservaciones.value = '';
+            if (inputEquiposOculto) inputEquiposOculto.value = '';
+
+            // 3. Restauramos el texto del botón azul largo
+            const botonEquipos = document.getElementById('btn-abrir-modal'); //
+            if (botonEquipos) {
+                botonEquipos.textContent = "Cambiar / Seleccionar Equipo"; //
+            }
+
+            // 🎯 4. ¡LO NUEVO!: Limpiamos la memoria del Modal para el próximo préstamo
+            appState.idsSeleccionados = [];
+            appState.nombresSeleccionados = [];
+
+            // 🔄 5. Refrescamos la tabla de abajo y RE-RENDERIZAMOS los botones del modal
+            await renderTablaPrestamos(); // Actualiza la grilla "Equipos en Uso"
+            
+            if (typeof renderEquipos === 'function') {
+                await renderEquipos(appState); // 💥 Esto vuelve a pintar las netbooks en el modal con sus estados reales actuales
+            }
+
+        } catch (error) {
+            console.error("Error al guardar el préstamo:", error);
+            alert("❌ Hubo un error al registrar el préstamo en la base de datos.");
         }
     });
 }
-
 // 4. ESCUCHADOR DE DEVOLUCIONES (Captura el clic en los botones de la tabla)
 document.getElementById('tabla-prestamos').addEventListener('click', async (e) => {
     
@@ -156,12 +235,12 @@ document.getElementById('tabla-prestamos').addEventListener('click', async (e) =
         if(confirm("¿Seguro querés devolver esta máquina específica?")) {
             try {
                 await devolverEquipoIndividual(pId, eId);
-                alert("Equipo devuelto al inventario.");
+               mostrarNotificacion("✅ Equipo devuelto al inventario");
                 await renderEquipos(appState);
                 await renderTablaPrestamos();
             } catch (err) {
                 console.error("Error al devolver individual:", err);
-                alert("No se pudo procesar la devolución.");
+                mostrarNotificacion("No se pudo procesar la devolución!!!");
             }
         }
         return; // IMPORTANTE: Cortamos acá para que no siga al otro botón
@@ -187,7 +266,7 @@ document.getElementById('tabla-prestamos').addEventListener('click', async (e) =
                 await renderTablaPrestamos();
             } catch (err) {
                 console.error("Error en devolución total:", err);
-                alert("No se pudo procesar la devolución.");
+                mostrarNotificacion("✅ ¡Préstamo registrado con éxito!");
             }
         }
         return;
@@ -394,4 +473,14 @@ function resetearFormularioProfe() {
     btnCancelarEdicion.style.display = 'none';
 }
 
+
+const inputDocente = document.getElementById('docente');
+const btnLimpiarDocente = document.getElementById('btn-limpiar-busqueda');
+
+if (btnLimpiarDocente && inputDocente) {
+    btnLimpiarDocente.addEventListener('click', () => {
+        inputDocente.value = ''; // Borra el texto escrito
+        inputDocente.focus();    // Te vuelve a dejar el cursor listo para escribir
+    });
+}
 

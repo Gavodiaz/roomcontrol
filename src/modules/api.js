@@ -3,19 +3,30 @@ import { supabaseClient } from './supabase.js';
 
 // 1. Traer la lista de docentes para el select
 export async function getDocentes() {
-    const { data, error } = await supabaseClient
+    const { data, error } = await supabaseClient  // 👈 Usando tu cliente original
         .from('usuarios')
-        .select('id, nombre_completo');
-    if (error) throw error;
+        .select('id, nombre_completo, dni')       // 🚀 CLAVE: Aseguramos que traiga el DNI
+        .eq('rol', 'Docente')                      // O como lo tengas filtrado en tu sistema
+        .order('nombre_completo', { ascending: true });
+
+    if (error) {
+        console.error("Error al traer docentes:", error);
+        return [];
+    }
     return data;
 }
 
 // 2. Traer todos los equipos para el panel/modal
 export async function getEquipos() {
-    const { data, error } = await supabaseClient
+    const { data, error } = await supabaseClient // Tu cliente original
         .from('equipos')
-        .select('id, nombre, estado');
-    if (error) throw error;
+        .select('id, nombre, estado') // (O los campos exactos que traigas de ahí)
+        .order('nombre', { ascending: true }); // 🚀 LA MAGIA CORREGIDA ACÁ
+
+    if (error) {
+        console.error("Error al obtener los equipos ordendados:", error);
+        return [];
+    }
     return data;
 }
 

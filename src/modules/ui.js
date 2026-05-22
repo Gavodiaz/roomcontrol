@@ -3,19 +3,29 @@ import { getDocentes, getEquipos, getPrestamosActivos, getDetallesDePrestamo, ge
 
 // 1. PINTAR LOS DOCENTES EN EL SELECT
 export async function renderDocentes() {
-    const selectDocente = document.getElementById('docente');
-    if (!selectDocente) return;
+    const datalist = document.getElementById('lista-docentes');
+    if (!datalist) return;
+
     try {
-        const usuarios = await getDocentes(); // Le pedimos los datos limpios al "cocinero" api.js
-        selectDocente.innerHTML = '<option value="">-- Seleccionar Docente --</option>';
+        const usuarios = await getDocentes(); // Pedimos los profes a la API
+        datalist.innerHTML = ''; 
+
         usuarios.forEach(user => {
             const option = document.createElement('option');
-            option.value = user.id;
-            option.textContent = user.nombre_completo;
-            selectDocente.appendChild(option);
+            
+            // Lo que el usuario escribe/selecciona en la caja (Nombre Completo)
+            option.value = user.nombre_completo; 
+            
+            // 🎯 CLAVE ACÁ: Guardamos el ID real de Supabase en el atributo 'data-id'
+            option.dataset.id = user.id; 
+            
+            // Esto muestra el DNI al lado en la persiana de sugerencias
+            option.textContent = user.dni ? `DNI: ${user.dni}` : '';
+
+            datalist.appendChild(option);
         });
     } catch (err) {
-        console.error("Error UI Docentes:", err);
+        console.error("Error al renderizar docentes en datalist:", err);
     }
 }
 
@@ -327,4 +337,40 @@ export function renderTablaProfesores(usuarios) {
 
         cuerpoTabla.appendChild(fila);
     });
+}
+
+
+// 🔔 FUNCIÓN MEJORADA: Recibe el mensaje y el tipo ('exito' o 'error')
+export function mostrarNotificacion(mensaje, tipo = 'exito') {
+    const aviso = document.createElement('div');
+    aviso.textContent = mensaje;
+    
+    // 🎨 Definimos el color de fondo según el tipo
+    const esError = tipo === 'error';
+    const colorFondo = esError ? '#ef4444' : '#10b981'; // Rojo si es error, Verde si es éxito
+
+    // Estilos modernos para que flote arriba a la derecha
+    Object.assign(aviso.style, {
+        position: 'fixed',
+        top: '20px',
+        right: '20px',
+        backgroundColor: colorFondo, // 🎯 Usa el color dinámico según el caso
+        color: 'white',
+        padding: '12px 24px',
+        borderRadius: '6px',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+        fontWeight: 'bold',
+        fontFamily: 'sans-serif',
+        fontSize: '14px',
+        zIndex: '9999',
+        transition: 'opacity 0.5s ease'
+    });
+
+    document.body.appendChild(aviso);
+
+    // A los 2.5 segundos empieza a desaparecer y a los 3 se elimina
+    setTimeout(() => {
+        aviso.style.opacity = '0';
+        setTimeout(() => aviso.remove(), 500);
+    }, 2500);
 }

@@ -64,13 +64,23 @@
         <div class="card">
             <h2>Registrar Nuevo Préstamo</h2>
             <form id="form-prestamo">
+                
                 <div class="form-group">
-                    <label for="docente">Seleccionar Docente:</label>
-                    <select id="docente" required>
-                        <option value="">-- Cargando docentes... --</option>
-                    </select>
+                <label for="docente">Seleccionar Docente:</label>
+                
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="docente" list="lista-docentes" placeholder="🔍 Tipeá nombre, apellido o DNI..." required autocomplete="off"
+                           style="padding: 10px; flex-grow: 1; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;">
+                    
+                    <button type="button" id="btn-limpiar-busqueda" 
+                            style="background: #6c757d; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold;">
+                        Limpiar
+                    </button>
                 </div>
 
+                <datalist id="lista-docentes">
+                    </datalist>
+            </div>
                 <div class="form-group">
                     <label>Seleccionar Equipo:</label>
                     <button type="button" id="btn-abrir-modal"
@@ -99,9 +109,29 @@
                 <input type="hidden" id="input-equipo-oculto" required>
 
                 <div class="form-group">
-                    <label for="observaciones">Observaciones / Ubicación:</label>
-                    <input type="text" id="observaciones" placeholder="Ej: Aula 4, 2do módulo">
-                </div>
+    <label for="observaciones">Curso / Ubicación:</label>
+    <input type="text" id="observaciones" list="lista-cursos" class="form-control" placeholder="Ej: 1° 1° o tipee para buscar..." style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc;">
+    
+    <datalist id="lista-cursos">
+        <option value="1°1°"></option>
+        <option value="1°2°"></option>
+        <option value="1°3°"></option>
+        <option value="1°4°"></option>
+        <option value="1°5°"></option>
+        <option value="2°1°"></option>
+        <option value="2°2°"></option>
+        <option value="2°3°"></option>
+        <option value="2°4°"></option>
+        <option value="3°1°"></option>
+        <option value="3°2°"></option>
+        <option value="3°3°"></option>
+        <option value="3°4°"></option>
+        <option value="4°1°"></option>
+        <option value="4°2°"></option>
+        <option value="4°3°"></option>
+        <option value="4°4°"></option>
+    </datalist>
+</div>
 
                 <div class="btn-group">
                     <button type="button" id="btn-registrar-prestamo" class="btn-guardar">
@@ -109,7 +139,7 @@
                     </button>
                     <button type="button" id="btn-ver-registros" class="btn-historial" style="flex: 1;">📅 Registros
                         Diarios</button>
-                    <button id="btn-gestionar-profes" class="btn-historial" style="flex:1;">
+                    <button id="btn-gestionar-profes" class="btn-historial" style="flex:1">
                         👤 Gestionar Profesores
                     </button>
                 </div>
@@ -117,6 +147,7 @@
         </div>
 
         <div class="card">
+            
             <h2>Equipos en Uso</h2>
             <div class="table-responsive">
                 <table>
