@@ -144,26 +144,29 @@ export async function renderTablaPrestamos() {
             const fila = document.createElement('tr');
             const fechaFormateada = new Date(prestamo.fecha_salida).toLocaleString('es-AR');
 
-            fila.innerHTML = `
-            <td style="vertical-align: middle;">${prestamo.usuarios?.nombre_completo || 'N/A'}</td>
-            <td style="vertical-align: middle;">${equiposMostrados}</td>
-            <td style="vertical-align: middle; white-space: nowrap;">${fechaFormateada}</td>
-            
-            <td style="vertical-align: middle;">
-                <div style="display: flex; flex-direction: column; gap: 6px; justify-content: center; align-items: center; min-width: 110px;">
-                    <button class="btn-agregar-parcial"
-                            data-id="${prestamo.id}"
-                            style="background-color: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; text-align: center;">
-                        Agregar
-                    </button>
-                    <button class="btn-devolver"
-                            data-id="${prestamo.id}"
-                            style="background-color: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; text-align: center;">
-                        Cerrar Lote
-                    </button>
-                </div>
-            </td>
-        `;
+          fila.innerHTML = `
+        <td style="vertical-align: middle; text-align: left;">${prestamo.usuarios?.nombre_completo || 'N/A'}</td>
+        <td style="vertical-align: middle; text-align: center;">${equiposMostrados}</td>
+        
+        <td style="vertical-align: middle; font-weight: bold; color: #4b5563; text-align: center;">
+            ${prestamo.observaciones || '---'}
+        </td>
+        
+        <td style="vertical-align: middle; white-space: nowrap; text-align: center;">${fechaFormateada}</td>
+        
+        <td style="vertical-align: middle; text-align: center;">
+            <div style="display: flex; flex-direction: column; gap: 6px; justify-content: center; align-items: center; width: 100%;">
+                <button class="btn-agregar-parcial" data-id="${prestamo.id}" style="background-color: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; width: 90px;">
+                    Agregar
+                </button>
+                <button class="btn-devolver" data-id="${prestamo.id}" style="background-color: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; width: 90px;">
+                    Cerrar Lote
+                </button>
+            </div>
+        </td>
+    `;
+
+    tabla.appendChild(fila);
             tabla.appendChild(fila);
         }
     } catch (err) {

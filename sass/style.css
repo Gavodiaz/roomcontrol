@@ -159,3 +159,9 @@ tr:hover {
 .modal.oculto { display: none; }
 .modal-contenido { background: white; padding: 20px; border-radius: 10px; width: 80%; max-width: 500px; }
 
+
+/* Efecto Hover: cuando pasás el mouse por encima, la fila se ilumina */
+#tabla-prestamos tr:hover {
+    background-color: #f1f5f9; /* Se oscurece un cachito al posar el mouse */
+    transition: background-color 0.2s ease;
+}

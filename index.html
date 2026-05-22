@@ -64,23 +64,24 @@
         <div class="card">
             <h2>Registrar Nuevo Préstamo</h2>
             <form id="form-prestamo">
-                
-                <div class="form-group">
-                <label for="docente">Seleccionar Docente:</label>
-                
-                <div style="display: flex; gap: 10px;">
-                    <input type="text" id="docente" list="lista-docentes" placeholder="🔍 Tipeá nombre, apellido o DNI..." required autocomplete="off"
-                           style="padding: 10px; flex-grow: 1; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;">
-                    
-                    <button type="button" id="btn-limpiar-busqueda" 
-                            style="background: #6c757d; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold;">
-                        Limpiar
-                    </button>
-                </div>
 
-                <datalist id="lista-docentes">
+                <div class="form-group">
+                    <label for="docente">Seleccionar Docente:</label>
+
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="docente" list="lista-docentes"
+                            placeholder="🔍 Tipeá nombre, apellido o DNI..." required autocomplete="off"
+                            style="padding: 10px; flex-grow: 1; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;">
+
+                        <button type="button" id="btn-limpiar-busqueda"
+                            style="background: #6c757d; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold;">
+                            Limpiar
+                        </button>
+                    </div>
+
+                    <datalist id="lista-docentes">
                     </datalist>
-            </div>
+                </div>
                 <div class="form-group">
                     <label>Seleccionar Equipo:</label>
                     <button type="button" id="btn-abrir-modal"
@@ -109,29 +110,31 @@
                 <input type="hidden" id="input-equipo-oculto" required>
 
                 <div class="form-group">
-    <label for="observaciones">Curso / Ubicación:</label>
-    <input type="text" id="observaciones" list="lista-cursos" class="form-control" placeholder="Ej: 1° 1° o tipee para buscar..." style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc;">
-    
-    <datalist id="lista-cursos">
-        <option value="1°1°"></option>
-        <option value="1°2°"></option>
-        <option value="1°3°"></option>
-        <option value="1°4°"></option>
-        <option value="1°5°"></option>
-        <option value="2°1°"></option>
-        <option value="2°2°"></option>
-        <option value="2°3°"></option>
-        <option value="2°4°"></option>
-        <option value="3°1°"></option>
-        <option value="3°2°"></option>
-        <option value="3°3°"></option>
-        <option value="3°4°"></option>
-        <option value="4°1°"></option>
-        <option value="4°2°"></option>
-        <option value="4°3°"></option>
-        <option value="4°4°"></option>
-    </datalist>
-</div>
+                    <label for="observaciones">Curso / Ubicación:</label>
+                    <input type="text" id="observaciones" list="lista-cursos" class="form-control"
+                        placeholder="Ej: 1° 1° o tipee para buscar..."
+                        style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc;">
+
+                    <datalist id="lista-cursos">
+                        <option value="1°1°"></option>
+                        <option value="1°2°"></option>
+                        <option value="1°3°"></option>
+                        <option value="1°4°"></option>
+                        <option value="1°5°"></option>
+                        <option value="2°1°"></option>
+                        <option value="2°2°"></option>
+                        <option value="2°3°"></option>
+                        <option value="2°4°"></option>
+                        <option value="3°1°"></option>
+                        <option value="3°2°"></option>
+                        <option value="3°3°"></option>
+                        <option value="3°4°"></option>
+                        <option value="4°1°"></option>
+                        <option value="4°2°"></option>
+                        <option value="4°3°"></option>
+                        <option value="4°4°"></option>
+                    </datalist>
+                </div>
 
                 <div class="btn-group">
                     <button type="button" id="btn-registrar-prestamo" class="btn-guardar">
@@ -147,16 +150,17 @@
         </div>
 
         <div class="card">
-            
+
             <h2>Equipos en Uso</h2>
             <div class="table-responsive">
                 <table>
                     <thead>
                         <tr>
-                            <th>Docente</th>
-                            <th>Equipo</th>
-                            <th>Fecha / Hora</th>
-                            <th>Estado</th>
+                            <th style="text-align: left; padding: 10px;">Docente</th>
+                            <th style="text-align: left; padding: 10px;">Equipo</th>
+                            <th style="text-align: center; padding: 10px;">Curso</th>
+                            <th style="text-align: left; padding: 10px;">Fecha / Hora</th>
+                            <th style="text-align: center; padding: 10px;">Estado</th>
                         </tr>
                     </thead>
                     <tbody id="tabla-prestamos">
@@ -226,67 +230,93 @@
 
 
 
-    <div id="modal-profesores" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4);">
-    
-    <div class="modal-content" style="background-color: #ffffff; margin: 5% auto; padding: 20px; border: 1px solid #888; width: 90%; max-width: 700px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); color: #333333;">
-        
-        <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eeeeee; padding-bottom: 10px; margin-bottom: 15px;">
-            <h3 style="margin: 0; color: #1e3a8a;">👤 Gestión de Profesores (ABM)</h3>
-            <span id="close-modal-profes" class="close-btn" style="font-size: 28px; font-weight: bold; cursor: pointer; color: #aaa;">&times;</span>
-        </div>
-        
-        <div class="modal-body">
-            <form id="form-profesor" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #dee2e6;">
-                <h4 id="form-titulo-profe" style="margin-top:0; color:#333; margin-bottom: 12px;">Registrar Nuevo Profesor</h4>
-                
-                <input type="hidden" id="profe-id" value="">
+    <div id="modal-profesores" class="modal"
+        style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4);">
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
-                    <div>
-                        <label style="font-size: 13px; font-weight: bold; color: #333;">Nombre Completo:</label>
-                        <input type="text" id="profe-nombre" required style="width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;" placeholder="Ej: Prof. Juan Pérez">
-                    </div>
-                    <div>
-                        <label style="font-size: 13px; font-weight: bold; color: #333;">Email:</label>
-                        <input type="email" id="profe-email" style="width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;" placeholder="juan.perez@escuela.edu.ar">
-                    </div>
-                </div>
+        <div class="modal-content"
+            style="background-color: #ffffff; margin: 5% auto; padding: 20px; border: 1px solid #888; width: 90%; max-width: 700px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); color: #333333;">
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
-                    <div>
-                        <label style="font-size: 13px; font-weight: bold; color: #333;">DNI:</label>
-                        <input type="text" id="profe-dni" style="width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;" placeholder="Sin puntos ni espacios">
-                    </div>
-                    <div>
-                        <label style="font-size: 13px; font-weight: bold; color: #333;">Celular / Teléfono:</label>
-                        <input type="text" id="profe-celular" style="width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;" placeholder="Ej: 261153456789">
-                    </div>
-                </div>
+            <div class="modal-header"
+                style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eeeeee; padding-bottom: 10px; margin-bottom: 15px;">
+                <h3 style="margin: 0; color: #1e3a8a;">👤 Gestión de Profesores (ABM)</h3>
+                <span id="close-modal-profes" class="close-btn"
+                    style="font-size: 28px; font-weight: bold; cursor: pointer; color: #aaa;">&times;</span>
+            </div>
 
-                <div style="text-align: right;">
-                    <button type="button" id="btn-cancelar-edicion" style="display:none; background:#6c757d; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; margin-right:5px;">Cancelar</button>
-                    <button type="submit" id="btn-guardar-profe" style="background:#0d6efd; color:white; border:none; padding:6px 15px; border-radius:4px; cursor:pointer; font-weight:bold;">Guardar Profesor</button>
-                </div>
-            </form>
+            <div class="modal-body">
+                <form id="form-profesor"
+                    style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #dee2e6;">
+                    <h4 id="form-titulo-profe" style="margin-top:0; color:#333; margin-bottom: 12px;">Registrar Nuevo
+                        Profesor</h4>
 
-            <h4 style="color: #333; margin-bottom: 8px;">Profesores Registrados</h4>
-            <div style="max-height: 220px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 4px; background-color: #ffffff;">
-                <table style="width: 100%; border-collapse: collapse; font-size: 14px; background-color: #ffffff;">
-                    <thead style="background: #e9ecef; color: #333; position: sticky; top: 0; z-index: 10;">
-                        <tr>
-                            <th style="padding: 10px; text-align: left; border-bottom: 2px solid #dee2e6; background: #e9ecef;">Nombre</th>
-                            <th style="padding: 10px; text-align: left; border-bottom: 2px solid #dee2e6; background: #e9ecef;">DNI</th>
-                            <th style="padding: 10px; text-align: left; border-bottom: 2px solid #dee2e6; background: #e9ecef;">Celular</th>
-                            <th style="padding: 10px; text-align: center; border-bottom: 2px solid #dee2e6; background: #e9ecef;">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabla-profesores-cuerpo" style="background-color: #ffffff; color: #333333;">
+                    <input type="hidden" id="profe-id" value="">
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                        <div>
+                            <label style="font-size: 13px; font-weight: bold; color: #333;">Nombre Completo:</label>
+                            <input type="text" id="profe-nombre" required
+                                style="width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;"
+                                placeholder="Ej: Prof. Juan Pérez">
+                        </div>
+                        <div>
+                            <label style="font-size: 13px; font-weight: bold; color: #333;">Email:</label>
+                            <input type="email" id="profe-email"
+                                style="width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;"
+                                placeholder="juan.perez@escuela.edu.ar">
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                        <div>
+                            <label style="font-size: 13px; font-weight: bold; color: #333;">DNI:</label>
+                            <input type="text" id="profe-dni"
+                                style="width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;"
+                                placeholder="Sin puntos ni espacios">
+                        </div>
+                        <div>
+                            <label style="font-size: 13px; font-weight: bold; color: #333;">Celular / Teléfono:</label>
+                            <input type="text" id="profe-celular"
+                                style="width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;"
+                                placeholder="Ej: 261153456789">
+                        </div>
+                    </div>
+
+                    <div style="text-align: right;">
+                        <button type="button" id="btn-cancelar-edicion"
+                            style="display:none; background:#6c757d; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; margin-right:5px;">Cancelar</button>
+                        <button type="submit" id="btn-guardar-profe"
+                            style="background:#0d6efd; color:white; border:none; padding:6px 15px; border-radius:4px; cursor:pointer; font-weight:bold;">Guardar
+                            Profesor</button>
+                    </div>
+                </form>
+
+                <h4 style="color: #333; margin-bottom: 8px;">Profesores Registrados</h4>
+                <div
+                    style="max-height: 220px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 4px; background-color: #ffffff;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 14px; background-color: #ffffff;">
+                        <thead style="background: #e9ecef; color: #333; position: sticky; top: 0; z-index: 10;">
+                            <tr>
+                                <th
+                                    style="padding: 10px; text-align: left; border-bottom: 2px solid #dee2e6; background: #e9ecef;">
+                                    Nombre</th>
+                                <th
+                                    style="padding: 10px; text-align: left; border-bottom: 2px solid #dee2e6; background: #e9ecef;">
+                                    DNI</th>
+                                <th
+                                    style="padding: 10px; text-align: left; border-bottom: 2px solid #dee2e6; background: #e9ecef;">
+                                    Celular</th>
+                                <th
+                                    style="padding: 10px; text-align: center; border-bottom: 2px solid #dee2e6; background: #e9ecef;">
+                                    Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-profesores-cuerpo" style="background-color: #ffffff; color: #333333;">
                         </tbody>
-                </table>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
 
 

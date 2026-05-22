@@ -31,13 +31,19 @@ export async function getEquipos() {
 }
 
 // 3. Registrar el préstamo general (Cabecera)
-export async function insertarPrestamoCabecera(usuarioId, primerEquipoId) {
+// 3. Registrar el préstamo general (Cabecera) - Corregido con tu campo original
+export async function insertarPrestamoCabecera(usuarioId, primerEquipoId, observaciones) {
     const { data, error } = await supabaseClient
         .from('prestamos')
-        .insert([{ usuario_id: parseInt(usuarioId), equipo_id: primerEquipoId }])
+        .insert([{ 
+            usuario_id: parseInt(usuarioId), 
+            equipo_id: primerEquipoId,
+            observaciones: observaciones // 🎯 Mismo nombre que en Supabase
+        }])
         .select();
+
     if (error) throw error;
-    return data[0].id; // Nos devuelve el ID del préstamo que se acaba de crear
+    return data[0].id; 
 }
 
 // 4. Registrar cada máquina del lote en la tabla secundaria (Detalle)

@@ -1,27 +1,29 @@
 // app.js
-import { renderDocentes, 
-    renderEquipos, 
-    renderTablaPrestamos, 
-    renderHistorialDiario, 
-    abrirModal, 
+import {
+    renderDocentes,
+    renderEquipos,
+    renderTablaPrestamos,
+    renderHistorialDiario,
+    abrirModal,
     cerrarModal,
     renderHistorialEnModal,
     renderTablaProfesores,
     mostrarNotificacion
 } from './modules/ui.js';
-import { insertarPrestamoCabecera, 
-    insertarPrestamoDetalle, 
+import {
+    insertarPrestamoCabecera,
+    insertarPrestamoDetalle,
     actualizarEstadoEquipo,
-    registrarFechaDevolucion, 
+    registrarFechaDevolucion,
     getDetallesDePrestamo,
     devolverEquipoIndividual,
     agregarEquipoAlDetalle,
     getPrestamosPorFecha,
-    getUsuarios, 
-    insertUsuario, 
-    updateUsuario, 
+    getUsuarios,
+    insertUsuario,
+    updateUsuario,
     deleteUsuario
-    } from './modules/api.js';
+} from './modules/api.js';
 
 // Un objeto "estado" temporal para compartir la selección de equipos entre el modal y el guardado
 const appState = {
@@ -41,10 +43,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 document.getElementById('btn-abrir-modal').addEventListener('click', abrirModal);
 
 // Cancelar/Cerrar del Modal (Limpiamos cualquier onclick viejo del HTML)
-document.querySelector('.btn-historial[onclick="cerrarModal()"]')?.removeAttribute('onclick'); 
+document.querySelector('.btn-historial[onclick="cerrarModal()"]')?.removeAttribute('onclick');
 document.querySelector('.btn-historial')?.addEventListener('click', () => {
     // 🔍 ¡ESTE ES EL DETALLE!: Si cierran el modal tocando "Cancelar", limpiamos la memoria
-    prestamoSeleccionadoId = null; 
+    prestamoSeleccionadoId = null;
     appState.idsSeleccionados = [];
     appState.nombresSeleccionados = [];
     cerrarModal(); // Ejecuta la función visual original que viene de ui.js
@@ -53,15 +55,9 @@ document.querySelector('.btn-historial')?.addEventListener('click', () => {
 // Confirmar la selección adentro del modal
 document.getElementById('btn-confirmar-seleccion-modal').addEventListener('click', async () => {
 
-if (!appState.idsSeleccionados || appState.idsSeleccionados.length === 0) {
-    // 🎯 Agregamos 'error' al final para que pinte rojo
-    mostrarNotificacion("❌ Por favor, selecciona al menos un equipo antes de confirmar.", 'error');
-    return; 
-}
-
-
-    if (appState.idsSeleccionados.length === 0) {
-        alert("Por favor, selecciona al menos un equipo antes de confirmar.");
+    if (!appState.idsSeleccionados || appState.idsSeleccionados.length === 0) {
+        // 🎯 Agregamos 'error' al final para que pinte rojo
+        mostrarNotificacion("❌ Por favor, selecciona al menos un equipo antes de confirmar.", 'error');
         return;
     }
 
@@ -74,8 +70,8 @@ if (!appState.idsSeleccionados || appState.idsSeleccionados.length === 0) {
                 // Cambiamos el estado del equipo en el inventario a 'Prestado'
                 await actualizarEstadoEquipo(equipoId, 'Prestado');
             }
-
-            alert("¡Equipo(s) agregado(s) con éxito al lote!");
+            mostrarNotificacion("✅ ¡Equipo(s) agregado(s) con éxito al lote!");
+            
 
             // Limpiamos el estado para que no interfiera en futuros préstamos
             prestamoSeleccionadoId = null;
@@ -83,14 +79,14 @@ if (!appState.idsSeleccionados || appState.idsSeleccionados.length === 0) {
             appState.nombresSeleccionados = [];
 
             // Cerramos el modal usando tu función nativa
-            cerrarModal(); 
+            cerrarModal();
 
             // Refrescamos la tabla para que impacte el cambio visual en la pantalla al instante
             await renderTablaPrestamos();
             await renderEquipos(appState);
 
         } catch (error) {
-            console.error("Error al agregar el equipo parcial:", error);
+            
             alert("Hubo un error al agregar el equipo a la base de datos.");
         }
     } else {
@@ -103,7 +99,7 @@ if (!appState.idsSeleccionados || appState.idsSeleccionados.length === 0) {
         } else {
             document.getElementById('btn-abrir-modal').textContent = `Equipos: (${appState.idsSeleccionados.length}) seleccionados`;
         }
-        
+
         cerrarModal();
     }
 });
@@ -114,7 +110,7 @@ const btnRegistrar = document.getElementById('btn-registrar-prestamo');
 
 if (btnRegistrar) {
     btnRegistrar.addEventListener('click', async () => {
-        
+
         const inputDocente = document.getElementById('docente');
         const datalistProfes = document.getElementById('lista-docentes');
         let usuarioId = null;
@@ -122,7 +118,7 @@ if (btnRegistrar) {
         if (inputDocente && datalistProfes) {
             const valorEscrito = inputDocente.value.trim().toLowerCase();
             const opciones = datalistProfes.options;
-            
+
             for (let i = 0; i < opciones.length; i++) {
                 if (opciones[i].value.trim().toLowerCase() === valorEscrito) {
                     usuarioId = opciones[i].dataset.id;
@@ -131,9 +127,11 @@ if (btnRegistrar) {
             }
         }
 
-       const inputEquiposOculto = document.getElementById('input-equipo-oculto');
+        const inputEquiposOculto = document.getElementById('input-equipo-oculto');
         const inputObservaciones = document.getElementById('observaciones');
+       
         
+
         const equiposTexto = inputEquiposOculto ? inputEquiposOculto.value : '';
         const observaciones = inputObservaciones ? inputObservaciones.value.trim() : '';
 
@@ -179,7 +177,7 @@ if (btnRegistrar) {
             const primerEquipoId = parseInt(arrayEquiposIds[0]);
 
             // PASO 1: Insertar la Cabecera del préstamo
-            const prestamoId = await insertarPrestamoCabecera(usuarioId, primerEquipoId);
+            const prestamoId = await insertarPrestamoCabecera(usuarioId, primerEquipoId, observaciones);
 
             // PASO 2: Insertar cada equipo en el Detalle y cambiarle el estado
             for (const equipoIdStr of arrayEquiposIds) {
@@ -189,10 +187,10 @@ if (btnRegistrar) {
                 await renderTablaPrestamos();
             }
 
-           // =========================================================================
+            // =========================================================================
             // 🎉 AVISO DE ÉXITO Y LIMPIEZA TOTAL (INCLUYENDO MODAL)
             // =========================================================================
-            
+
             // 1. Avisamos que se guardó todo joya
             mostrarNotificacion("✅ ¡Préstamo registrado con éxito!");
 
@@ -213,29 +211,29 @@ if (btnRegistrar) {
 
             // 🔄 5. Refrescamos la tabla de abajo y RE-RENDERIZAMOS los botones del modal
             await renderTablaPrestamos(); // Actualiza la grilla "Equipos en Uso"
-            
+
             if (typeof renderEquipos === 'function') {
                 await renderEquipos(appState); // 💥 Esto vuelve a pintar las netbooks en el modal con sus estados reales actuales
             }
 
         } catch (error) {
-            console.error("Error al guardar el préstamo:", error);
+            
             alert("❌ Hubo un error al registrar el préstamo en la base de datos.");
         }
     });
 }
 // 4. ESCUCHADOR DE DEVOLUCIONES (Captura el clic en los botones de la tabla)
 document.getElementById('tabla-prestamos').addEventListener('click', async (e) => {
-    
+
     // A) CASO: Devolver UN solo equipo (Botón nuevo)
     if (e.target && e.target.classList.contains('btn-devolver-uno')) {
         const pId = e.target.getAttribute('data-prestamo');
         const eId = e.target.getAttribute('data-equipo');
-        
-        if(confirm("¿Seguro querés devolver esta máquina específica?")) {
+
+        if (confirm("¿Seguro querés devolver esta máquina específica?")) {
             try {
                 await devolverEquipoIndividual(pId, eId);
-               mostrarNotificacion("✅ Equipo devuelto al inventario");
+                mostrarNotificacion("✅ Equipo devuelto al inventario");
                 await renderEquipos(appState);
                 await renderTablaPrestamos();
             } catch (err) {
@@ -249,8 +247,8 @@ document.getElementById('tabla-prestamos').addEventListener('click', async (e) =
     // B) CASO: Devolver TODO el lote (Botón viejo)
     if (e.target && e.target.classList.contains('btn-devolver')) {
         const idPrestamo = e.target.getAttribute('data-id');
-        
-        if(confirm("¿Seguro querés cerrar todo el préstamo y devolver todas las máquinas?")) {
+
+        if (confirm("¿Seguro querés cerrar todo el préstamo y devolver todas las máquinas?")) {
             try {
                 const detalles = await getDetallesDePrestamo(idPrestamo);
                 await registrarFechaDevolucion(idPrestamo);
@@ -260,12 +258,12 @@ document.getElementById('tabla-prestamos').addEventListener('click', async (e) =
                         await actualizarEstadoEquipo(d.equipo_id, 'Disponible');
                     }
                 }
+                mostrarNotificacion("✅ ¡Lote de equipos devuelto y disponible!");
                 
-                alert("¡Lote de equipos devuelto y disponible!");
                 await renderEquipos(appState);
                 await renderTablaPrestamos();
             } catch (err) {
-                console.error("Error en devolución total:", err);
+                
                 mostrarNotificacion("✅ ¡Préstamo registrado con éxito!");
             }
         }
@@ -275,13 +273,13 @@ document.getElementById('tabla-prestamos').addEventListener('click', async (e) =
     // Caso C agregar un equipo parcial al registro (botón agregar)
     else if (e.target && e.target.classList.contains('btn-agregar-parcial')) {
         const prestamoId = e.target.getAttribute('data-id');
-        
+
         // 1. Guardamos el ID del préstamo en la variable global
         prestamoSeleccionadoId = prestamoId;
-        
+
         // 2. Ejecutamos la función que lee Supabase y dibuja los cuadraditos disponibles
         await renderEquipos(appState);
-        
+
         // 3. ¡Ejecutamos tu función nativa para abrir la ventana emergente!
         abrirModal();
     }
@@ -291,7 +289,7 @@ document.getElementById('tabla-prestamos').addEventListener('click', async (e) =
 document.getElementById('btn-ver-registros').addEventListener('click', async () => {
     const seccionDiaria = document.getElementById('seccion-registros-diarios');
     if (!seccionDiaria) return;
-    
+
     if (!seccionDiaria.classList.contains('oculto')) {
         seccionDiaria.classList.add('oculto');
         return;
@@ -313,10 +311,10 @@ document.getElementById('btn-ver-registros').addEventListener('click', async () 
         const hoy = new Date().toISOString().split('T')[0];
         inputFecha.value = hoy;
     }
-    
+
     // Mostramos el modal usando Flexbox para centrarlo
     modalHistorial.style.display = 'flex';
-    
+
     // Cargamos los datos del día
     await cargarHistorialPorFecha(inputFecha.value);
 });
@@ -395,21 +393,24 @@ if (formProfesor) {
             if (idActual) {
                 // ✏️ MODO MODIFICACIÓN: Si el ID oculto tiene valor, actualizamos
                 await updateUsuario(idActual, datosProfe);
-                alert("¡Profesor actualizado con éxito!");
+                mostrarNotificacion("✅ ¡Profesor actualizado con éxito!");
+                
             } else {
                 // ➕ MODO ALTA: Si no hay ID, es un profesor nuevo
                 await insertUsuario(datosProfe);
-                alert("¡Profesor registrado con éxito!");
+                mostrarNotificacion("✅ ¡Profesor registrado con éxito!");
+                
             }
 
             resetearFormularioProfe();
             await cargarYMostrarProfesores(); // Recarga la tabla con los cambios
-            
+
             // Opcional: Si en tu pantalla principal tenés un select de profesores para los préstamos,
             // acá podrías llamar a la función que lo llena para que aparezca el nuevo profe al instante.
 
         } catch (error) {
-            alert("Hubo un error al guardar los datos del profesor.");
+            mostrarNotificacion("❌ Por favor, seleccione un curso válido de la lista desplegable.", 'error');
+            
             console.error(error);
         }
     });
@@ -419,7 +420,7 @@ if (formProfesor) {
 const cuerpoTablaProfes = document.getElementById('tabla-profesores-cuerpo');
 if (cuerpoTablaProfes) {
     cuerpoTablaProfes.addEventListener('click', async (e) => {
-        
+
         // BOTÓN EDITAR ✏️
         const btnEditar = e.target.closest('.btn-editar-profe');
         if (btnEditar) {
