@@ -324,30 +324,23 @@ tr:hover {
         left: auto !important;
     }
 
- /* ---------------------------------------------------------------------
-       3. AJUSTE EXCLUSIVO SOLAPA DERECHA (Para que no tape el nombre)
+   /* ---------------------------------------------------------------------
+       3. AJUSTE DE LA SOLAPA AZUL (Desplazada más a la izquierda)
        --------------------------------------------------------------------- */
-    /* Usamos el ID del contenedor para asegurarnos de no tocar la izquierda */
     #sidebar-equipos-uso .sidebar-pestana {
         position: absolute !important;
         top: 20px !important;
-        left: -48px !important;       /* La estiramos más hacia la izquierda */
-        width: 48px !important;        /* Le damos más cuerpo total al botón azul */
+        
+        /* 🔥 CAMBIAZO AQUÍ: La empujamos a -45px y le damos más ancho para que no tape las letras */
+        left: -60px !important;      /* La saca 10 píxeles más hacia afuera */
+        width: 45px !important;       /* Le damos más cuerpo para que entre cómodo el texto/icono */
+        
         right: auto !important;
-        
-        /* 🔥 LA CLAVE: Mucho padding izquierdo para empujar las letras hacia afuera del borde */
-        padding: 12px 2px 12px 10px !important; 
-        
+        padding: 12px 4px !important;
         font-size: 0.7rem !important;
         border-radius: 8px 0 0 8px !important;
         display: block !important;
         visibility: visible !important;
-    }
-
-    /* Por si el texto interno tiene un span que achique el espacio */
-    #sidebar-equipos-uso .sidebar-pestana span {
-        display: inline-block !important;
-        padding-left: 2px !important; /* Ajuste fino del texto */
     }
 
    /* ---------------------------------------------------------------------
