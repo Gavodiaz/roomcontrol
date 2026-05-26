@@ -280,40 +280,65 @@ tr:hover {
 .sidebar-flotante-izq:hover {
     left: 0;
 }
-
 /* =========================================================================
-   📱 ADAPTACIÓN RESPONSIVA PARA CELULARES (PANTALLAS CHICAS)
+   📱 OPTIMIZACIÓN RESPONSIVA AVANZADA PARA CELULARES
    ========================================================================= */
 @media (max-width: 768px) {
-    /* 1. Hacemos que la barra ocupe casi todo el ancho para que entren las tablas */
+    /* 1. Reducimos el ancho de la barra para que no sea gigante en celulares */
     .sidebar-flotante-izq {
-        width: 90vw !important; /* Ocupa el 90% del ancho del celular */
-        max-width: 360px;       /* Le ponemos un tope para que no quede gigante */
-        left: -90vw !important; /* Se esconde exactamente la misma distancia */
+        width: 85vw !important;  /* Ocupa el 85% de la pantalla del celu */
+        max-width: 320px;        /* Un tope de ancho bien compacto */
+        left: -85vw !important;  /* Ocultación exacta según su tamaño */
+        height: 90vh !important; /* Dejamos un margen arriba y abajo */
+        top: 5vh !important;
+        border-radius: 0 12px 12px 0; /* Bordes redondeados estéticos */
     }
 
-    /* 2. Modificamos el comportamiento del hover porque en celular no hay mouse */
-    /* Ahora se va a desplegar de forma segura al hacerle un toque (tap) */
+    /* Activación por toque o selección en pantalla táctil */
     .sidebar-flotante-izq:hover,
     .sidebar-flotante-izq:focus-within {
         left: 0 !important;
     }
 
-    /* 3. Achicamos un pelín la letra de la tabla interna para que no desborde */
+    /* 2. Rediseñamos el contenedor interno para permitir el scroll de la tabla */
+    #seccion-lateral-diaria {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* 🔥 LA CLAVE: Habilitamos el scroll táctil interno de forma independiente */
+    #seccion-lateral-diaria .table-responsive {
+        overflow-x: auto !important;   /* Permite scroll horizontal */
+        overflow-y: auto !important;   /* Permite scroll vertical si hay muchas filas */
+        max-height: 75vh;
+        -webkit-overflow-scrolling: touch; /* Suaviza el deslizamiento en iPhone/Android */
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+    }
+
+    /* 3. Compactamos la tipografía interna de la tabla */
     #seccion-lateral-diaria h2 {
-        font-size: 1.1rem;
-        margin-bottom: 10px;
+        font-size: 1rem;
+        margin-bottom: 8px;
     }
 
-    #seccion-lateral-diaria .table th,
-    #seccion-lateral-diaria .table td {
+    #seccion-lateral-diaria .table th {
+        background-color: #f8fafc;
+        font-size: 0.72rem !important;
         padding: 6px 4px !important;
-        font-size: 0.78rem !important; /* Letra compacta pero legible en pantalla chica */
+        white-space: nowrap; /* Evita que los títulos se rompan en dos renglones */
     }
 
-    /* 4. Hacemos que los badges de los equipos se acomoden mejor */
+    #seccion-lateral-diaria .table td {
+        font-size: 0.75rem !important;
+        padding: 8px 4px !important;
+    }
+
+    /* 4. Achicamos los badges de equipos para que entren en su columna */
     .badge-equipo-item {
-        font-size: 0.75em !important;
-        padding: 1px 5px !important;
+        font-size: 0.7em !important;
+        padding: 1px 4px !important;
+        margin: 1px !important;
     }
 }
