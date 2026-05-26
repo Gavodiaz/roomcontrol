@@ -341,17 +341,21 @@ tr:hover {
         font-size: 0.75rem !important;
     }
 
-    /* ---------------------------------------------------------------------
+   /* ---------------------------------------------------------------------
        4. SOLUCIÓN AL RECORRIDO TÁCTIL (Scroll de tablas)
        --------------------------------------------------------------------- */
-    /* Aplicable a .table-responsive de ambas barras flotantes */
     .sidebar-flotante-izq .table-responsive,
     #sidebar-equipos-uso .table-responsive {
         width: 100% !important;
-        overflow-x: auto !important;   /* 🔥 Habilita arrastrar con el dedo horizontalmente */
-        overflow-y: auto !important;   /* 🔥 Permite scroll vertical interno si hay muchos docentes */
-        max-height: 62vh !important;   /* Evita que la tabla se vaya abajo de la pantalla */
-        -webkit-overflow-scrolling: touch; /* Fluidez táctil nativa */
+        overflow-x: auto !important;       /* Permite scroll horizontal */
+        overflow-y: auto !important;       /* Permite scroll vertical interno */
+        max-height: 62vh !important;       
+        
+        /* 🔥 LAS 3 LÍNEAS CLAVE PARA CELULARES REALES: */
+        touch-action: pan-x !important;    /* Le dice al celu: "Acá el dedo solo mueve el eje X (izquierda/derecha)" */
+        -webkit-overflow-scrolling: touch; /* Activa el scroll por inercia ultra suave en Android e iOS */
+        pointer-events: auto !important;   /* Asegura que la tabla reciba los toques del dedo */
+
         border: 1px solid #e2e8f0 !important;
         border-radius: 6px !important;
     }
