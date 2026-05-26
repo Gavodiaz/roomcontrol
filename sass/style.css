@@ -324,32 +324,54 @@ tr:hover {
         left: auto !important;
     }
 /* ---------------------------------------------------------------------
-       3. AJUSTE EXCLUSIVO SOLAPA DERECHA (Orientación Vertical para Celular)
+       3. CONFIGURACIÓN INDEPENDIENTE DE SOLAPAS (Izquierda y Derecha)
        --------------------------------------------------------------------- */
+    
+    /* 🍏 SOLAPA IZQUIERDA: Registros Diarios (Mantenemos tu estilo original horizontal) */
+    #sidebar-registros-diarios .sidebar-pestana-izq {
+        position: absolute !important;
+        top: 20px !important;
+        right: -35px !important; /* Sobresale hacia la derecha del panel oculto */
+        left: auto !important;
+        width: 35px !important;
+        padding: 10px 5px !important;
+        font-size: 0.75rem !important;
+        display: block !important;
+        visibility: visible !important;
+    }
+    
+    /* Aseguramos que el texto izquierdo no se rompa ni se ponga vertical */
+    #sidebar-registros-diarios .sidebar-pestana-izq span {
+        writing-mode: horizontal-tb !important;
+        transform: none !important;
+        display: inline !important;
+    }
+
+    /* 💙 SOLAPA DERECHA: Equipos en Uso (Modo Vertical Exclusivo) */
     #sidebar-equipos-uso .sidebar-pestana {
         position: absolute !important;
         top: 25px !important;
-        left: -38px !important;       /* La sacamos lo justo hacia la izquierda */
-        width: 30px !important;        /* Ancho compacto ideal para el dedo */
+        left: -38px !important;  /* Sobresale hacia la izquierda del panel oculto */
+        width: 38px !important;   /* Ancho justo para que entre en el celular */
         right: auto !important;
-        background-color: #007bff !important; /* Tu color azul original */
+        background-color: #007bff !important; /* Tu azul característico */
         color: white !important;
         padding: 15px 0 !important;
-        
         border-radius: 8px 0 0 8px !important;
+        
         display: flex !important;
-        flex-direction: column !important; /* Apila el emoji y el texto */
+        flex-direction: column !important; /* Apila el emoji arriba y el texto abajo */
         align-items: center !important;
         justify-content: center !important;
         gap: 8px !important;
         visibility: visible !important;
     }
 
-    /* 🔥 LA CLAVE: Rotamos el texto para que se lea de arriba a abajo en vertical */
+    /* Rotación exclusiva para el texto de la derecha */
     #sidebar-equipos-uso .sidebar-pestana span {
         display: block !important;
-        writing-mode: vertical-rl !important; /* Hace que el texto se escriba verticalmente */
-        transform: rotate(180deg) !important;  /* Lo gira para que se lea de arriba a abajo de forma natural */
+        writing-mode: vertical-rl !important; /* Letras de arriba hacia abajo */
+        transform: rotate(180deg) !important;  /* Orientación de lectura natural */
         white-space: nowrap !important;
         font-size: 0.72rem !important;
         font-weight: bold !important;
@@ -357,6 +379,7 @@ tr:hover {
         padding: 0 !important;
         margin: 0 !important;
     }
+    
    /* ---------------------------------------------------------------------
        4. SOLUCIÓN AL RECORRIDO TÁCTIL (Scroll de tablas)
        --------------------------------------------------------------------- */
