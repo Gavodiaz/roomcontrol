@@ -302,45 +302,43 @@ tr:hover {
         transition: left 0.3s ease, right 0.3s ease !important;
     }
 
-    /* ---------------------------------------------------------------------
-       2. COMPORTAMIENTO INDEPENDIENTE IZQUIERDA / DERECHA
+   /* ---------------------------------------------------------------------
+       2. DERECHA (Equipos en Uso - Rescate de Posición)
        --------------------------------------------------------------------- */
-    
-    /* Izquierda (Registros Diarios) */
-    .sidebar-flotante-izq {
-        left: -85vw !important;
-        right: auto !important;
-    }
-    .sidebar-flotante-izq:hover,
-    .sidebar-flotante-izq:focus-within {
-        left: 0 !important;
+    #sidebar-equipos-uso {
+        position: fixed !important;  /* Nos aseguramos de que flote */
+        left: auto !important;       /* Anulamos por completo el empuje izquierdo */
+        right: -275px !important;    /* Lo escondemos usando píxeles fijos para que sea exacto */
+        width: 275px !important;     /* Ancho fijo ideal para pantallas de celulares */
+        height: 80vh !important;
+        top: 10vh !important;
+        z-index: 99999 !important;
+        background-color: white !important;
+        box-shadow: -2px 0 8px rgba(0,0,0,0.15) !important;
     }
 
-    /* Derecha (Equipos en Uso - Tu ID Real) */
-    #sidebar-equipos-uso {
-        right: -85vw !important;    /* Oculta el panel hacia la derecha del S20 */
-        left: auto !important;      /* Mata cualquier herencia que lo tire a la izquierda */
-        border-radius: 12px 0 0 12px !important;
-    }
+    /* Activación táctil y hover corregida */
     #sidebar-equipos-uso:hover,
     #sidebar-equipos-uso:focus-within {
-        right: 0 !important;        /* Al tocarlo, entra suavemente a la pantalla */
+        right: 0 !important;
         left: auto !important;
     }
 
     /* ---------------------------------------------------------------------
-       3. AJUSTE DE LAS SOLAPAS (Las pestañas grises/azules que sobresalen)
+       3. AJUSTE DE LA SOLAPA AZUL (Para que no se esconda)
        --------------------------------------------------------------------- */
-    /* Forzamos que la solapa azul se quede pegada al borde izquierdo de su caja */
     #sidebar-equipos-uso .sidebar-pestana {
         position: absolute !important;
-        left: -35px !important;     /* La saca hacia afuera lo justo para que se vea el dedito */
+        top: 20px !important;
+        left: -35px !important;      /* Se desplaza hacia la izquierda de la barra para quedar a la vista */
         right: auto !important;
         width: 35px !important;
-        padding: 10px 5px !important;
-        font-size: 0.75rem !important;
+        padding: 12px 5px !important;
+        font-size: 0.72rem !important;
+        border-radius: 8px 0 0 8px !important; /* Redondeado del lado que asoma */
+        display: block !important;    /* Forzamos que se dibuje sí o sí */
+        visibility: visible !important;
     }
-
    /* ---------------------------------------------------------------------
        4. SOLUCIÓN AL RECORRIDO TÁCTIL (Scroll de tablas)
        --------------------------------------------------------------------- */
