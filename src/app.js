@@ -38,7 +38,7 @@ async function controlarSesion() {
     const { data: { session }, error: authError } = await supabaseClient.auth.getSession();
 
     if (authError || !session) {
-        window.location.href = 'login.html';
+        window.location.href = './login.html'; // 👈 Asegurás el rebote correcto en GitHub Pages
         return;
     }
 

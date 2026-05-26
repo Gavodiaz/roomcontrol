@@ -15,7 +15,7 @@ document.getElementById('form-login').addEventListener('submit', async (e) => {
 
     try {
         await iniciarSesion(email, password);
-        window.location.href = 'index.html'; 
+        window.location.href = './index.html'; // 👈 Asegurás que busque en la raíz del sitio de GitHub
         
    } catch (error) {
         // Guardamos el error completo en la consola
