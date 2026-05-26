@@ -323,21 +323,39 @@ tr:hover {
         right: 0 !important;
         left: auto !important;
     }
-
-    /* ---------------------------------------------------------------------
-       3. AJUSTE DE LA SOLAPA AZUL (Para que no se esconda)
+/* ---------------------------------------------------------------------
+       3. AJUSTE EXCLUSIVO SOLAPA DERECHA (Orientación Vertical para Celular)
        --------------------------------------------------------------------- */
     #sidebar-equipos-uso .sidebar-pestana {
         position: absolute !important;
-        top: 20px !important;
-        left: -35px !important;      /* Se desplaza hacia la izquierda de la barra para quedar a la vista */
+        top: 25px !important;
+        left: -38px !important;       /* La sacamos lo justo hacia la izquierda */
+        width: 38px !important;        /* Ancho compacto ideal para el dedo */
         right: auto !important;
-        width: 35px !important;
-        padding: 12px 5px !important;
-        font-size: 0.72rem !important;
-        border-radius: 8px 0 0 8px !important; /* Redondeado del lado que asoma */
-        display: block !important;    /* Forzamos que se dibuje sí o sí */
+        background-color: #007bff !important; /* Tu color azul original */
+        color: white !important;
+        padding: 15px 0 !important;
+        
+        border-radius: 8px 0 0 8px !important;
+        display: flex !important;
+        flex-direction: column !important; /* Apila el emoji y el texto */
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 8px !important;
         visibility: visible !important;
+    }
+
+    /* 🔥 LA CLAVE: Rotamos el texto para que se lea de arriba a abajo en vertical */
+    #sidebar-equipos-uso .sidebar-pestana span {
+        display: block !important;
+        writing-mode: vertical-rl !important; /* Hace que el texto se escriba verticalmente */
+        transform: rotate(180deg) !important;  /* Lo gira para que se lea de arriba a abajo de forma natural */
+        white-space: nowrap !important;
+        font-size: 0.72rem !important;
+        font-weight: bold !important;
+        letter-spacing: 1px !important;
+        padding: 0 !important;
+        margin: 0 !important;
     }
    /* ---------------------------------------------------------------------
        4. SOLUCIÓN AL RECORRIDO TÁCTIL (Scroll de tablas)
