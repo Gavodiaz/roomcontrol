@@ -356,32 +356,45 @@ tr:hover {
         border-radius: 6px !important;
     }
 
-    /* ---------------------------------------------------------------------
-       5. INTERFAZ ULTRA COMPACTA (Tablas y Botones)
+   /* ---------------------------------------------------------------------
+       5. INTERFAZ ULTRA COMPACTA (Fuerza fuentes chicas en S23 Ultra)
        --------------------------------------------------------------------- */
     .sidebar-contenido h2 {
         font-size: 0.95rem !important;
         margin-bottom: 6px !important;
     }
 
-    .table th {
-        background-color: #f8fafc !important;
-        font-size: 0.68rem !important;   /* Letra chica para optimizar espacio en el S20 */
-        padding: 5px 3px !important;
-        white-space: nowrap !important;  /* Evita que títulos como "Fecha / Hora" se estiren abajo */
-    }
-
-    .table td {
-        font-size: 0.7rem !important;
-        padding: 5px 3px !important;
+    /* 🔥 ESPECÍFICO PARA LA TABLA DERECHA (Mata el tamaño gigante) */
+    #sidebar-equipos-uso .table,
+    #sidebar-equipos-uso .table th,
+    #sidebar-equipos-uso .table td,
+    #tabla-prestamos,
+    #tabla-prestamos td,
+    #tabla-prestamos th {
+        font-size: 0.68rem !important; /* Letra ultra compacta idéntica a la izquierda */
+        padding: 4px 3px !important;   /* Reduce el espacio interno para que no desborde */
         vertical-align: middle !important;
     }
 
-    /* Compactación de tus botones de acción (Agregar / Cerrar Lote) */
-    .table td .btn, 
-    .table td button {
+    /* Títulos de la tabla derecha */
+    #sidebar-equipos-uso .table th {
+        background-color: #f8fafc !important;
+        white-space: nowrap !important;
+        font-weight: bold !important;
+    }
+
+    /* Forzamos que el texto de las celdas de la derecha no herede fuentes grandes */
+    #tabla-prestamos td strong,
+    #sidebar-equipos-uso .table td span {
+        font-size: 0.68rem !important;
+    }
+
+    /* Compactación extrema de tus botones (Agregar / Cerrar Lote) */
+    #sidebar-equipos-uso .table .btn, 
+    #sidebar-equipos-uso .table button {
         padding: 2px 4px !important;
         font-size: 0.62rem !important;
+        line-height: 1.1 !important;
         display: block !important;
         width: 100% !important;
         margin: 1px 0 !important;
