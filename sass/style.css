@@ -165,3 +165,118 @@ tr:hover {
     background-color: #f1f5f9; /* Se oscurece un cachito al posar el mouse */
     transition: background-color 0.2s ease;
 }
+
+
+/* =========================================================================
+   📌 SIDEBAR FLOTANTE (PANEL LATERAL DESPLEGABLE)
+   ========================================================================= */
+
+/* 1. Posicionamos todo el panel fijo a la derecha de la pantalla */
+.sidebar-flotante {
+    position: fixed;
+    top: 50px;
+   width: 650px;      /* Mantiene el ancho ideal de 650px para la tabla */
+    right: -620px;     /* 🔥 AHORA SÍ: Se esconde por COMPLETO hacia la derecha */
+    height: calc(100vh - 100px);
+    background-color: #ffffff;
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.15);
+    border-radius: 8px 0 0 8px;
+    z-index: 1050; /* Por encima del formulario principal */
+    transition: right 0.3s ease-in-out; /* Animación suave al salir/entrar */
+    display: flex;
+}
+
+/* 2. La pestañita vertical que queda siempre a la vista */
+.sidebar-pestana {
+    width: 30px;
+    background-color: #0d6efd; /* Color azul a tono con RoomControl */
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 8px 0 0 8px;
+    font-weight: bold;
+    font-size: 13px;
+    padding: 10px 0;
+}
+
+.sidebar-pestana span {
+    writing-mode: vertical-rl; /* Hace que el texto se lea de arriba a abajo */
+    transform: rotate(180deg);
+    margin-top: 10px;
+    white-space: nowrap;
+}
+
+/* 3. El contenedor interno del contenido (La tabla en sí) */
+.sidebar-contenido {
+    flex-grow: 1;
+    padding: 15px;
+    overflow-y: auto; /* Si hay muchos profes, crea scroll interno propio */
+}
+
+.sidebar-contenido h3 {
+    margin-top: 0;
+    font-size: 18px;
+    border-bottom: 2px solid #eeeeee;
+    padding-bottom: 8px;
+    color: #333;
+}
+
+/* 🔥 LA MAGIA DEL HOVER: Cuando el mouse entra al panel o a la pestaña, se despliega */
+.sidebar-flotante:hover {
+    right: 0; /* Vuelve a su posición original visible */
+}
+
+
+/* =========================================================================
+   📌 SIDEBAR LATERAL FLOTANTE IZQUIERDO (REGISTROS DIARIOS)
+   ========================================================================= */
+
+.sidebar-flotante-izq {
+    position: fixed;
+    top: 100px;
+    width: 650px;       /* El mismo ancho cómodo para ver bien los horarios */
+    left: -650px;       /* 🔥 SE ESCONDE por completo hacia la IZQUIERDA */
+    height: calc(100vh - 150px);
+    background-color: #ffffff;
+    box-shadow: 5px 0 15px rgba(0, 0, 0, 0.15); /* Sombra hacia la derecha */
+    border-radius: 0 8px 8px 0;
+    z-index: 1050;
+    transition: left 0.3s ease-in-out; /* Animación de salida fluida */
+    display: flex;
+    flex-direction: row-reverse; /* Da vuelta los componentes internos para que la pestaña quede al borde */
+}
+
+/* La solapa de activación izquierda */
+.sidebar-pestana-izq {
+    position: absolute;
+    right: -30px;       /* Cuelga 30px hacia afuera de la pantalla */
+    top: 20%;           /* Un poquito más arriba que la otra para que no compitan si se cruzan */
+    width: 30px;
+    height: 140px;
+    background-color: #6c757d; /* Color gris oscuro para diferenciarla de los activos */
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 0 8px 8px 0;
+    font-weight: bold;
+    font-size: 12px;
+    box-shadow: 3px 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.sidebar-pestana-izq span {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    margin-top: 5px;
+    white-space: nowrap;
+}
+
+/* 🔥 EFECTO HOVER IZQUIERDO: Al pasar el mouse, sale hacia el centro */
+.sidebar-flotante-izq:hover {
+    left: 0;
+}

@@ -156,25 +156,31 @@
             </form>
         </div>
 
-        <div class="card">
-
-            <h2>Equipos en Uso</h2>
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th style="text-align: left; padding: 10px;">Docente</th>
-                            <th style="text-align: left; padding: 10px;">Equipo</th>
-                            <th style="text-align: center; padding: 10px;">Curso</th>
-                            <th style="text-align: left; padding: 10px;">Fecha / Hora</th>
-                            <th style="text-align: center; padding: 10px;">Estado</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabla-prestamos">
-                    </tbody>
-                </table>
-            </div>
+       <div id="sidebar-equipos-uso" class="sidebar-flotante">
+    <div class="sidebar-pestana">
+        💻 <span>Equipos en Uso</span>
+    </div>
+    <div class="sidebar-contenido">
+        <h2>Equipos en Uso</h2>
+        
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th style="text-align: left; padding: 10px;">Docente</th>
+                        <th style="text-align: left; padding: 10px;">Equipo</th>
+                        <th style="text-align: center; padding: 10px;">Curso</th>
+                        <th style="text-align: left; padding: 10px;">Fecha / Hora</th>
+                        <th style="text-align: center; padding: 10px;">Estado</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-prestamos">
+                </tbody>
+            </table>
         </div>
+
+    </div>
+</div>
 
         <div id="seccion-registros-diarios" class="card oculto">
             <h2>Movimientos del Día de Hoy</h2>
@@ -318,6 +324,33 @@
                             </tr>
                         </thead>
                         <tbody id="tabla-profesores-cuerpo" style="background-color: #ffffff; color: #333333;">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="sidebar-registros-diarios" class="sidebar-flotante-izq">
+        <div class="sidebar-pestana-izq">
+            📅 <span>Registros Diarios</span>
+        </div>
+        <div class="sidebar-contenido">
+            <div id="seccion-lateral-diaria">
+                <h2>Movimientos del Día de Hoy</h2>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Docente</th>
+                                <th>Equipo</th>
+                                <th>Salida</th>
+                                <th>Devolución</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-registros-lateral">
                         </tbody>
                     </table>
                 </div>
