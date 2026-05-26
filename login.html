@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RoomControl - Iniciar Sesión</title>
+   <link rel="stylesheet" href="style.css">
+
+<link rel="stylesheet" href="sass/style.css"> 
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* =========================================
+           Estilos con Escala Corregida (Más compacto)
+           ========================================= */
+        
+        :root {
+            --bg-color: #f1f5f9;
+            --text-color-primary: #1e293b;
+            --text-color-secondary: #64748b;
+            --primary-color: #3b82f6; 
+            --primary-color-hover: #2563eb;
+            --card-bg: #ffffff;
+            --card-border: rgba(0, 0, 0, 0.06);
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-family);
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            background-color: var(--bg-color);
+            overflow: hidden;
+        }
+
+        /* Fondo sutil */
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(-45deg, #f1f5f9, #e2e8f0, #f8fafc);
+            background-size: 400% 400%;
+            animation: gradient-anim 15s ease infinite;
+            z-index: -1;
+        }
+
+        @keyframes gradient-anim {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        /* 🎯 Achicamos el ancho máximo y los paddings internos */
+        .login-card {
+            background: var(--card-bg);
+            padding: 32px 28px; /* Reducido para que sea más estilizado */
+            border-radius: 12px;
+            border: 1px solid var(--card-border);
+            box-shadow: var(--card-shadow);
+            width: 100%;
+            max-width: 360px; /* Bajó de 440px a 360px */
+        }
+
+        /* 🎯 Título más chico y fino */
+        .login-card h2 {
+            margin-top: 0;
+            margin-bottom: 6px;
+            color: var(--text-color-primary);
+            text-align: center;
+            font-size: 22px; /* Bajó de 28px a 22px */
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+
+        /* 🎯 Subtítulo adaptado */
+        .login-card p {
+            color: var(--text-color-secondary);
+            font-size: 13px; /* Bajó de 15px a 13px */
+            font-weight: 400;
+            text-align: center;
+            margin-bottom: 24px; /* Menos separación */
+        }
+
+        .form-group {
+            margin-bottom: 16px; /* Espaciado más compacto */
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            color: #475569;
+            font-size: 13px; /* Más sutil */
+        }
+
+        .input-icon-wrapper {
+            position: relative;
+        }
+
+        .input-icon-wrapper i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            font-size: 15px; /* Icono más chico */
+            transition: color 0.2s;
+        }
+
+        /* 🎯 Inputs más estilizados y finos */
+        .form-group input {
+            box-sizing: border-box;
+            width: 100%;
+            padding: 10px 12px 10px 38px; /* Ajustado el espacio del icono */
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 14px; /* Letra interna más chica */
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-group input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.08);
+        }
+
+        .form-group input:focus + i {
+            color: var(--primary-color);
+        }
+
+        /* 🎯 Botón estilizado y proporcional */
+        .btn-login {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 11px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            transition: background-color 0.2s;
+        }
+
+        .btn-login:hover {
+            background-color: var(--primary-color-hover);
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+
+    <div class="animated-bg"></div>
+
+    <div class="login-container">
+        <div class="login-card">
+            <h2>RoomControl</h2>
+            <p>Acceso exclusivo para el personal de informática</p>
+            
+            <form id="form-login">
+                <div class="form-group">
+                    <label for="login-email">Correo Electrónico</label>
+                    <div class="input-icon-wrapper">
+                        <input type="email" id="login-email" placeholder="ejemplo@escuela.com" required>
+                        <i class="fas fa-envelope"></i> </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="login-password">Contraseña</label>
+                    <div class="input-icon-wrapper">
+                        <input type="password" id="login-password" placeholder="••••••••" required>
+                        <i class="fas fa-lock"></i> </div>
+                </div>
+                
+                <button type="submit" class="btn-login">Ingresar al Sistema</button>
+            </form>
+        </div>
+    </div>
+
+    
+    <script type="module" src="src/loginApp.js"></script>
+
+<script type="module" src="loginApp.js"></script>
+
+</body>
+</html>
