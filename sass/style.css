@@ -280,65 +280,111 @@ tr:hover {
 .sidebar-flotante-izq:hover {
     left: 0;
 }
+
+
+
 /* =========================================================================
-   📱 OPTIMIZACIÓN RESPONSIVA AVANZADA PARA CELULARES
+   📱 CONTROL RESPONSIVO REAL PARA DISPOSITIVOS MÓVILES (CELULARES)
    ========================================================================= */
 @media (max-width: 768px) {
-    /* 1. Reducimos el ancho de la barra para que no sea gigante en celulares */
-    .sidebar-flotante-izq {
-        width: 85vw !important;  /* Ocupa el 85% de la pantalla del celu */
-        max-width: 320px;        /* Un tope de ancho bien compacto */
-        left: -85vw !important;  /* Ocultación exacta según su tamaño */
-        height: 90vh !important; /* Dejamos un margen arriba y abajo */
-        top: 5vh !important;
-        border-radius: 0 12px 12px 0; /* Bordes redondeados estéticos */
+    
+    /* ---------------------------------------------------------------------
+       1. REGLAS GENERALES PARA AMBAS BARRAS FLOTANTES
+       --------------------------------------------------------------------- */
+    .sidebar-flotante-izq,
+    #sidebar-equipos-uso,
+    .sidebar-flotante {
+        width: 85vw !important;      /* Se adaptan al 85% del ancho del S20 */
+        max-width: 310px !important; /* Ancho ultra compacto para que no tape todo */
+        height: 80vh !important;     /* Altura contenida para dejar aire arriba y abajo */
+        top: 10vh !important;
+        z-index: 99999 !important;   /* Pasan al frente de cualquier formulario */
+        transition: left 0.3s ease, right 0.3s ease !important;
     }
 
-    /* Activación por toque o selección en pantalla táctil */
+    /* ---------------------------------------------------------------------
+       2. COMPORTAMIENTO INDEPENDIENTE IZQUIERDA / DERECHA
+       --------------------------------------------------------------------- */
+    
+    /* Izquierda (Registros Diarios) */
+    .sidebar-flotante-izq {
+        left: -85vw !important;
+        right: auto !important;
+    }
     .sidebar-flotante-izq:hover,
     .sidebar-flotante-izq:focus-within {
         left: 0 !important;
     }
 
-    /* 2. Rediseñamos el contenedor interno para permitir el scroll de la tabla */
-    #seccion-lateral-diaria {
-        height: 100%;
-        display: flex;
-        flex-direction: column;
+    /* Derecha (Equipos en Uso - Tu ID Real) */
+    #sidebar-equipos-uso {
+        right: -85vw !important;    /* Oculta el panel hacia la derecha del S20 */
+        left: auto !important;      /* Mata cualquier herencia que lo tire a la izquierda */
+        border-radius: 12px 0 0 12px !important;
+    }
+    #sidebar-equipos-uso:hover,
+    #sidebar-equipos-uso:focus-within {
+        right: 0 !important;        /* Al tocarlo, entra suavemente a la pantalla */
+        left: auto !important;
     }
 
-    /* 🔥 LA CLAVE: Habilitamos el scroll táctil interno de forma independiente */
-    #seccion-lateral-diaria .table-responsive {
-        overflow-x: auto !important;   /* Permite scroll horizontal */
-        overflow-y: auto !important;   /* Permite scroll vertical si hay muchas filas */
-        max-height: 75vh;
-        -webkit-overflow-scrolling: touch; /* Suaviza el deslizamiento en iPhone/Android */
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-    }
-
-    /* 3. Compactamos la tipografía interna de la tabla */
-    #seccion-lateral-diaria h2 {
-        font-size: 1rem;
-        margin-bottom: 8px;
-    }
-
-    #seccion-lateral-diaria .table th {
-        background-color: #f8fafc;
-        font-size: 0.72rem !important;
-        padding: 6px 4px !important;
-        white-space: nowrap; /* Evita que los títulos se rompan en dos renglones */
-    }
-
-    #seccion-lateral-diaria .table td {
+    /* ---------------------------------------------------------------------
+       3. AJUSTE DE LAS SOLAPAS (Las pestañas grises/azules que sobresalen)
+       --------------------------------------------------------------------- */
+    /* Forzamos que la solapa azul se quede pegada al borde izquierdo de su caja */
+    #sidebar-equipos-uso .sidebar-pestana {
+        position: absolute !important;
+        left: -35px !important;     /* La saca hacia afuera lo justo para que se vea el dedito */
+        right: auto !important;
+        width: 35px !important;
+        padding: 10px 5px !important;
         font-size: 0.75rem !important;
-        padding: 8px 4px !important;
     }
 
-    /* 4. Achicamos los badges de equipos para que entren en su columna */
-    .badge-equipo-item {
-        font-size: 0.7em !important;
-        padding: 1px 4px !important;
-        margin: 1px !important;
+    /* ---------------------------------------------------------------------
+       4. SOLUCIÓN AL RECORRIDO TÁCTIL (Scroll de tablas)
+       --------------------------------------------------------------------- */
+    /* Aplicable a .table-responsive de ambas barras flotantes */
+    .sidebar-flotante-izq .table-responsive,
+    #sidebar-equipos-uso .table-responsive {
+        width: 100% !important;
+        overflow-x: auto !important;   /* 🔥 Habilita arrastrar con el dedo horizontalmente */
+        overflow-y: auto !important;   /* 🔥 Permite scroll vertical interno si hay muchos docentes */
+        max-height: 62vh !important;   /* Evita que la tabla se vaya abajo de la pantalla */
+        -webkit-overflow-scrolling: touch; /* Fluidez táctil nativa */
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 6px !important;
+    }
+
+    /* ---------------------------------------------------------------------
+       5. INTERFAZ ULTRA COMPACTA (Tablas y Botones)
+       --------------------------------------------------------------------- */
+    .sidebar-contenido h2 {
+        font-size: 0.95rem !important;
+        margin-bottom: 6px !important;
+    }
+
+    .table th {
+        background-color: #f8fafc !important;
+        font-size: 0.68rem !important;   /* Letra chica para optimizar espacio en el S20 */
+        padding: 5px 3px !important;
+        white-space: nowrap !important;  /* Evita que títulos como "Fecha / Hora" se estiren abajo */
+    }
+
+    .table td {
+        font-size: 0.7rem !important;
+        padding: 5px 3px !important;
+        vertical-align: middle !important;
+    }
+
+    /* Compactación de tus botones de acción (Agregar / Cerrar Lote) */
+    .table td .btn, 
+    .table td button {
+        padding: 2px 4px !important;
+        font-size: 0.62rem !important;
+        display: block !important;
+        width: 100% !important;
+        margin: 1px 0 !important;
+        white-space: nowrap !important;
     }
 }
