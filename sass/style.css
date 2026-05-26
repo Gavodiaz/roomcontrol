@@ -330,7 +330,7 @@ tr:hover {
         position: absolute !important;
         top: 25px !important;
         left: -38px !important;       /* La sacamos lo justo hacia la izquierda */
-        width: 38px !important;        /* Ancho compacto ideal para el dedo */
+        width: 30px !important;        /* Ancho compacto ideal para el dedo */
         right: auto !important;
         background-color: #007bff !important; /* Tu color azul original */
         color: white !important;
