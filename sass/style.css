@@ -324,25 +324,21 @@ tr:hover {
         left: auto !important;
     }
 
-   /* ---------------------------------------------------------------------
-       3. AJUSTE DE LA SOLAPA AZUL (Desplazada más a la izquierda)
+    /* ---------------------------------------------------------------------
+       3. AJUSTE DE LA SOLAPA AZUL (Para que no se esconda)
        --------------------------------------------------------------------- */
     #sidebar-equipos-uso .sidebar-pestana {
         position: absolute !important;
         top: 20px !important;
-        
-        /* 🔥 CAMBIAZO AQUÍ: La empujamos a -45px y le damos más ancho para que no tape las letras */
-        left: -60px !important;      /* La saca 10 píxeles más hacia afuera */
-        width: 45px !important;       /* Le damos más cuerpo para que entre cómodo el texto/icono */
-        
+        left: -35px !important;      /* Se desplaza hacia la izquierda de la barra para quedar a la vista */
         right: auto !important;
-        padding: 12px 4px !important;
-        font-size: 0.7rem !important;
-        border-radius: 8px 0 0 8px !important;
-        display: block !important;
+        width: 35px !important;
+        padding: 12px 5px !important;
+        font-size: 0.72rem !important;
+        border-radius: 8px 0 0 8px !important; /* Redondeado del lado que asoma */
+        display: block !important;    /* Forzamos que se dibuje sí o sí */
         visibility: visible !important;
     }
-
    /* ---------------------------------------------------------------------
        4. SOLUCIÓN AL RECORRIDO TÁCTIL (Scroll de tablas)
        --------------------------------------------------------------------- */
