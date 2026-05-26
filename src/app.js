@@ -25,6 +25,67 @@ import {
     deleteUsuario
 } from './modules/api.js';
 
+
+
+
+// 📄 src/app.js (Líneas superiores)
+import { supabaseClient } from './modules/supabase.js'; // Tu cliente clásico que ya funciona
+import { cerrarSesion } from './modules/auth.js'; // Importamos la función de salida
+
+// 🚀 Función para controlar la sesión al cargar el index
+// 📄 src/app.js
+async function controlarSesion() {
+    const { data: { session }, error: authError } = await supabaseClient.auth.getSession();
+
+    if (authError || !session) {
+        window.location.href = 'login.html';
+        return;
+    }
+
+    try {
+        // 🎯 Buscamos en tu tabla por la nueva columna compañera 'user_id'
+        const { data: usuarioDb, error: dbError } = await supabaseClient
+            .from('usuarios')
+            .select('nombre_completo') // Nombre exacto de tu columna
+            .eq('user_id', session.user.id) // 👈 Filtra comparando tu UID con la columna nueva
+            .single();
+
+        if (usuarioDb && usuarioDb.nombre_completo) {
+            document.getElementById('user-display-email').textContent = `👤 ${usuarioDb.nombre_completo}`;
+        } else {
+            document.getElementById('user-display-email').textContent = `👤 ${session.user.email}`;
+        }
+
+    } catch (err) {
+        console.error("Error al traer el nombre desde la tabla usuarios:", err);
+        document.getElementById('user-display-email').textContent = `👤 ${session.user.email}`;
+    }
+}
+
+// Ejecutamos el control apenas arranca la página
+controlarSesion();
+
+// 🛑 Configuración del botón de Cerrar Sesión
+document.getElementById('btn-logout').addEventListener('click', async () => {
+    if (confirm("¿Estás seguro de que querés cerrar sesión?")) {
+        try {
+            await cerrarSesion(); // Llama a tu función original que hace el signOut() y redirige
+        } catch (error) {
+            console.error("Error al cerrar sesión:", error.message);
+            // Por si las moscas falla la red, forzamos la salida igual
+            window.location.href = 'login.html';
+        }
+    }
+});
+
+// ... abajo sigue todo tu código original de la tabla de préstamos ...
+
+
+
+
+
+
+
 // Un objeto "estado" temporal para compartir la selección de equipos entre el modal y el guardado
 const appState = {
     idsSeleccionados: [],

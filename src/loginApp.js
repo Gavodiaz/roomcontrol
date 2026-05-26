@@ -16,6 +16,7 @@ document.getElementById('form-login').addEventListener('submit', async (e) => {
     try {
         await iniciarSesion(email, password);
         window.location.href = 'index.html'; 
+        
    } catch (error) {
         // Guardamos el error completo en la consola
         console.error("Error detallado de Supabase:", error);

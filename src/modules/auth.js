@@ -1,6 +1,7 @@
 // 📄 src/modules/auth.js
 // Importamos el cliente de Supabase que ya tenés configurado en tu proyecto
 import { supabaseClient } from './supabase.js';
+
 /**
  * Intenta iniciar sesión con correo y contraseña en Supabase Auth
  * @param {string} email 
