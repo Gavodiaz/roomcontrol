@@ -204,20 +204,53 @@ export async function renderHistorialDiario() {
                 ? '<span class="badge-devuelto">Devuelto</span>'
                 : '<span class="badge-uso">En Uso</span>';
 
-            fila.innerHTML = `
-                <td><strong>${reg.usuarios?.nombre_completo || 'Desconocido'}</strong></td>
-                <td>${reg.equipos?.nombre || 'Equipo Eliminado'}</td>
-                <td>⏱️ ${horaSalida} hs</td>
-                <td>⏱️ ${horaDevolucion} hs</td>
-                <td style="text-align:center;">${etiquetaEstado}</td>
-            `;
-            tablaDiaria.appendChild(fila);
+            // 🎯 CONSTRUCCIÓN DINÁMICA DE LOS CHIPS DE EQUIPOS
+            // Cambiá 'detalle_prestamos' si tu relación en la consulta de Supabase usa otro nombre
+           const detalles = reg.detalle_prestamos || []; 
+let htmlChipsEquipos = '';
+
+// 🎯 Reemplazá el bloque del d.equipos adentro de renderHistorialDiario():
+if (detalles && detalles.length > 0) {
+    htmlChipsEquipos = detalles.map(d => {
+        let nombreDisplay = 'Desconocido';
+        
+        if (d.equipos) {
+            nombreDisplay = d.equipos.nombre || 'Sin nombre';
+        }
+        
+        // ✨ Chips con el estilo amarillito del modal
+        return `<span style="
+            display: inline-block;
+            background-color: #fffbeb;
+            color: #b45309;
+            padding: 3px 10px;
+            margin: 2px 4px;
+            border-radius: 12px;
+            font-size: 0.82em;
+            border: 1px solid #fde68a;
+            font-weight: 500;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        ">${nombreDisplay}</span>`;
+    }).join('');
+} else {
+    htmlChipsEquipos = `<span style="color:#64748b; font-style:italic;">Sin equipos</span>`;
+}
+
+// 4. Inyectamos las celdas en la fila de la tabla
+fila.innerHTML = `
+    <td><strong>${reg.usuarios?.nombre_completo || 'Desconocido'}</strong></td>
+    <td>${htmlChipsEquipos}</td> 
+    <td>⏱️ ${horaSalida} hs</td>
+    <td>⏱️ ${horaDevolucion} hs</td>
+    <td style="text-align:center;">${etiquetaEstado}</td>
+`;            tablaDiaria.appendChild(fila);
         });
     } catch (err) {
         console.error("Error UI Historial:", err);
         tablaDiaria.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red;">Error al consultar el historial diario.</td></tr>';
     }
 }
+
 
 // 5. FUNCIONES AUXILIARES DE PANTALLA (MODAL)
 export function abrirModal() {

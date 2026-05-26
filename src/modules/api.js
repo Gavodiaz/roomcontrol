@@ -98,6 +98,7 @@ export async function registrarFechaDevolucion(prestamoId) {
 }
 
 // 9. Traer los movimientos que ocurrieron hoy para el Historial Diario
+// 9. Traer los movimientos que ocurrieron hoy para el Historial Diario
 export async function getRegistrosDelDia(stringInicioHoy) {
     const { data, error } = await supabaseClient
         .from('prestamos')
@@ -106,11 +107,18 @@ export async function getRegistrosDelDia(stringInicioHoy) {
             fecha_salida,
             fecha_devolucion,
             usuarios ( nombre_completo ),
-            equipos ( nombre )
-        `)
-        .gte('fecha_salida', stringInicioHoy) 
+            detalle_prestamos (
+                id,
+                equipos ( nombre )
+            )
+        `) // 👈 Buscamos la relación exacta: tabla intermedia -> tabla equipos -> columna nombre
+        .gte('fecha_salida', stringInicioHoy)
         .order('fecha_salida', { ascending: false });
-    if (error) throw error;
+
+    if (error) {
+        console.error("Error crítico en getRegistrosDelDia:", error);
+        throw error;
+    }
     return data;
 }
 

@@ -78,12 +78,6 @@ document.getElementById('btn-logout').addEventListener('click', async () => {
     }
 });
 
-// ... abajo sigue todo tu código original de la tabla de préstamos ...
-
-
-
-
-
 
 
 // Un objeto "estado" temporal para compartir la selección de equipos entre el modal y el guardado
@@ -93,12 +87,43 @@ const appState = {
 };
 let prestamoSeleccionadoId = null;
 
+
 // 1. INICIALIZACIÓN: Cuando se abre la página, mandamos a pintar todo
 document.addEventListener('DOMContentLoaded', async () => {
     await renderDocentes();
     await renderEquipos(appState);
     await renderTablaPrestamos();
 });
+
+// 🎯 AUTOMATIZACIÓN: Al elegir docente de la lista, abrir modal de equipos
+    const inputBuscarDocente = document.getElementById('docente');
+
+    if (inputBuscarDocente) {
+        inputBuscarDocente.addEventListener('input', (e) => {
+            const valorInput = e.target.value.trim();
+
+            // 1. Buscamos todas las opciones en el datalist
+            const opcionesDatalist = document.querySelectorAll('#lista-docentes option');
+            let docenteValidoElegido = false;
+
+            opcionesDatalist.forEach(option => {
+                if (option.value === valorInput) {
+                    docenteValidoElegido = true;
+                }
+            });
+
+            // 2. Si coincide con un docente real, disparamos el modal automático
+            if (docenteValidoElegido) {
+                console.log("🚀 Docente válido seleccionado:", valorInput);
+                
+                // Usamos el ID real de tu línea 101
+                const botonEquipos = document.getElementById('btn-abrir-modal');
+                if (botonEquipos) {
+                    botonEquipos.click(); // 🔥 Simula el clic y abre el panel de netbooks
+                }
+            }
+        });
+    }
 
 // 2. EVENTOS DEL MODAL DE EQUIPOS
 document.getElementById('btn-abrir-modal').addEventListener('click', abrirModal);
@@ -163,6 +188,35 @@ document.getElementById('btn-confirmar-seleccion-modal').addEventListener('click
 
         cerrarModal();
     }
+
+
+    // 1. Cerrás tu modal de forma visual (esto ya lo tenés en tu código)
+    cerrarModal();
+
+    // 🔥 AUTOMATIZACIÓN: Foco y despliegue automático del datalist de cursos
+    const inputCurso = document.getElementById('observaciones'); // 👈 ID real de tu HTML
+    
+    if (inputCurso) {
+        setTimeout(() => {
+            inputCurso.focus(); // Le da el foco a la caja de texto
+            
+            // Forzamos un valor vacío temporal para que el navegador 
+            // despliegue la persiana completa con las opciones (1°1°, 1°2°...)
+            const valorOriginal = inputCurso.value;
+            inputCurso.value = ''; 
+            inputCurso.value = valorOriginal;
+
+            // Compatibilidad moderna: si el navegador soporta showPicker en inputs, lo ejecuta
+            if (typeof inputCurso.showPicker === 'function') {
+                try {
+                    inputCurso.showPicker();
+                } catch (err) {
+                    console.log("showPicker no requerido o no soportado en este elemento");
+                }
+            }
+        }, 100); // Un mini delay de 100ms para esperar que el modal termine de ocultarse
+    }
+
 });
 
 // 3. EVENTO PARA GUARDAR EL PRÉSTAMO (Clic en Registrar)
@@ -397,6 +451,9 @@ async function cargarHistorialPorFecha(fecha) {
 }
 
 
+
+
+
 // =========================================================================
 // LÓGICA PARA EL ABM DE PROFESORES
 // =========================================================================
@@ -542,7 +599,23 @@ const btnLimpiarDocente = document.getElementById('btn-limpiar-busqueda');
 if (btnLimpiarDocente && inputDocente) {
     btnLimpiarDocente.addEventListener('click', () => {
         inputDocente.value = ''; // Borra el texto escrito
-        inputDocente.focus();    // Te vuelve a dejar el cursor listo para escribir
+        
+        // 🔥 Limpiamos también el input de los cursos
+        const inputCurso = document.getElementById('observaciones');
+        if (inputCurso) {
+            inputCurso.value = '';
+        }
+
+        // 🎯 FOCUS CORRECTO: Buscamos el botón de confirmación mediante su ID real para que no tire error
+        // Cambiá 'btn-registrar-prestamo' por el ID real que tenga en tu HTML si es que difiere
+        const btnConfirmar = document.getElementById('btn-registrar-prestamo') 
+                        
+
+        if (btnConfirmar) {
+           btnConfirmar.focus({ preventScroll: true }); // 👈 Le agregamos esto adentro
+    console.log("💥 Foco enviado sin mover la pantalla");
+        }
+
+        console.log("🧹 Formulario limpio y foco en Confirmar");
     });
 }
-
