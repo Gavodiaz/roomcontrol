@@ -288,18 +288,27 @@ tr:hover {
    ========================================================================= */
 @media (max-width: 768px) {
     
-    /* ---------------------------------------------------------------------
-       1. REGLAS GENERALES PARA AMBAS BARRAS FLOTANTES
+   /* ---------------------------------------------------------------------
+       1. REGLAS GENERALES Y PESTAÑA IZQUIERDA (Rescate con píxeles fijos)
        --------------------------------------------------------------------- */
-    .sidebar-flotante-izq,
-    #sidebar-equipos-uso,
-    .sidebar-flotante {
-        width: 85vw !important;      /* Se adaptan al 85% del ancho del S20 */
-        max-width: 310px !important; /* Ancho ultra compacto para que no tape todo */
-        height: 80vh !important;     /* Altura contenida para dejar aire arriba y abajo */
+    .sidebar-flotante-izq {
+        position: fixed !important;  /* Nos aseguramos de que flote */
+        right: auto !important;
+        left: -275px !important;     /* 🔥 LA CLAVE: Se esconde exactamente 275px a la izquierda */
+        width: 275px !important;     /* Ancho fijo idéntico al de la derecha */
+        height: 80vh !important;
         top: 10vh !important;
-        z-index: 99999 !important;   /* Pasan al frente de cualquier formulario */
-        transition: left 0.3s ease, right 0.3s ease !important;
+        z-index: 99999 !important;
+        background-color: white !important;
+        box-shadow: 2px 0 8px rgba(0,0,0,0.15) !important;
+        transition: left 0.3s ease !important;
+    }
+    
+    /* Apertura táctil y hover fija */
+    .sidebar-flotante-izq:hover,
+    .sidebar-flotante-izq:focus-within {
+        left: 0 !important;
+        right: auto !important;
     }
 
    /* ---------------------------------------------------------------------
@@ -327,59 +336,57 @@ tr:hover {
        3. CONFIGURACIÓN INDEPENDIENTE DE SOLAPAS (Izquierda y Derecha)
        --------------------------------------------------------------------- */
     
-    /* 🍏 SOLAPA IZQUIERDA: Registros Diarios (Mantenemos tu estilo original horizontal) */
+    /* 🍏 SOLAPA IZQUIERDA: Registros Diarios (Forzamos que asome en el S23 Ultra) */
     #sidebar-registros-diarios .sidebar-pestana-izq {
         position: absolute !important;
         top: 20px !important;
-        right: -35px !important; /* Sobresale hacia la derecha del panel oculto */
+        
+        /* 🔥 Forzamos la posición para que asome sí o sí en el borde izquierdo */
+        right: -38px !important;    /* Sobresale 38px hacia el área visible del celular */
         left: auto !important;
-        width: 35px !important;
+        width: 38px !important;
         padding: 10px 5px !important;
         font-size: 0.75rem !important;
         display: block !important;
         visibility: visible !important;
+        background-color: #6c757d !important; /* Tu color gris original */
+        color: white !important;
+        border-radius: 0 8px 8px 0 !important; /* Redondeado del lado que asoma */
     }
     
-    /* Aseguramos que el texto izquierdo no se rompa ni se ponga vertical */
     #sidebar-registros-diarios .sidebar-pestana-izq span {
         writing-mode: horizontal-tb !important;
         transform: none !important;
         display: inline !important;
     }
 
-    /* 💙 SOLAPA DERECHA: Equipos en Uso (Modo Vertical Exclusivo) */
+    /* 💙 SOLAPA DERECHA: Equipos en Uso (La dejamos tal cual, que ya te gustaba) */
     #sidebar-equipos-uso .sidebar-pestana {
         position: absolute !important;
         top: 25px !important;
-        left: -38px !important;  /* Sobresale hacia la izquierda del panel oculto */
-        width: 38px !important;   /* Ancho justo para que entre en el celular */
+        left: -38px !important;
+        width: 38px !important;
         right: auto !important;
-        background-color: #007bff !important; /* Tu azul característico */
+        background-color: #007bff !important;
         color: white !important;
         padding: 15px 0 !important;
         border-radius: 8px 0 0 8px !important;
-        
         display: flex !important;
-        flex-direction: column !important; /* Apila el emoji arriba y el texto abajo */
+        flex-direction: column !important;
         align-items: center !important;
         justify-content: center !important;
         gap: 8px !important;
         visibility: visible !important;
     }
-
-    /* Rotación exclusiva para el texto de la derecha */
     #sidebar-equipos-uso .sidebar-pestana span {
         display: block !important;
-        writing-mode: vertical-rl !important; /* Letras de arriba hacia abajo */
-        transform: rotate(180deg) !important;  /* Orientación de lectura natural */
+        writing-mode: vertical-rl !important;
+        transform: rotate(180deg) !important;
         white-space: nowrap !important;
         font-size: 0.72rem !important;
         font-weight: bold !important;
         letter-spacing: 1px !important;
-        padding: 0 !important;
-        margin: 0 !important;
     }
-    
    /* ---------------------------------------------------------------------
        4. SOLUCIÓN AL RECORRIDO TÁCTIL (Scroll de tablas)
        --------------------------------------------------------------------- */
