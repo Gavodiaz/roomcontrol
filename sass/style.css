@@ -455,15 +455,15 @@ tr:hover {
         font-size: 0.68rem !important;
     }
 
-    /* Compactación extrema de tus botones (Agregar / Cerrar Lote) */
-    #sidebar-equipos-uso .table .btn, 
-    #sidebar-equipos-uso .table button {
-        padding: 2px 4px !important;
-        font-size: 0.62rem !important;
-        line-height: 1.1 !important;
-        display: block !important;
-        width: 100% !important;
-        margin: 1px 0 !important;
-        white-space: nowrap !important;
-    }
+    /* 🔥 COMPACTACIÓN DEL BOTÓN GESTIONAR PROFESORES (Igual al de registros) */
+    .sidebar-flotante-izq .btn-primary,
+    .sidebar-flotante-izq .btn,
+    #btn-gestionar-profesores { /* Por si tiene un ID específico */
+        padding: 4px 8px !important;       /* Reduce el espacio interno drásticamente */
+        font-size: 0.72rem !important;     /* Letra más chica y sutil para celular */
+        line-height: 1.2 !important;
+        margin-top: 5px !important;        /* Margen controlado */
+        margin-bottom: 5px !important;
+        width: auto !important;            /* Evita que se estire al 100% si no es necesario */
+        display: inline-block !important;
 }
