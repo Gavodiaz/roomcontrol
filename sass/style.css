@@ -297,7 +297,7 @@ tr:hover {
         left: -275px !important;     /* 🔥 LA CLAVE: Se esconde exactamente 275px a la izquierda */
         width: 275px !important;     /* Ancho fijo idéntico al de la derecha */
         height: 80vh !important;
-        top: 10vh !important;
+        top: 30vh !important;
         z-index: 99999 !important;
         background-color: white !important;
         box-shadow: 2px 0 8px rgba(0,0,0,0.15) !important;
@@ -455,15 +455,25 @@ tr:hover {
         font-size: 0.68rem !important;
     }
 
-    /* 🔥 COMPACTACIÓN DEL BOTÓN GESTIONAR PROFESORES (Igual al de registros) */
-    .sidebar-flotante-izq .btn-primary,
-    .sidebar-flotante-izq .btn,
-    #btn-gestionar-profesores { /* Por si tiene un ID específico */
-        padding: 4px 8px !important;       /* Reduce el espacio interno drásticamente */
-        font-size: 0.72rem !important;     /* Letra más chica y sutil para celular */
-        line-height: 1.2 !important;
-        margin-top: 5px !important;        /* Margen controlado */
-        margin-bottom: 5px !important;
-        width: auto !important;            /* Evita que se estire al 100% si no es necesario */
-        display: inline-block !important;
+   /* 🔥 COMPACTACIÓN QUIRÚRGICA DE BOTONES GRISES EN CELULARES */
+    #btn-ver-registros,
+    #btn-gestionar-profes {
+        padding: 4px 6px !important;       /* Achica drásticamente el espacio interno */
+        font-size: 0.68rem !important;     /* Letra sutil y compacta para el S23 Ultra */
+        line-height: 1.1 !important;
+        white-space: normal !important;    /* Permite que el texto se acomode en dos renglones si es necesario */
+        text-align: center !important;
+        height: auto !important;           /* Que no herede alturas fijas */
+        min-height: 32px !important;       /* Altura mínima prolija para el dedo */
+    }
+
+    /* Ajuste fino para los iconos/emojis adentro de estos botones */
+    #btn-logout,
+    #btn-limpiar-busqueda,
+    #btn-abrir-modal,
+    #btn-registrar-prestamo,
+    #btn-ver-registros text,
+    #btn-gestionar-profes text {
+        font-size: 0.7rem !important;
+    }
 }
