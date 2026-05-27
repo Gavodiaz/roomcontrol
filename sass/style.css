@@ -333,59 +333,75 @@ tr:hover {
         left: auto !important;
     }
 /* ---------------------------------------------------------------------
-       3. CONFIGURACIÓN INDEPENDIENTE DE SOLAPAS (Izquierda y Derecha)
+       3. CONFIGURACIÓN INDEPENDIENTE DE SOLAPAS (Ambas en Vertical)
        --------------------------------------------------------------------- */
     
-    /* 🍏 SOLAPA IZQUIERDA: Registros Diarios (Forzamos que asome en el S23 Ultra) */
+    /* 🍏 SOLAPA IZQUIERDA: Registros Diarios */
     #sidebar-registros-diarios .sidebar-pestana-izq {
         position: absolute !important;
-        top: 20px !important;
-        
-        /* 🔥 Forzamos la posición para que asome sí o sí en el borde izquierdo */
-        right: -38px !important;    /* Sobresale 38px hacia el área visible del celular */
-        left: auto !important;
-        width: 38px !important;
-        padding: 10px 5px !important;
-        font-size: 0.75rem !important;
-        display: block !important;
-        visibility: visible !important;
-        background-color: #6c757d !important; /* Tu color gris original */
-        color: white !important;
-        border-radius: 0 8px 8px 0 !important; /* Redondeado del lado que asoma */
-    }
-    
-    #sidebar-registros-diarios .sidebar-pestana-izq span {
-        writing-mode: horizontal-tb !important;
-        transform: none !important;
-        display: inline !important;
-    }
-
-    /* 💙 SOLAPA DERECHA: Equipos en Uso (La dejamos tal cual, que ya te gustaba) */
-    #sidebar-equipos-uso .sidebar-pestana {
-        position: absolute !important;
         top: 25px !important;
-        left: -38px !important;
-        width: 38px !important;
-        right: auto !important;
-        background-color: #007bff !important;
+        right: -38px !important;       /* Sobresale hacia el área visible */
+        left: auto !important;
+        width: 38px !important;        /* Mismo ancho que la derecha */
+        right: -38px !important;
+        background-color: #6c757d !important; /* Tu gris original */
         color: white !important;
         padding: 15px 0 !important;
-        border-radius: 8px 0 0 8px !important;
+        
+        /* Redondeado invertido (asoma hacia la derecha) */
+        border-radius: 0 8px 8px 0 !important; 
+        
         display: flex !important;
-        flex-direction: column !important;
+        flex-direction: column !important; /* Apila el emoji arriba y el texto abajo */
         align-items: center !important;
         justify-content: center !important;
         gap: 8px !important;
         visibility: visible !important;
     }
-    #sidebar-equipos-uso .sidebar-pestana span {
+    
+    /* 🔥 Rotación vertical para la izquierda */
+    #sidebar-registros-diarios .sidebar-pestana-izq span {
         display: block !important;
-        writing-mode: vertical-rl !important;
-        transform: rotate(180deg) !important;
+        writing-mode: vertical-rl !important; /* Texto de arriba a abajo */
+        transform: rotate(180deg) !important;  /* Orientación de lectura natural */
         white-space: nowrap !important;
         font-size: 0.72rem !important;
         font-weight: bold !important;
         letter-spacing: 1px !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    /* 💙 SOLAPA DERECHA: Equipos en Uso (Se mantiene intacta) */
+    #sidebar-equipos-uso .sidebar-pestana {
+        position: absolute !important;
+        top: 25px !important;
+        left: -38px !important;  
+        width: 38px !important;   
+        right: auto !important;
+        background-color: #007bff !important; 
+        color: white !important;
+        padding: 15px 0 !important;
+        border-radius: 8px 0 0 8px !important; /* Redondeado hacia la izquierda */
+        
+        display: flex !important;
+        flex-direction: column !important; 
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 8px !important;
+        visibility: visible !important;
+    }
+
+    #sidebar-equipos-uso .sidebar-pestana span {
+        display: block !important;
+        writing-mode: vertical-rl !important; 
+        transform: rotate(180deg) !important;  
+        white-space: nowrap !important;
+        font-size: 0.72rem !important;
+        font-weight: bold !important;
+        letter-spacing: 1px !important;
+        padding: 0 !important;
+        margin: 0 !important;
     }
    /* ---------------------------------------------------------------------
        4. SOLUCIÓN AL RECORRIDO TÁCTIL (Scroll de tablas)
