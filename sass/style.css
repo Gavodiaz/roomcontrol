@@ -160,6 +160,39 @@ tr:hover {
 .modal-contenido { background: white; padding: 20px; border-radius: 10px; width: 80%; max-width: 500px; }
 
 
+/* Grilla horizontal compacta para las horas cátedra */
+.grilla-horas {
+    display: grid;
+    /* 🎯 Cambiamos a auto-fill: mete todos los cuadraditos que entren de costado (mínimo 140px cada uno) */
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); 
+    gap: 8px; /* Un toque más juntitos */
+    background-color: #f8fafc;
+    padding: 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+}
+
+.hora-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background-color: white;
+    padding: 6px 10px; /* Reducimos el margen interno para que sea más estilizado */
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.8rem; /* Un pelín más chica la letra para que entre joya */
+    color: #475569;
+    white-space: nowrap; /* Evita que el texto de la hora se parta en dos renglones */
+    transition: all 0.2s;
+}
+
+.hora-item:hover {
+    border-color: #3b82f6; /* Borde azul al pasar el mouse */
+    background-color: #eff6ff;
+}
+
+
 /* Efecto Hover: cuando pasás el mouse por encima, la fila se ilumina */
 #tabla-prestamos tr:hover {
     background-color: #f1f5f9; /* Se oscurece un cachito al posar el mouse */
@@ -476,4 +509,43 @@ tr:hover {
     #btn-gestionar-profes text {
         font-size: 0.7rem !important;
     }
+}
+
+#btn-abrir-modal:disabled {
+    background-color: #cbd5e1 !important;
+    color: #94a3b8 !important;
+    cursor: not-allowed !important;
+}
+
+/* Estilo base para los botones de las netbooks dentro del modal */
+.btn-equipo {
+    padding: 12px 20px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* 🟢 Estilo cuando el equipo está LIBRE */
+.btn-equipo.disponible {
+    background-color: #f8fafc;
+    color: #334155;
+    border-color: #cbd5e1;
+}
+
+/* 🔵 Estilo cuando el docente selecciona una netbook libre */
+.btn-equipo.disponible.seleccionado {
+    background-color: #3b82f6 !important;
+    color: white !important;
+    border-color: #2563eb !important;
+}
+
+/* 🔴 Estilo cuando el equipo YA ESTÁ RESERVADO (El que nos falta) */
+.btn-equipo.prestado {
+    background-color: #fee2e2 !important; /* Fondo rojo clarito de alerta */
+    color: #ef4444 !important;        /* Texto rojo */
+    border-color: #fca5a5 !important;  /* Borde rojo */
+    cursor: not-allowed !important;    /* Cursor con el signo de prohibido */
+    opacity: 0.8;
 }

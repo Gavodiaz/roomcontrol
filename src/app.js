@@ -592,6 +592,10 @@ function resetearFormularioProfe() {
     formTituloProfe.textContent = "Registrar Nuevo Profesor";
     btnCancelarEdicion.style.display = 'none';
 }
+//Botón llamar a las reservas
+document.getElementById('btn-ir-reservas').addEventListener('click', () => {
+    window.location.href = 'reservas.html';
+});
 
 
 const inputDocente = document.getElementById('docente');

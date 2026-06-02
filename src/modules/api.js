@@ -267,3 +267,57 @@ export async function deleteUsuario(id) {
     }
     return true;
 }
+
+/**
+ * Trae todos los equipos de Supabase y marca cuáles están ocupados en una fecha y horas específicas.
+ */
+export async function obtenerDisponibilidadEquipos(fechaSeleccionada, horasSeleccionadas) {
+    try {
+        // 1. Traer todos los equipos de la escuela ORDENADOS NUMÉRICAMENTE
+        const { data: todosLosEquipos, error: errEq } = await supabaseClient
+            .from('equipos')
+            .select('id, nombre')
+            .order('nombre', { ascending: true }); // 🎯 ¡ESTA ES LA LÍNEA MÁGICA!
+
+        if (errEq) throw errEq;
+
+        // 2. Traer reservas ocupadas en esa fecha y horas (Esto queda igual)
+        const { data: reservasOcupadas, error: errRes } = await supabaseClient
+            .from('reservas')
+            .select('equipo_id')
+            .eq('fecha_reserva', fechaSeleccionada)
+            .in('hora_catedra', horasSeleccionadas);
+
+        if (errRes) throw errRes;
+
+        const idsOcupados = reservasOcupadas ? reservasOcupadas.map(r => r.equipo_id) : [];
+
+        // 3. Mapeamos (Esto también queda igual)
+        return todosLosEquipos.map(eq => ({
+            id: eq.id,
+            nombre: eq.nombre,
+            ocupado: idsOcupados.includes(eq.id)
+        }));
+        
+    } catch (error) {
+        console.error("Error en obtenerDisponibilidadEquipos con horas:", error.message);
+        throw error;
+    }
+}
+
+/**
+ * Inserta múltiples filas en la tabla reservas (Inserción masiva de netbooks)
+ * @param {Array} filas - Array de objetos [{docente_id, equipo_id, fecha_reserva, estado}, ...]
+ */
+export async function guardarReservaMasiva(filas) {
+    try {
+        const { data, error } = await supabaseClient
+            .from('reservas')
+            .insert(filas);
+        if (error) throw error;
+        return data;
+    } catch (error) {
+        console.error("Error en guardarReservaMasiva:", error.message);
+        throw error;
+    }
+}
