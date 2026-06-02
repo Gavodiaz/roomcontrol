@@ -8,7 +8,9 @@ import {
     cerrarModal,
     renderHistorialEnModal,
     renderTablaProfesores,
-    mostrarNotificacion
+    mostrarNotificacion,
+    renderRegistrosEnLateral,
+    renderReservasEnLateral
 } from './modules/ui.js';
 import {
     insertarPrestamoCabecera,
@@ -23,7 +25,8 @@ import {
     getUsuarios,
     insertUsuario,
     updateUsuario,
-    deleteUsuario
+    deleteUsuario,
+    getReservasDelDia
 } from './modules/api.js';
 
 
@@ -123,6 +126,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     botonEquipos.click(); // 🔥 Simula el clic y abre el panel de netbooks
                 }
             }
+
+            
         });
     }
 
@@ -624,77 +629,35 @@ if (btnLimpiarDocente && inputDocente) {
         console.log("🧹 Formulario limpio y foco en Confirmar");
     });
 }
-// =========================================================================
-// 📅 CONSULTA DIRECTA: Llena la pestaña izquierda usando getRegistrosDelDia
-// =========================================================================
+
+
+// Listener: Carga y renderiza los movimientos del día en la barra lateral
 const sidebarIzquierda = document.getElementById('sidebar-registros-diarios');
 
 if (sidebarIzquierda) {
     sidebarIzquierda.addEventListener('mouseenter', async () => {
         try {
-            console.log("🖱️ Mouse en pestaña: Consultando getRegistrosDelDia...");
-            
-            // 1. Obtenemos la fecha de hoy en formato YYYY-MM-DD
-            const hoy = new Date().toLocaleDateString('sv'); 
-
-            // 2. Ejecutamos la consulta de tu archivo api.js
-            if (typeof getRegistrosDelDia === 'function') {
-                const registros = await getRegistrosDelDia(hoy);
-                
-                const tbodyLateral = document.getElementById('tabla-registros-lateral');
-                if (tbodyLateral) {
-                    tbodyLateral.innerHTML = ''; // Limpiamos registros anteriores
-                    
-                    if (!registros || registros.length === 0) {
-                        tbodyLateral.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:15px; color:#6c757d;">No hay movimientos hoy.</td></tr>`;
-                        return;
-                    }
-
-                   // 3. Mapeamos el Array exacto que devuelve Supabase
-                    registros.forEach(reg => {
-                        const fila = document.createElement('tr');
-                        
-                        // Extraemos el nombre del docente de la relación directa
-                        const docente = reg.usuarios?.nombre_completo || 'Sin datos';
-                        
-                        // 🔥 RECORREMOS TODOS LOS EQUIPOS DEL PRÉSTAMO Y ARMAMOS LOS BADGES
-                        let equiposHTML = '';
-                        if (reg.detalle_prestamos && reg.detalle_prestamos.length > 0) {
-                            // Iteramos por cada equipo del array y le clavamos la estructura visual
-                            equiposHTML = reg.detalle_prestamos.map(dp => {
-                                const nombreEquipo = dp.equipos?.nombre || 'Desconocido';
-                                // Usamos las clases nativas de tus burbujas de equipos
-                                return `<span class="badge-equipo-item" style="display: inline-block; background-color: #fffbeb; color: #b45309; border: 1px solid #fcd34d; padding: 2px 8px; border-radius: 12px; font-size: 0.85em; margin: 2px;">${nombreEquipo}</span>`;
-                            }).join(' '); // Los une dejando un espacio entre burbujas
-                        } else {
-                            equiposHTML = `<span style="color: #6c757d;">Sin equipos</span>`;
-                        }
-                        
-                        // Recortamos los strings de fecha para mostrar HH:MM de forma prolija
-                        const salida = reg.fecha_salida ? reg.fecha_salida.substring(11, 16) : '—';
-                        const devolucion = reg.fecha_devolucion ? reg.fecha_devolucion.substring(11, 16) : '—';
-                        
-                        const tieneDevolucion = reg.fecha_devolucion !== null;
-                        const claseEstado = tieneDevolucion ? 'badge-devuelto' : 'badge-en-uso';
-                        const textoEstado = tieneDevolucion ? 'Devuelto' : 'En Uso';
-
-                        fila.innerHTML = `
-                            <td><strong>${docente}</strong></td>
-                            <td><div style="display: flex; flex-wrap: wrap; gap: 4px;">${equiposHTML}</div></td>
-                            <td>⏱️ ${salida} hs</td>
-                            <td>⏱️ ${devolucion} hs</td>
-                            <td><span class="${claseEstado}">${textoEstado}</span></td>
-                        `;
-                        tbodyLateral.appendChild(fila);
-                    });
-
-                    console.log("✨ ¡Pestaña izquierda renderizada con éxito y datos aislados!");
-                }
-            } else {
-                console.warn("⚠️ getRegistrosDelDia no está accesible directamente en el entorno global.");
-            }
+            const hoy = new Date().toLocaleDateString('sv');
+            const registros = await getRegistrosDelDia(hoy); // 1. Traigo datos
+            renderRegistrosEnLateral(registros);            // 2. Pinto
+            console.log("✨ Renderizado con éxito");
         } catch (error) {
-            console.error("❌ Error al renderizar los datos en el lateral:", error);
+            console.error("Error:", error);
         }
+    });
+}
+
+
+// =========================================================================
+// 📅 CONSULTA: Llena la pestaña de Reservas Diarias
+// =========================================================================
+
+const sidebarReservas = document.getElementById('sidebar-reservas-diarias');
+
+if (sidebarReservas) {
+    sidebarReservas.addEventListener('mouseenter', async () => {
+        const hoy = new Date().toLocaleDateString('sv');
+        const reservas = await getReservasDelDia(hoy); // Asegurate que esta función exista en api.js
+        renderReservasEnLateral(reservas); 
     });
 }

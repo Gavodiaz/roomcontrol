@@ -8,17 +8,17 @@ export async function renderDocentes() {
 
     try {
         const usuarios = await getDocentes(); // Pedimos los profes a la API
-        datalist.innerHTML = ''; 
+        datalist.innerHTML = '';
 
         usuarios.forEach(user => {
             const option = document.createElement('option');
-            
+
             // Lo que el usuario escribe/selecciona en la caja (Nombre Completo)
-            option.value = user.nombre_completo; 
-            
+            option.value = user.nombre_completo;
+
             // 🎯 CLAVE ACÁ: Guardamos el ID real de Supabase en el atributo 'data-id'
-            option.dataset.id = user.id; 
-            
+            option.dataset.id = user.id;
+
             // Esto muestra el DNI al lado en la persiana de sugerencias
             option.textContent = user.dni ? `DNI: ${user.dni}` : '';
 
@@ -144,7 +144,7 @@ export async function renderTablaPrestamos() {
             const fila = document.createElement('tr');
             const fechaFormateada = new Date(prestamo.fecha_salida).toLocaleString('es-AR');
 
-          fila.innerHTML = `
+            fila.innerHTML = `
         <td style="vertical-align: middle; text-align: left;">${prestamo.usuarios?.nombre_completo || 'N/A'}</td>
         <td style="vertical-align: middle; text-align: center;">${equiposMostrados}</td>
         
@@ -166,7 +166,7 @@ export async function renderTablaPrestamos() {
         </td>
     `;
 
-    tabla.appendChild(fila);
+            tabla.appendChild(fila);
             tabla.appendChild(fila);
         }
     } catch (err) {
@@ -206,20 +206,20 @@ export async function renderHistorialDiario() {
 
             // 🎯 CONSTRUCCIÓN DINÁMICA DE LOS CHIPS DE EQUIPOS
             // Cambiá 'detalle_prestamos' si tu relación en la consulta de Supabase usa otro nombre
-           const detalles = reg.detalle_prestamos || []; 
-let htmlChipsEquipos = '';
+            const detalles = reg.detalle_prestamos || [];
+            let htmlChipsEquipos = '';
 
-// 🎯 Reemplazá el bloque del d.equipos adentro de renderHistorialDiario():
-if (detalles && detalles.length > 0) {
-    htmlChipsEquipos = detalles.map(d => {
-        let nombreDisplay = 'Desconocido';
-        
-        if (d.equipos) {
-            nombreDisplay = d.equipos.nombre || 'Sin nombre';
-        }
-        
-        // ✨ Chips con el estilo amarillito del modal
-        return `<span style="
+            // 🎯 Reemplazá el bloque del d.equipos adentro de renderHistorialDiario():
+            if (detalles && detalles.length > 0) {
+                htmlChipsEquipos = detalles.map(d => {
+                    let nombreDisplay = 'Desconocido';
+
+                    if (d.equipos) {
+                        nombreDisplay = d.equipos.nombre || 'Sin nombre';
+                    }
+
+                    // ✨ Chips con el estilo amarillito del modal
+                    return `<span style="
             display: inline-block;
             background-color: #fffbeb;
             color: #b45309;
@@ -231,19 +231,19 @@ if (detalles && detalles.length > 0) {
             font-weight: 500;
             box-shadow: 0 1px 2px rgba(0,0,0,0.02);
         ">${nombreDisplay}</span>`;
-    }).join('');
-} else {
-    htmlChipsEquipos = `<span style="color:#64748b; font-style:italic;">Sin equipos</span>`;
-}
+                }).join('');
+            } else {
+                htmlChipsEquipos = `<span style="color:#64748b; font-style:italic;">Sin equipos</span>`;
+            }
 
-// 4. Inyectamos las celdas en la fila de la tabla
-fila.innerHTML = `
+            // 4. Inyectamos las celdas en la fila de la tabla
+            fila.innerHTML = `
     <td><strong>${reg.usuarios?.nombre_completo || 'Desconocido'}</strong></td>
     <td>${htmlChipsEquipos}</td> 
     <td>⏱️ ${horaSalida} hs</td>
     <td>⏱️ ${horaDevolucion} hs</td>
     <td style="text-align:center;">${etiquetaEstado}</td>
-`;            tablaDiaria.appendChild(fila);
+`; tablaDiaria.appendChild(fila);
         });
     } catch (err) {
         console.error("Error UI Historial:", err);
@@ -380,7 +380,7 @@ export function renderTablaProfesores(usuarios) {
 export function mostrarNotificacion(mensaje, tipo = 'exito') {
     const aviso = document.createElement('div');
     aviso.textContent = mensaje;
-    
+
     // 🎨 Definimos el color de fondo según el tipo
     const esError = tipo === 'error';
     const colorFondo = esError ? '#ef4444' : '#10b981'; // Rojo si es error, Verde si es éxito
@@ -410,3 +410,144 @@ export function mostrarNotificacion(mensaje, tipo = 'exito') {
         setTimeout(() => aviso.remove(), 500);
     }, 2500);
 }
+
+
+// Funcion para pintar la barra lateral izquierda con regitros diarios
+export function renderRegistrosEnLateral(registros) {
+    const tbodyLateral = document.getElementById('tabla-registros-lateral');
+    if (!tbodyLateral) return;
+
+    tbodyLateral.innerHTML = '';
+
+    if (!registros || registros.length === 0) {
+        tbodyLateral.innerHTML = `<tr><td colspan="5">No hay movimientos hoy.</td></tr>`;
+        return;
+    }
+
+    registros.forEach(reg => {
+        const fila = document.createElement('tr');
+
+        // Extraemos el nombre del docente de la relación directa
+        const docente = reg.usuarios?.nombre_completo || 'Sin datos';
+
+        // 🔥 RECORREMOS TODOS LOS EQUIPOS DEL PRÉSTAMO Y ARMAMOS LOS BADGES
+        let equiposHTML = '';
+        if (reg.detalle_prestamos && reg.detalle_prestamos.length > 0) {
+            // Iteramos por cada equipo del array y le clavamos la estructura visual
+            equiposHTML = reg.detalle_prestamos.map(dp => {
+                const nombreEquipo = dp.equipos?.nombre || 'Desconocido';
+                // Usamos las clases nativas de tus burbujas de equipos
+                return `<span class="badge-equipo-item" style="display: inline-block; background-color: #fffbeb; color: #b45309; border: 1px solid #fcd34d; padding: 2px 8px; border-radius: 12px; font-size: 0.85em; margin: 2px;">${nombreEquipo}</span>`;
+            }).join(' '); // Los une dejando un espacio entre burbujas
+        } else {
+            equiposHTML = `<span style="color: #6c757d;">Sin equipos</span>`;
+        }
+
+        // Recortamos los strings de fecha para mostrar HH:MM de forma prolija
+        const salida = reg.fecha_salida ? reg.fecha_salida.substring(11, 16) : '—';
+        const devolucion = reg.fecha_devolucion ? reg.fecha_devolucion.substring(11, 16) : '—';
+
+        const tieneDevolucion = reg.fecha_devolucion !== null;
+        const claseEstado = tieneDevolucion ? 'badge-devuelto' : 'badge-en-uso';
+        const textoEstado = tieneDevolucion ? 'Devuelto' : 'En Uso';
+
+        fila.innerHTML = `
+                            <td><strong>${docente}</strong></td>
+                            <td><div style="display: flex; flex-wrap: wrap; gap: 4px;">${equiposHTML}</div></td>
+                            <td>⏱️ ${salida} hs</td>
+                            <td>⏱️ ${devolucion} hs</td>
+                            <td><span class="${claseEstado}">${textoEstado}</span></td>
+                        `;
+
+        tbodyLateral.appendChild(fila);
+    });
+}
+
+
+// Función para pintar la tabla lateral izquierda con reservas diarias
+
+// ui.js
+export function renderReservasEnLateral(reservas) {
+    const tbody = document.getElementById('tabla-reservas-lateral');
+    if (!tbody) return;
+
+    tbody.innerHTML = '';
+
+    // ... (tu código de validación de reservas.length sigue igual)
+
+    const agrupado = reservas.reduce((acc, res) => {
+        const nombreDocente = res.usuarios?.nombre_completo || 'Sin nombre';
+        if (!acc[nombreDocente]) {
+            acc[nombreDocente] = {
+                nombre: nombreDocente,
+                equipos: new Set(),
+                horas: new Set()
+            };
+        }
+        acc[nombreDocente].equipos.add(res.equipos?.nombre);
+        acc[nombreDocente].horas.add(res.hora_catedra);
+        return acc;
+    }, {});
+
+    // 2. PINTADO: El bucle debe procesar a cada docente y calcular sus rangos
+    Object.values(agrupado).forEach(res => {
+        const fila = document.createElement('tr');
+
+        // Procesamos equipos
+        const equiposUnicos = Array.from(res.equipos);
+        const equiposHTML = equiposUnicos.map(nombre =>
+            `<span class="badge-equipo-item"> ${nombre} </span>`
+        ).join(' ');
+
+        // --- AQUÍ VA LA LÓGICA DE LAS HORAS ---
+        // 1. Ordenamos las horas
+        const horasOrdenadas = Array.from(res.horas).sort((a, b) => a - b);
+        // 2. Identificamos solo la primera y la última hora
+        const primera = horasOrdenadas[0];
+        const ultima = horasOrdenadas[horasOrdenadas.length - 1];
+
+        // Usamos el diccionario. Si no encuentra la hora, muestra un fallback seguro
+        console.log("Buscando hora:", ultima, "Tipo:", typeof ultima);
+        console.log("Valor encontrado:", MAPA_HORARIOS[String(ultima)]);
+        // Cambiamos el split(' - ') por split(' a ')
+        const inicio = MAPA_HORARIOS[String(primera)]
+            ? MAPA_HORARIOS[String(primera)].split(' a ')[0]
+            : `Bloque ${primera}`;
+
+        const fin = MAPA_HORARIOS[String(ultima)]
+            ? MAPA_HORARIOS[String(ultima)].split(' a ')[1]
+            : `Bloque ${ultima}`;
+        const rangoFinal = `${inicio} a ${fin}`;
+
+
+        fila.innerHTML = `
+    <td><strong>${res.nombre}</strong></td>
+    <td><div style="display: flex; flex-wrap: wrap; gap: 4px;">${equiposHTML}</div></td>
+    <td>⏱️ ${rangoFinal} hs</td>
+    <td><span class="badge-en-uso">Confirmada</span></td>
+
+`;
+        tbody.appendChild(fila);
+    });
+}
+
+
+
+// constantes.js o al inicio de ui.js
+const MAPA_HORARIOS = {
+    1: "8:00 a 8:40",
+    2: "8:40 a 9:20",
+    3: "9:30 a 10:10",
+    4: "10:10 a 10:50",
+    5: "10:50 a 11:30",
+    6: "11:40 a 12:20",
+    7: "12:20 a 13:00",
+    8: "13:30 a 14:10",
+    9: "14:10 a 14:50",
+    10: "14:50 a 15:30",
+    11: "15:40 a 16:20",
+    12: "16:20 a 17:00",
+    13: "17:10 a 17:50",
+    14: "17:50 a 18:30"
+
+};

@@ -321,3 +321,30 @@ export async function guardarReservaMasiva(filas) {
         throw error;
     }
 }
+
+
+
+// Consulta para obtener las reservas del día
+export async function getReservasDelDia(fechaISO) {
+    const fecha = fechaISO.split('T')[0]; // Formato YYYY-MM-DD
+    
+    const { data, error } = await supabaseClient
+        .from('reservas')
+        .select(`
+            id,
+            fecha_reserva,
+            hora_catedra,
+            estado,
+            usuarios ( nombre_completo ),
+            equipos ( nombre )
+        `)
+        .eq('fecha_reserva', fecha)
+        .eq('estado', 'Confirmada')
+        .order('hora_catedra', { ascending: true });
+
+    if (error) {
+        console.error("Error al traer reservas:", error);
+        return [];
+    }
+    return data;
+}

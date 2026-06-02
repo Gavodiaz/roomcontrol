@@ -336,7 +336,7 @@
     </div>
 
 
-    <div id="sidebar-registros-diarios" class="sidebar-flotante-izq" tabindex="0">
+    <div id="sidebar-registros-diarios" class="sidebar-flotante-izq sidebar-top" tabindex="0">
         <div class="sidebar-pestana-izq">
             📅 <span>Registros Diarios</span>
         </div>
@@ -348,7 +348,7 @@
                         <thead>
                             <tr>
                                 <th>Docente</th>
-                                <th>Equipo</th>
+                                <th>Equipo/s</th>
                                 <th>Salida</th>
                                 <th>Devolución</th>
                                 <th>Estado</th>
@@ -362,6 +362,31 @@
         </div>
     </div>
 
+    
+<div id="sidebar-reservas-diarias" class="sidebar-flotante-izq sidebar-bottom" tabindex="0">
+        <div class="sidebar-pestana-izq">
+            📅 <span>Reservas Diarias</span>
+        </div>
+        <div class="sidebar-contenido">
+            <div id="seccion-lateral-diaria">
+                <h2>Reservas del Día de Hoy</h2>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Docente</th>
+                                <th>Equipo/s</th>
+                                <th>Hora/s</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-reservas-lateral">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>>
 
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

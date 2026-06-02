@@ -313,7 +313,13 @@ tr:hover {
 .sidebar-flotante-izq:hover {
     left: 0;
 }
+.sidebar-top {
+    top: 50px; /* La altura donde está tu botón actual */
+}
 
+.sidebar-bottom {
+    top: 200px; /* Un poco más abajo (ejemplo: 200px + 60px de altura del botón) */
+}
 
 
 /* =========================================================================
