@@ -348,3 +348,31 @@ export async function getReservasDelDia(fechaISO) {
     }
     return data;
 }
+
+// Hace la consulta para obtener las reservas del mes 
+export async function getReservasDelMes() {
+    // 1. Obtenemos el primer día del mes en formato YYYY-MM-DD
+    const ahora = new Date();
+    const primerDia = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
+    
+    // Convertimos manualmente a formato YYYY-MM-DD para evitar errores de zona horaria
+    const fechaString = primerDia.toISOString().split('T')[0]; 
+    
+    console.log("FILTRANDO DESDE:", fechaString);
+
+    const { data, error } = await supabaseClient
+        .from('reservas')
+        .select(`
+            *,
+            docentes:docente_id(nombre_completo),
+            equipos:equipo_id(nombre)
+        `)
+        .gte('fecha_reserva', fechaString); // Usamos el string simple
+
+    if (error) {
+        console.error("Error en consulta:", error);
+        throw error;
+    }
+
+    return data || [];
+}

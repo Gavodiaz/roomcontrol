@@ -1,5 +1,9 @@
+
+
+
 // 📄 src/reservas.js
-import { obtenerDisponibilidadEquipos, guardarReservaMasiva, getDocentes } from './modules/api.js';
+import { obtenerDisponibilidadEquipos, guardarReservaMasiva, getDocentes, getReservasDelMes } from './modules/api.js';
+import { renderDocentes } from './modules/ui.js';
 
 const appState = {
     idsSeleccionados: [],
@@ -7,7 +11,8 @@ const appState = {
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
-    const selectDocente = document.getElementById('select-docente');
+    
+
     const inputFecha = document.getElementById('input-fecha');
     const formReservas = document.getElementById('form-reservas');
     
@@ -20,21 +25,72 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (btnAbrirModal) btnAbrirModal.disabled = true;
 
     // A: Cargar los docentes
-    async function cargarDocentes() {
-        if (!selectDocente) return;
-        try {
-            const usuarios = await getDocentes();
-            selectDocente.innerHTML = '<option value="" disabled selected>-- Seleccione un Profesor --</option>';
-            usuarios.forEach(user => {
-                const option = document.createElement('option');
-                option.value = user.id;
-                option.textContent = user.nombre_completo;
-                selectDocente.appendChild(option);
-            });
-        } catch (err) {
-            console.error("Error cargando profesores:", err.message);
-        }
+// 2. Esta función es la que realmente va a pintar los datos en tu sidebar
+async function renderizarHistorial() {
+    const tbody = document.getElementById('tabla-historial-body'); // Asegurate que este ID exista en tu HTML
+    if (!tbody) {
+        console.warn("No se encuentra el elemento con ID 'tabla-historial-body'");
+        return;
     }
+
+    try {
+        const reservas = await getReservasDelMes();
+        const reservasAgrupadas = reservas.reduce((acc, r) => {
+            const nombreDocente = r.docentes?.nombre_completo || 'Sin nombre';
+            const nombreEquipo = r.equipos?.nombre || 'ID: ' + r.equipo_id;
+            const fecha = r.fecha_reserva;
+
+            if (!acc[nombreDocente]) {
+                acc[nombreDocente] = { equipos: new Set(), fecha: fecha };
+            }
+            acc[nombreDocente].equipos.add(nombreEquipo);
+            return acc;
+        }, {});
+
+        // --- PINTAMOS LA TABLA AGRUPADA ---
+        tbody.innerHTML = '';
+        Object.keys(reservasAgrupadas).forEach(docente => {
+            const datos = reservasAgrupadas[docente];
+            const listaEquipos = Array.from(datos.equipos).join(', '); // Une los equipos con comas
+
+            tbody.innerHTML += `
+                <tr>
+                    <td style="padding: 10px;">${docente}</td>
+                    <td style="padding: 10px;">${listaEquipos}</td>
+                    <td style="padding: 10px;">${datos.fecha}</td>
+                </tr>`;
+        });
+    } catch (err) {
+        console.error("Error al cargar el historial:", err);
+    }
+}
+
+
+// Funcion que carga los docentes en el text de docentes
+window.onload = async () => {
+    console.log("Página cargada al 100%, intentando traer docentes...");
+    
+    try {
+        const docentes = await getDocentes();
+        console.log("Docentes recibidos:", docentes);
+        
+        if (docentes && docentes.length > 0) {
+            await renderDocentes(); // Llamamos a la función
+            console.log("renderDocentes ejecutado.");
+        } else {
+            console.warn("La lista de docentes está vacía.");
+        }
+    } catch (error) {
+        console.error("Error fatal al cargar:", error);
+    }
+};
+
+// LLAMADA AL HISTORIAL
+    await renderizarHistorial();
+
+
+
+
 
     // 🔒 FUNCIÓN CLAVE: Valida si habilitar o no el botón azul del modal
     function validarRequisitosModal() {
@@ -181,53 +237,64 @@ document.addEventListener('DOMContentLoaded', async () => {
     // =========================================================
     // D: ENVIAR RESERVA CON MULTIPLICACIÓN POR HORA CÁTEDRA
     // =========================================================
+  
     if (formReservas) {
         formReservas.addEventListener('submit', async (e) => {
-            e.preventDefault();
+    e.preventDefault();
 
-            const docenteId = selectDocente.value;
-            const fechaSelected = inputFecha.value;
-            const horasSelected = obtenerHorasSeleccionadas();
+    // 1. Obtenemos los elementos
+    const inputDocente = document.getElementById('docente');
+    const datalistProfes = document.getElementById('lista-docentes'); // Asegurate que este ID coincida con tu HTML
+    
+    // 2. BUSCAMOS EL ID DIRECTAMENTE EN EL DATALIST
+    let usuarioId = null;
+    const valorEscrito = inputDocente.value.trim().toLowerCase();
+    const opciones = datalistProfes.options;
 
-            if (!docenteId || appState.idsSeleccionados.length === 0 || horasSelected.length === 0) {
-                alert("Faltan completar datos obligatorios.");
-                return;
-            }
+    for (let i = 0; i < opciones.length; i++) {
+        if (opciones[i].value.trim().toLowerCase() === valorEscrito) {
+            usuarioId = opciones[i].dataset.id; // ¡Acá obtenés el ID real!
+            break;
+        }
+    }
 
-            try {
-                const filasAInsertar = [];
+    // 3. Validación
+    const fechaSelected = inputFecha.value;
+    const horasSelected = obtenerHorasSeleccionadas();
 
-                // 🎯 LA MAGIA: Multiplicamos filas (Equipos x Horas Seleccionadas)
-                appState.idsSeleccionados.forEach(idEquipo => {
-                    horasSelected.forEach(hora => {
-                        filasAInsertar.push({
-                            docente_id: parseInt(docenteId),
-                            equipo_id: idEquipo,
-                            fecha_reserva: fechaSelected,
-                            hora_catedra: hora, // Se guarda el número de hora (1 al 14)
-                            estado: 'Confirmada'
-                        });
-                    });
+    if (!usuarioId || appState.idsSeleccionados.length === 0 || horasSelected.length === 0) {
+        alert("Por favor, selecciona un docente válido de la lista y completa los datos.");
+        return;
+    }
+
+    // 4. Guardado
+    try {
+        const filasAInsertar = [];
+        appState.idsSeleccionados.forEach(idEquipo => {
+            horasSelected.forEach(hora => {
+                filasAInsertar.push({
+                    docente_id: parseInt(usuarioId), // Usamos el ID encontrado
+                    equipo_id: idEquipo,
+                    fecha_reserva: fechaSelected,
+                    hora_catedra: hora,
+                    estado: 'Confirmada'
                 });
-
-                await guardarReservaMasiva(filasAInsertar);
-
-                alert(`🎉 ¡Reserva masiva completada! Se registraron los equipos para las ${horasSelected.length} horas cátedra elegidas.`);
-                
-                // Resetear todo el formulario
-                formReservas.reset();
-                appState.idsSeleccionados = [];
-                appState.nombresSeleccionados = [];
-                if (btnAbrirModal) {
-                    btnAbrirModal.textContent = "Seleccionar Equipos Masivos";
-                    btnAbrirModal.style.backgroundColor = '#2563eb';
-                    btnAbrirModal.disabled = true;
-                }
-
-            } catch (error) {
-                alert("Hubo un error al procesar la reserva por horas.");
-            }
+            });
         });
+
+        await guardarReservaMasiva(filasAInsertar);
+        alert("¡Reserva masiva completada!");
+
+        await renderizarHistorial();
+
+        formReservas.reset();
+        
+        // ... limpiar estados
+    } catch (error) {
+        console.error(error);
+        alert("Error al guardar la reserva.");
+    }
+});
     }
 
     await cargarDocentes();

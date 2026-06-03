@@ -27,13 +27,25 @@
 
                 <form id="form-reservas">
                     <!-- 1. Selección de Docente -->
-                    <div class="mb-3">
-                        <label for="select-docente" class="form-label font-weight-bold">Seleccionar Docente:</label>
-                        <select id="select-docente" class="form-select" required>
-                            <option value="" disabled selected>Cargando docentes...</option>
-                            <!-- Se rellena dinámicamente con JS -->
-                        </select>
+
+
+                    <div class="form-group">
+                    <label for="docente">Seleccionar Docente:</label>
+
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="docente" list="lista-docentes"
+                            placeholder="🔍 Tipeá nombre, apellido o DNI..." required autocomplete="off"
+                            style="padding: 10px; flex-grow: 1; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;">
+
+                        <button type="button" id="btn-limpiar-busqueda"
+                            style="background: #6c757d; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold;">
+                            Limpiar
+                        </button>
                     </div>
+
+                    <datalist id="lista-docentes">
+                    </datalist>
+                </div>
 
                     <!-- 2. Selección de Fecha -->
                     <div class="mb-4">
@@ -132,6 +144,28 @@
         </div>
     </div>
 
+   <div id="sidebar-historial" class="sidebar-flotante" tabindex="0">
+    <div class="sidebar-pestana">
+        📅 <span>Historial Reservas</span>
+    </div>
+    <div class="sidebar-contenido">
+        <h2>Historial del Mes</h2>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th style="text-align: left; padding: 10px;">Docente</th>
+                        <th style="text-align: left; padding: 10px;">Equipo</th>
+                        <th style="text-align: center; padding: 10px;">Fecha</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-historial-body">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
     <!-- 📚 LIBRERÍAS -->
     <!-- Supabase CDN (Asegurate de que sea la misma versión que usás en app.js) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
@@ -139,6 +173,7 @@
     <!-- 🧠 LÓGICA MODULARIZADA -->
     <!-- Creamos un archivo JS exclusivo para esta pantalla -->
     <script type="module" src="src/reservas.js"></script>
+    
 </body>
 
 </html>
