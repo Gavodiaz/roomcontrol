@@ -175,6 +175,9 @@ export async function renderTablaPrestamos() {
     }
 }
 
+
+
+
 // 4. PINTAR LA TABLA DEL HISTORIAL DIARIO
 export async function renderHistorialDiario() {
     const tablaDiaria = document.getElementById('tabla-registros-diarios');

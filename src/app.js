@@ -99,6 +99,46 @@ document.addEventListener('DOMContentLoaded', async () => {
     await renderTablaPrestamos();
 });
 
+
+//Esto permite que las pestañas se queden fija o moviles
+// Asegurate de seleccionar el contenedor principal que tiene la clase .sidebar-flotante
+const panelEquipos = document.querySelector('.sidebar-flotante'); 
+const btnFijar = document.getElementById('btn-fijar'); 
+
+btnFijar.addEventListener('click', () => {
+    // Alternamos la clase 'fija'
+    panelEquipos.classList.toggle('fija');
+    
+    // Cambiamos el texto del botón (opcional)
+    btnFijar.textContent = panelEquipos.classList.contains('fija') ? '❌' : '📌';
+});
+
+
+const panelRegistrosDiarios = document.querySelector('.sidebar-flotante-izq'); 
+const btnFijarDiarios = document.getElementById('btn-fijar-registro'); 
+
+btnFijarDiarios.addEventListener('click', () => {
+    // Alternamos la clase 'fija'
+    panelRegistrosDiarios.classList.toggle('fija');
+    
+    // Cambiamos el texto del botón (opcional)
+    btnFijarDiarios.textContent = panelRegistrosDiarios.classList.contains('fija') ? '❌' : '📌';
+});
+
+const panelReservas = document.getElementById('sidebar-reservas-diarias');
+const btnFijarReservas = document.getElementById('btn-fijar-reserva'); 
+
+btnFijarReservas.addEventListener('click', () => {
+    // Alternamos la clase 'fija'
+    panelReservas.classList.toggle('fija');
+    
+    // Cambiamos el texto del botón (opcional)
+    btnFijarReservas.textContent = panelReservas.classList.contains('fija') ? '❌' : '📌';
+});
+
+
+
+
 // 🎯 AUTOMATIZACIÓN: Al elegir docente de la lista, abrir modal de equipos
     const inputBuscarDocente = document.getElementById('docente');
 
@@ -343,6 +383,8 @@ if (btnRegistrar) {
         }
     });
 }
+
+
 // 4. ESCUCHADOR DE DEVOLUCIONES (Captura el clic en los botones de la tabla)
 document.getElementById('tabla-prestamos').addEventListener('click', async (e) => {
 
@@ -407,54 +449,54 @@ document.getElementById('tabla-prestamos').addEventListener('click', async (e) =
 });
 
 // 5. BOTÓN DE HISTORIAL DIARIO (Esconde o muestra la tabla de abajo)
-document.getElementById('btn-ver-registros').addEventListener('click', async () => {
-    const seccionDiaria = document.getElementById('seccion-registros-diarios');
-    if (!seccionDiaria) return;
+// document.getElementById('btn-ver-registros').addEventListener('click', async () => {
+//     const seccionDiaria = document.getElementById('seccion-registros-diarios');
+//     if (!seccionDiaria) return;
 
-    if (!seccionDiaria.classList.contains('oculto')) {
-        seccionDiaria.classList.add('oculto');
-        return;
-    }
+//     if (!seccionDiaria.classList.contains('oculto')) {
+//         seccionDiaria.classList.add('oculto');
+//         return;
+//     }
 
-    seccionDiaria.classList.remove('oculto');
-    await renderHistorialDiario();
-});
+//     seccionDiaria.classList.remove('oculto');
+//     await renderHistorialDiario();
+// });
 
 
-// CONTROL DEL MODAL DE HISTORIAL DIARIO
-const modalHistorial = document.getElementById('modal-historial');
-const inputFecha = document.getElementById('fecha-busqueda');
+// // CONTROL DEL MODAL DE HISTORIAL DIARIO
+// const modalHistorial = document.getElementById('modal-historial');
+// const inputFecha = document.getElementById('fecha-busqueda');
 
-// 1. Abrir el modal al hacer clic en Registros Diarios
-document.getElementById('btn-ver-registros').addEventListener('click', async () => {
-    // Ponemos por defecto la fecha de hoy en el calendario (formato YYYY-MM-DD)
-    if (!inputFecha.value) {
-        const hoy = new Date().toISOString().split('T')[0];
-        inputFecha.value = hoy;
-    }
+// // 1. Abrir el modal al hacer clic en Registros Diarios
+// document.getElementById('btn-ver-registros').addEventListener('click', async () => {
+//     // Ponemos por defecto la fecha de hoy en el calendario (formato YYYY-MM-DD)
+//     if (!inputFecha.value) {
+//         const hoy = new Date().toISOString().split('T')[0];
+//         inputFecha.value = hoy;
+//     }
 
-    // Mostramos el modal usando Flexbox para centrarlo
-    modalHistorial.style.display = 'flex';
+//     // Mostramos el modal usando Flexbox para centrarlo
+//     modalHistorial.style.display = 'flex';
 
-    // Cargamos los datos del día
-    await cargarHistorialPorFecha(inputFecha.value);
-});
+//     // Cargamos los datos del día
+//     await cargarHistorialPorFecha(inputFecha.value);
+// });
 
-// 2. Escuchar cuando el preceptor cambia la fecha en el calendario
-inputFecha.addEventListener('change', async (e) => {
-    await cargarHistorialPorFecha(e.target.value);
-});
+// // 2. Escuchar cuando el preceptor cambia la fecha en el calendario
+// inputFecha.addEventListener('change', async (e) => {
+//     await cargarHistorialPorFecha(e.target.value);
+// });
 
-// 3. Cerrar el modal al tocar la "X"
-document.getElementById('btn-cerrar-historial').addEventListener('click', () => {
-    modalHistorial.style.display = 'none';
-});
+// // 3. Cerrar el modal al tocar la "X"
+// document.getElementById('btn-cerrar-historial').addEventListener('click', () => {
+//     modalHistorial.style.display = 'none';
+// });
 
-// Función interna auxiliar para coordinar la búsqueda y el dibujado
-async function cargarHistorialPorFecha(fecha) {
-    const registros = await getPrestamosPorFecha(fecha);
-    renderHistorialEnModal(registros);
-}
+// // Función interna auxiliar para coordinar la búsqueda y el dibujado
+// async function cargarHistorialPorFecha(fecha) {
+//     const registros = await getPrestamosPorFecha(fecha);
+//     renderHistorialEnModal(registros);
+// }
 
 
 
@@ -597,6 +639,10 @@ function resetearFormularioProfe() {
     formTituloProfe.textContent = "Registrar Nuevo Profesor";
     btnCancelarEdicion.style.display = 'none';
 }
+
+// =========================================================================
+// LÓGICA PARA LAS RESERVAS
+// =========================================================================
 //Botón llamar a las reservas
 document.getElementById('btn-ir-reservas').addEventListener('click', () => {
     window.location.href = 'reservas.html';

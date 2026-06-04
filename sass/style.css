@@ -262,6 +262,10 @@ tr:hover {
     right: 0; /* Vuelve a su posición original visible */
 }
 
+/* Si el panel tiene la clase 'fija', forzamos el 'right: 0' ignorando el hover */
+.sidebar-flotante.fija {
+    right: 0 !important;
+}
 
 /* =========================================================================
    📌 SIDEBAR LATERAL FLOTANTE IZQUIERDO (REGISTROS DIARIOS)
@@ -319,6 +323,11 @@ tr:hover {
 
 .sidebar-bottom {
     top: 200px; /* Un poco más abajo (ejemplo: 200px + 60px de altura del botón) */
+}
+
+/* Si el panel tiene la clase 'fija', forzamos el 'right: 0' ignorando el hover */
+.sidebar-flotante-izq.fija {
+    left: 0 !important;
 }
 
 
@@ -554,4 +563,20 @@ tr:hover {
     border-color: #fca5a5 !important;  /* Borde rojo */
     cursor: not-allowed !important;    /* Cursor con el signo de prohibido */
     opacity: 0.8;
+}
+
+/* Cuando el panel tenga la clase .fija, el evento de ocultar se ignora */
+.panel-lateral.fija {
+    display: block !important;
+    position: fixed; /* O el estilo que necesites para que no se mueva */
+}
+
+.btn-pin {
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    position: absolute;
+    top: 5px;
+    right: 5px;
 }
