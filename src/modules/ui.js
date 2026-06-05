@@ -471,6 +471,7 @@ export function renderRegistrosEnLateral(registros) {
 
 // ui.js
 export function renderReservasEnLateral(reservas) {
+    
     const tbody = document.getElementById('tabla-reservas-lateral');
     if (!tbody) return;
 

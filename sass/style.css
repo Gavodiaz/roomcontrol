@@ -580,3 +580,17 @@ tr:hover {
     top: 5px;
     right: 5px;
 }
+
+/* Estilo para el boton de cancelar reservas en la pestaña */
+.btn-cancelar {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 0 5px;
+    transition: transform 0.2s;
+}
+
+.btn-cancelar:hover {
+    transform: scale(1.2);
+}

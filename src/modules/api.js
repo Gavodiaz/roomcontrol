@@ -376,3 +376,19 @@ export async function getReservasDelMes() {
 
     return data || [];
 }
+
+
+
+// 📄 Permite eliminar reservas de la tabla
+export async function eliminarReservasMasivas(idsArray) {
+    // Reemplazá 'supabase' por el nombre de tu cliente de Supabase si se llama distinto
+    const { data, error } = await supabaseClient
+        .from('reservas')
+        .delete()
+        .in('id', idsArray); // Elimina todas las filas cuyo 'id' esté en la lista [96, 97, 98]
+
+    if (error) {
+        throw new Error("No se pudieron eliminar las reservas de la base de datos: " + error.message);
+    }
+    return data;
+}
