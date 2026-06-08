@@ -1,5 +1,12 @@
 // modules/ui.js
-import { getDocentes, getEquipos, getPrestamosActivos, getDetallesDePrestamo, getRegistrosDelDia } from './api.js';
+import { getDocentes, 
+    getEquipos, 
+    getPrestamosActivos, 
+    getDetallesDePrestamo, 
+    getRegistrosDelDia,
+    getReservasDeHoy 
+} from './api.js';
+import { supabaseClient } from './supabase.js';
 
 // 1. PINTAR LOS DOCENTES EN EL SELECT
 export async function renderDocentes() {
@@ -30,34 +37,50 @@ export async function renderDocentes() {
 }
 
 // 2. PINTAR LOS BOTONES DE EQUIPOS EN EL MODAL
+// 📄 Funcion actualizada que bloquea los equipos reservados
+// 📄 src/modules/ui.js
 export async function renderEquipos(state) {
     const contenedor = document.getElementById('contenedor-equipos');
     if (!contenedor) return;
 
     try {
-        const equipos = await getEquipos(); // Le pedimos los equipos a api.js
+        const equipos = await getEquipos(); 
         contenedor.innerHTML = '';
 
-        // Reiniciamos las selecciones en el estado temporal
+        let reservasHoy = [];
+        try {
+            const hoy = new Date().toLocaleDateString('en-CA'); 
+            reservasHoy = await getReservasDeHoy(hoy);
+            console.log("📅 Reservas de hoy traídas de Supabase:", reservasHoy);
+        } catch (reservaErr) {
+            console.warn("Error al traer reservas:", reservaErr);
+        }
+
         state.idsSeleccionados = [];
         state.nombresSeleccionados = [];
-
-        let infoContador = document.getElementById('contador-modal');
-        if (!infoContador) {
-            infoContador = document.createElement('p');
-            infoContador.id = 'contador-modal';
-            infoContador.style.cssText = "text-align: center; margin-top: 15px; font-weight: bold; color: #475569; font-size: 15px;";
-            contenedor.after(infoContador);
-        }
-        infoContador.textContent = `Equipos seleccionados: 0`;
 
         equipos.forEach(eq => {
             const btn = document.createElement('button');
             btn.textContent = eq.nombre;
             btn.type = "button";
-            btn.className = `btn-equipo ${eq.estado.toLowerCase()}`;
 
-            if (eq.estado.toLowerCase() === 'disponible') {
+            // 🌟 PASO EN MODO FÁCIL: Ignoramos la hora. 
+            // Si el equipo aparece en alguna reserva de hoy, se tiene que bloquear.
+            const estaReservadoHoy = reservasHoy.some(reserva => {
+                // Prueba 1: Por ID directo (si es que la tabla guarda un ID numérico por fila)
+                const coincidenciaPorId = reserva.equipo_id === eq.id;
+                
+                // Prueba 2: Por texto (por si guardó el renglón con muchos nombres juntos, ej: "Netbook 04")
+                const coincidenciaPorTexto = JSON.stringify(reserva).toLowerCase().includes(eq.nombre.toLowerCase());
+
+                return coincidenciaPorId || coincidenciaPorTexto;
+            });
+
+            // Si está reservado hoy, le clavamos la clase 'prestado' (rojo)
+            const estadoVisual = estaReservadoHoy ? 'prestado' : eq.estado.toLowerCase();
+            btn.className = `btn-equipo ${estadoVisual}`;
+
+            if (eq.estado.toLowerCase() === 'disponible' && !estaReservadoHoy) {
                 btn.addEventListener('click', () => {
                     if (btn.classList.contains('seleccionado')) {
                         btn.classList.remove('seleccionado');
@@ -68,17 +91,19 @@ export async function renderEquipos(state) {
                         state.idsSeleccionados.push(eq.id);
                         state.nombresSeleccionados.push(eq.nombre);
                     }
-                    infoContador.textContent = `Equipos seleccionados: ${state.idsSeleccionados.length}`;
                 });
             } else {
-                btn.disabled = true;
+                btn.disabled = true; // Deshabilitado si ya está reservado
             }
+            
             contenedor.appendChild(btn);
         });
     } catch (err) {
-        console.error("Error UI Equipos:", err);
+        console.error("Error crítico al renderizar equipos:", err);
     }
 }
+
+
 
 // 3. PINTAR LA TABLA PRINCIPAL DE PRÉSTAMOS ACTIVOS
 export async function renderTablaPrestamos() {
@@ -167,7 +192,7 @@ export async function renderTablaPrestamos() {
     `;
 
             tabla.appendChild(fila);
-            tabla.appendChild(fila);
+           
         }
     } catch (err) {
         console.error("Error UI Tabla Préstamos:", err);
@@ -469,72 +494,219 @@ export function renderRegistrosEnLateral(registros) {
 
 // Función para pintar la tabla lateral izquierda con reservas diarias
 
-// ui.js
+/**
+ * Inserta múltiples filas en la tabla reservas (Inserción masiva de netbooks)
+ * @param {Array} filas - Array de objetos [{docente_id, equipo_id, fecha_reserva, estado}, ...]
+ */
 export function renderReservasEnLateral(reservas) {
-    
     const tbody = document.getElementById('tabla-reservas-lateral');
     if (!tbody) return;
 
     tbody.innerHTML = '';
 
-    // ... (tu código de validación de reservas.length sigue igual)
+    if (!reservas || reservas.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--text-muted);">No hay reservas registradas para hoy.</td></tr>`;
+        return;
+    }
 
+    // 1. AGRUPACIÓN: Recolectamos nombres, horas, IDs de reservas e IDs de equipos
     const agrupado = reservas.reduce((acc, res) => {
         const nombreDocente = res.usuarios?.nombre_completo || 'Sin nombre';
+        
         if (!acc[nombreDocente]) {
             acc[nombreDocente] = {
                 nombre: nombreDocente,
+                usuario_id: res.usuario_id || null, // Guardamos el ID del docente
                 equipos: new Set(),
-                horas: new Set()
+                horas: new Set(),
+                reservaIds: [],    // Guardaremos todos los IDs de esta reserva agrupada
+                equiposIds: [],    // Guardaremos los IDs físicos de las netbooks
+                curso: res.curso || '1° 1°', // Curso por defecto o el que venga de la base
+                estado: res.estado || 'Confirmada'
             };
         }
+        
         acc[nombreDocente].equipos.add(res.equipos?.nombre);
         acc[nombreDocente].horas.add(res.hora_catedra);
+        
+        // Guardamos los IDs únicos para la base de datos
+        if (res.id && !acc[nombreDocente].reservaIds.includes(res.id)) {
+            acc[nombreDocente].reservaIds.push(res.id);
+        }
+        if (res.equipo_id && !acc[nombreDocente].equiposIds.includes(res.equipo_id)) {
+            acc[nombreDocente].equiposIds.push(res.equipo_id);
+        }
+        
+        // Mantenemos el estado actualizado real
+        if (res.estado) {
+            acc[nombreDocente].estado = res.estado;
+        }
+
         return acc;
     }, {});
 
-    // 2. PINTADO: El bucle debe procesar a cada docente y calcular sus rangos
+    // 2. PINTADO DE FILAS
     Object.values(agrupado).forEach(res => {
         const fila = document.createElement('tr');
 
-        // Procesamos equipos
+        // Procesamos etiquetas de los equipos
         const equiposUnicos = Array.from(res.equipos);
         const equiposHTML = equiposUnicos.map(nombre =>
             `<span class="badge-equipo-item"> ${nombre} </span>`
         ).join(' ');
 
-        // --- AQUÍ VA LA LÓGICA DE LAS HORAS ---
-        // 1. Ordenamos las horas
+        // --- LÓGICA DE LAS HORAS (Limpia sin MAPA_HORARIOS) ---
         const horasOrdenadas = Array.from(res.horas).sort((a, b) => a - b);
-        // 2. Identificamos solo la primera y la última hora
-        const primera = horasOrdenadas[0];
-        const ultima = horasOrdenadas[horasOrdenadas.length - 1];
+        let rangoFinal = '';
+        if (horasOrdenadas.length > 0) {
+            const primera = horasOrdenadas[0];
+            const ultima = horasOrdenadas[horasOrdenadas.length - 1];
+            rangoFinal = primera === ultima ? `Bloque ${primera}` : `Bloques ${primera} al ${ultima}`;
+        } else {
+            rangoFinal = 'Sin hora';
+        }
 
-        // Usamos el diccionario. Si no encuentra la hora, muestra un fallback seguro
-        console.log("Buscando hora:", ultima, "Tipo:", typeof ultima);
-        console.log("Valor encontrado:", MAPA_HORARIOS[String(ultima)]);
-        // Cambiamos el split(' - ') por split(' a ')
-        const inicio = MAPA_HORARIOS[String(primera)]
-            ? MAPA_HORARIOS[String(primera)].split(' a ')[0]
-            : `Bloque ${primera}`;
+        // --- COLUMNA DE ESTADO / ACCIÓN DINÁMICA ---
+        let columnaAccionHTML = '';
+        
+        if (res.estado.toLowerCase() === 'confirmada') {
+            columnaAccionHTML = `
+                <td>
+                    <button class="btn-entregar-lote" data-docente="${res.nombre}" style="padding: 5px 10px; background-color: #16a34a; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 12px;">
+                        🚀 Entregar
+                    </button>
+                </td>`;
+        } else {
+            columnaAccionHTML = `<td><span class="badge-en-uso" style="background-color: #2563eb; color: white; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">${res.estado}</span></td>`;
+        }
 
-        const fin = MAPA_HORARIOS[String(ultima)]
-            ? MAPA_HORARIOS[String(ultima)].split(' a ')[1]
-            : `Bloque ${ultima}`;
-        const rangoFinal = `${inicio} a ${fin}`;
-
-
+        // Armamos la estructura de la fila
         fila.innerHTML = `
-    <td><strong>${res.nombre}</strong></td>
-    <td><div style="display: flex; flex-wrap: wrap; gap: 4px;">${equiposHTML}</div></td>
-    <td>⏱️ ${rangoFinal} hs</td>
-    <td><span class="badge-en-uso">Confirmada</span></td>
+            <td><strong>${res.nombre}</strong></td>
+            <td><div style="display: flex; flex-wrap: wrap; gap: 4px;">${equiposHTML}</div></td>
+            <td>⏱️ ${rangoFinal}</td>
+            ${columnaAccionHTML}
+        `;
 
-`;
+        // 3. EVENTO CLIC DEL BOTÓN ENTREGAR
+        const btnEntregar = fila.querySelector('.btn-entregar-lote');
+        if (btnEntregar) {
+            btnEntregar.addEventListener('click', async () => {
+                if (confirm(`¿Confirmás la entrega de equipos para el ${res.nombre}?`)) {
+                    await ejecutarTraspasoReservaAUso(res);
+                }
+            });
+        }
+
         tbody.appendChild(fila);
     });
 }
 
+// 🌐 FUNCIÓN CORREGIDA (SIN EL TYPO DE VARIABLE)
+async function ejecutarTraspasoReservaAUso(datosAgrupados) {
+    console.log("📊 [DIAGNÓSTICO] Iniciando traspaso para:", datosAgrupados.nombre);
+    
+    try {
+        // 1️⃣ RESCATE DEL ID DEL DOCENTE
+        let idUsuario = datosAgrupados.usuario_id || null;
+        
+        if (!idUsuario) {
+            console.log("⚠️ El usuario_id vino vacío. Buscando coincidencia por nombre...");
+            const { data: usuarios } = await supabaseClient
+                .from('usuarios')
+                .select('id, nombre_completo');
+            
+            if (usuarios) {
+                const deDocente = datosAgrupados.nombre.toLowerCase().trim();
+                const encontrado = usuarios.find(u => 
+                    u.nombre_completo.toLowerCase().trim().includes(deDocente) || 
+                    deDocente.includes(u.nombre_completo.toLowerCase().trim())
+                );
+                if (encontrado) {
+                    idUsuario = encontrado.id;
+                    console.log("✅ ID de usuario localizado:", idUsuario);
+                }
+            }
+        }
+
+        // 2️⃣ RESCATE INFALIBLE DE LOS IDs DE NETBOOKS
+        let listaEquiposIds = [];
+        
+        // Intento A: Si ya venían IDs físicos en el array, los usamos
+        if (datosAgrupados.equiposIds && datosAgrupados.equiposIds.length > 0) {
+            listaEquiposIds = datosAgrupados.equiposIds;
+        } 
+        // Intento B: Si venían como texto en el Set (ej: "Netbook 04"), buscamos sus IDs correspondientes
+        else if (datosAgrupados.equipos && datosAgrupados.equipos.size > 0) {
+            console.log("🔍 'equiposIds' estaba vacío. Buscando correspondencias en BD para el Set:", Array.from(datosAgrupados.equipos));
+            const { data: tablaEquipos } = await supabaseClient.from('equipos').select('id, nombre');
+            
+            if (tablaEquipos) {
+                const nombresSet = Array.from(datosAgrupados.equipos);
+                listaEquiposIds = nombresSet.map(nom => {
+                    if (!nom) return null;
+                    const eq = tablaEquipos.find(e => e.nombre.toLowerCase().trim() === nom.toLowerCase().trim());
+                    return eq ? eq.id : null;
+                }).filter(id => id !== null);
+            }
+        }
+
+        console.log("🎯 IDs finales de netbooks listos para impactar:", listaEquiposIds);
+
+        if (listaEquiposIds.length === 0) {
+            alert("No se pudieron determinar los IDs de las netbooks. Proceso detenido para evitar registros vacíos.");
+            return;
+        }
+
+        // 3️⃣ INSERCIÓN MAESTRA EN LA TABLA 'PRESTAMOS'
+        const { data: prestamoCreado, error: errorPrestamo } = await supabaseClient
+            .from('prestamos')
+            .insert([{
+                usuario_id: idUsuario,
+                fecha_salida: new Date().toISOString(),
+                observaciones: datosAgrupados.curso || '1° 1°'
+            }])
+            .select();
+
+        if (errorPrestamo) throw errorPrestamo;
+
+        const idDelPrestamoMaestro = prestamoCreado[0].id;
+        console.log("✅ Registro maestro asentado en 'prestamos'. ID asignado:", idDelPrestamoMaestro);
+
+        // 4️⃣ INSERCIÓN EN 'DETALLE_PRESTAMOS' (Relación Muchos a Muchos)
+        const filasDetalle = listaEquiposIds.map(idEquipo => ({
+            prestamo_id: idDelPrestamoMaestro,
+            equipo_id: idEquipo
+        }));
+
+        const { error: errorDetalle } = await supabaseClient
+            .from('detalle_prestamos')
+            .insert(filasDetalle);
+
+        if (errorDetalle) throw errorDetalle;
+        console.log("✅ Relaciones guardadas con éxito en 'detalle_prestamos'.");
+
+        // 5️⃣ MUTACIÓN DE ESTADO: DE 'Confirmada' A 'En Uso' EN LA TABLA 'RESERVAS'
+        if (datosAgrupados.reservaIds && datosAgrupados.reservaIds.length > 0) {
+            console.log("🔄 Actualizando estado de reservas vinculadas en Supabase...", datosAgrupados.reservaIds);
+            const { error: errorReservas } = await supabaseClient
+                .from('reservas')
+                .update({ estado: 'En Uso' })
+                .in('id', datosAgrupados.reservaIds);
+
+            if (errorReservas) throw errorReservas;
+            console.log("✅ Reservas actualizadas a 'En Uso' en la base de datos.");
+        }
+
+        // 6️⃣ REFRESCO DE INTERFAZ EN TIEMPO REAL
+        alert(`¡Préstamo para ${datosAgrupados.nombre} procesado con éxito absoluto!`);
+        window.location.reload(); // Recarga la app para limpiar los paneles y actualizar las pestañas lateral/central
+
+    } catch (error) {
+        console.error("❌ Error crítico en el flujo de traspaso:", error);
+        alert("Ocurrió un error al guardar el préstamo. Revisá los detalles en la consola de desarrollador.");
+    }
+}
 
 
 // constantes.js o al inicio de ui.js

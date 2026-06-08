@@ -68,12 +68,30 @@ export async function actualizarEstadoEquipo(equipoId, nuevoEstado) {
 export async function getPrestamosActivos() {
     const { data, error } = await supabaseClient
         .from('prestamos')
-        // El secreto está acá: además de traer todo (*), le pedimos el nombre de la tabla usuarios
-        .select('*, usuarios(nombre_completo)') 
-        .is('fecha_devolucion', null); // O la lógica de activos que estés usando
+        // 🌟 LA MAGIA: Traemos el préstamo, el docente y la lista de equipos asociados
+        .select(`
+            *,
+            usuarios ( 
+                nombre_completo 
+            ),
+            detalle_prestamos (
+                equipo_id,
+                fecha_devolucion,
+                equipos (
+                    nombre
+                )
+            )
+        `) 
+        // Filtro para traer solo lo que no se devolvió. 
+        // (Nota: Si tu base de datos maneja la fecha_devolucion en la tabla 'prestamos' queda así. 
+        // Si la maneja adentro de 'detalle_prestamos', avisame y lo adaptamos).
+        .is('fecha_devolucion', null); 
         
-    if (error) throw error;
-    return data;
+    if (error) {
+        console.error("Error al obtener préstamos activos:", error);
+        throw error;
+    }
+    return data || [];
 }
 
 // 7. Buscar qué equipos específicos componen un préstamo
@@ -391,4 +409,27 @@ export async function eliminarReservasMasivas(idsArray) {
         throw new Error("No se pudieron eliminar las reservas de la base de datos: " + error.message);
     }
     return data;
+}
+
+
+// 📄 Consulta para traer las reservas del día, sirve para comparar con el horario actual y desactivar
+// los equipos reservados.
+export async function getReservasDeHoy(fechaYYYYMMDD) {
+    const { data, error } = await supabaseClient 
+        .from('reservas')
+        // 👇 Cambiamos '*' por esto para que traiga TODO de reservas y el NOMBRE de la tabla usuarios
+        .select(`
+            *,
+            usuarios (
+                nombre_completo
+            )
+        `) 
+        .eq('fecha_reserva', fechaYYYYMMDD)
+        .eq('estado', 'Confirmada');
+
+    if (error) {
+        console.error("Error al traer reservas de hoy:", error);
+        throw error;
+    }
+    return data || [];
 }
