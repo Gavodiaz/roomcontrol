@@ -516,12 +516,12 @@ export function renderReservasEnLateral(reservas) {
         if (!acc[nombreDocente]) {
             acc[nombreDocente] = {
                 nombre: nombreDocente,
-                usuario_id: res.usuario_id || null, // Guardamos el ID del docente
+                usuario_id: res.usuario_id || null,
                 equipos: new Set(),
                 horas: new Set(),
-                reservaIds: [],    // Guardaremos todos los IDs de esta reserva agrupada
-                equiposIds: [],    // Guardaremos los IDs físicos de las netbooks
-                curso: res.curso || '1° 1°', // Curso por defecto o el que venga de la base
+                reservaIds: [],    
+                equiposIds: [],    
+                curso: res.curso || '1° 1°', 
                 estado: res.estado || 'Confirmada'
             };
         }
@@ -529,7 +529,6 @@ export function renderReservasEnLateral(reservas) {
         acc[nombreDocente].equipos.add(res.equipos?.nombre);
         acc[nombreDocente].horas.add(res.hora_catedra);
         
-        // Guardamos los IDs únicos para la base de datos
         if (res.id && !acc[nombreDocente].reservaIds.includes(res.id)) {
             acc[nombreDocente].reservaIds.push(res.id);
         }
@@ -537,7 +536,6 @@ export function renderReservasEnLateral(reservas) {
             acc[nombreDocente].equiposIds.push(res.equipo_id);
         }
         
-        // Mantenemos el estado actualizado real
         if (res.estado) {
             acc[nombreDocente].estado = res.estado;
         }
@@ -549,26 +547,36 @@ export function renderReservasEnLateral(reservas) {
     Object.values(agrupado).forEach(res => {
         const fila = document.createElement('tr');
 
-        // Procesamos etiquetas de los equipos
         const equiposUnicos = Array.from(res.equipos);
         const equiposHTML = equiposUnicos.map(nombre =>
             `<span class="badge-equipo-item"> ${nombre} </span>`
         ).join(' ');
 
-        // --- LÓGICA DE LAS HORAS (Limpia sin MAPA_HORARIOS) ---
+        // --- ⏱️ NUEVA LÓGICA DE TRADUCCIÓN DE HORARIOS ---
         const horasOrdenadas = Array.from(res.horas).sort((a, b) => a - b);
         let rangoFinal = '';
+        
         if (horasOrdenadas.length > 0) {
             const primera = horasOrdenadas[0];
             const ultima = horasOrdenadas[horasOrdenadas.length - 1];
-            rangoFinal = primera === ultima ? `Bloque ${primera}` : `Bloques ${primera} al ${ultima}`;
+            
+            // Extrae la hora de entrada de la primera materia (ej: "18:30")
+            const inicio = MAPA_HORARIOS[String(primera)]
+                ? MAPA_HORARIOS[String(primera)].split(' a ')[0]
+                : `Bloque ${primera}`;
+                
+            // Extrae la hora de salida de la última materia (ej: "19:50")
+            const fin = MAPA_HORARIOS[String(ultima)]
+                ? MAPA_HORARIOS[String(ultima)].split(' a ')[1]
+                : `Bloque ${ultima}`;
+                
+            rangoFinal = `${inicio} a ${fin}`;
         } else {
             rangoFinal = 'Sin hora';
         }
 
         // --- COLUMNA DE ESTADO / ACCIÓN DINÁMICA ---
         let columnaAccionHTML = '';
-        
         if (res.estado.toLowerCase() === 'confirmada') {
             columnaAccionHTML = `
                 <td>
@@ -580,11 +588,11 @@ export function renderReservasEnLateral(reservas) {
             columnaAccionHTML = `<td><span class="badge-en-uso" style="background-color: #2563eb; color: white; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">${res.estado}</span></td>`;
         }
 
-        // Armamos la estructura de la fila
+        // Armamos la estructura de la fila con el rango de reloj
         fila.innerHTML = `
             <td><strong>${res.nombre}</strong></td>
             <td><div style="display: flex; flex-wrap: wrap; gap: 4px;">${equiposHTML}</div></td>
-            <td>⏱️ ${rangoFinal}</td>
+            <td>⏱️ ${rangoFinal} hs</td>
             ${columnaAccionHTML}
         `;
 
