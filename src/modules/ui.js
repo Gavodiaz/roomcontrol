@@ -61,7 +61,9 @@ export async function renderEquipos(state) {
 
         equipos.forEach(eq => {
             const btn = document.createElement('button');
-            btn.textContent = eq.nombre;
+            
+            // 🌟 Agregamos el ícono acá:
+            btn.innerHTML = `💻 ${eq.nombre}`;
             btn.type = "button";
 
             // 🌟 PASO EN MODO FÁCIL: Ignoramos la hora. 

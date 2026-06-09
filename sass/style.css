@@ -594,3 +594,30 @@ tr:hover {
 .btn-cancelar:hover {
     transform: scale(1.2);
 }
+
+/* 📊 Para los badges del lateral (Registro Diario) */
+.badge-equipo-item {
+    font-size: 11px;          /* Más chico que el texto normal */
+    padding: 2px 6px;         /* Más compacto */
+    background-color: #f1f5f9;/* Un gris clarito sutil de fondo */
+    color: #334155;           /* Color de texto suave */
+    border: 1px solid #e2e8f0;/* Bordes finitos */
+    border-radius: 4px;       /* Esquinas apenas redondeadas */
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;                 /* Separación entre la compu y el texto */
+    font-weight: 500;
+}
+
+/* 📱 Para los botones de equipos dentro del Modal */
+.btn-equipo {
+    font-size: 12px;          /* Un punto más chico para que no ocupe tanto espacio */
+    padding: 6px 10px;        /* Reducimos el relleno para achicar el botón */
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}

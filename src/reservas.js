@@ -47,7 +47,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Cargar el historial en el sidebar
     await renderizarHistorial();
 
-
     // =========================================================
     // 2. LOGICA DEL HISTORIAL Y CANCELACIONES
     // =========================================================
@@ -156,7 +155,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             listaEquipos.forEach(eq => {
                 const btn = document.createElement('button');
-                btn.textContent = eq.nombre;
+                
+                btn.innerHTML = `💻 ${eq.nombre}`;
                 btn.type = "button";
 
                 if (eq.ocupado) {
@@ -246,6 +246,39 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.cerrarModal = function() {
         if (modalEquipos) modalEquipos.classList.add('oculto');
     };
+
+    // 🧼 LÓGICA INTEGRADITA DEL BOTÓN LIMPIAR BUSQUEDA
+    const btnLimpiar = document.getElementById('btn-limpiar-busqueda');
+    if (btnLimpiar) {
+        btnLimpiar.addEventListener('click', () => {
+            const inputDocente = document.getElementById('docente');
+            
+            // 1. Vaciamos los campos de texto y fecha
+            if (inputDocente) inputDocente.value = '';
+            if (inputFecha) inputFecha.value = '';
+
+            // 2. Destildamos y habilitamos todos los checkboxes de horas
+            const checkboxesHoras = document.querySelectorAll('input[name="hora"]');
+            checkboxesHoras.forEach(cb => {
+                cb.checked = false;
+                cb.disabled = false;
+            });
+
+            // 3. Reseteamos el estado interno usando tu función
+            resetearSeleccionEquipos();
+
+            // 4. Limpiamos visualmente el contenedor del modal
+            if (contenedorEquipos) contenedorEquipos.innerHTML = '';
+
+            // 5. Deshabilitamos el botón azul porque ya no hay fecha ni hora elegida
+            validarRequisitosModal();
+
+            // 6. Foco automático al cuadro del docente
+            if (inputDocente) inputDocente.focus();
+
+            console.log("🧹 Formulario reseteado por completo sin romper el código.");
+        });
+    }
 
     // =========================================================
     // 5. ENVÍO DEL FORMULARIO (Inserción Masiva)
