@@ -546,6 +546,14 @@ tr:hover {
   .btn-movil-equipos {
     background-color: #007bff !important;
   }
+  /* 📅 Botón de reservas con fondo verde y texto bien oscuro */
+  .btn-movil-reservas {
+    background-color: #6c757d !important;
+    color: white !important; /* 🔥 Esto hace la palabra "Reservas" bien oscura */
+  }
+  .btn-movil-equipos {
+    background-color: #007bff !important;
+  }
   /* 5. ❌ ENCABEZADO Y BOTÓN DE CERRAR ADENTRO DEL PANEL */
   .header-sidebar-movil {
     display: flex !important;
