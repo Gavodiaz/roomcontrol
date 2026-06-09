@@ -1,0 +1,111 @@
+/* ==========================================================================
+   ESTILOS GLOBALES (Se leen en cualquier tamaño de pantalla)
+   ========================================================================== */
+
+/* El botón de cerrar solo debe existir en celulares, lo ocultamos en la compu */
+.header-sidebar-movil {
+    display: none;
+}
+
+
+/* ==========================================================================
+   DISEÑO RESPONSIVE: CELULARES Y TABLETS (Pantallas de 768px o menos)
+   ========================================================================== */
+@media (max-width: 768px) {
+
+    /* 1. 🚫 OCULTAR PESTAÑAS VERTICALES VIEJAS */
+    #sidebar-registros-diarios .sidebar-pestana-izq,
+    #sidebar-equipos-uso .sidebar-pestana {
+        display: none !important;
+    }
+
+    /* 2. 📱 PANELES FLOTANTES (Escondidos por defecto a los costados) */
+    .sidebar-flotante-izq {
+        position: fixed !important;
+        top: 0 !important;
+        left: -100% !important; /* Escondido a la izquierda */
+        width: 85% !important;
+        height: 100vh !important;
+        z-index: 9999 !important;
+        background-color: white !important;
+        box-shadow: 5px 0 15px rgba(0,0,0,0.2) !important;
+        transition: left 0.3s ease-in-out !important;
+    }
+
+    #sidebar-equipos-uso {
+        position: fixed !important;
+        top: 0 !important;
+        right: -100% !important; /* Escondido a la derecha */
+        width: 85% !important;
+        height: 100vh !important;
+        z-index: 9999 !important;
+        background-color: white !important;
+        box-shadow: -5px 0 15px rgba(0,0,0,0.2) !important;
+        left: auto !important; /* Rompe el left de escritorio */
+        transition: right 0.3s ease-in-out !important;
+    }
+
+    /* 3. 🟢 CLASES DE APERTURA (Lo que activa el JavaScript) */
+    .sidebar-flotante-izq.open {
+        left: 0 !important; /* Entra a la pantalla */
+    }
+
+    #sidebar-equipos-uso.open {
+        right: 0 !important; /* Entra a la pantalla */
+        left: auto !important;
+    }
+
+    /* 4. 💅 BOTONES SUPERIORES DE ACCESO RÁPIDO */
+    .contenedor-botones-movil {
+        display: flex !important;
+        gap: 12px;
+        margin: 15px 0;
+        width: 100%;
+    }
+
+    .btn-movil-accion {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 10px;
+        font-size: 0.85rem;
+        font-weight: bold;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+        cursor: pointer;
+    }
+
+    .btn-movil-registros { background-color: #6c757d !important; }
+    .btn-movil-equipos { background-color: #007bff !important; }
+
+
+    /* 5. ❌ ENCABEZADO Y BOTÓN DE CERRAR ADENTRO DEL PANEL */
+    .header-sidebar-movil {
+        display: flex !important;
+        justify-content: flex-end;
+        padding: 12px;
+        border-bottom: 1px solid #e2e8f0;
+        background-color: #f8fafc;
+    }
+
+    .btn-cerrar-sidebar {
+        background-color: #dc2626 !important; /* Rojo */
+        color: white !important;
+        border: none;
+        padding: 8px 16px;
+        font-size: 0.9rem;
+        font-weight: bold;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    .sidebar-contenido {
+        padding: 20px !important;
+        height: calc(100vh - 60px) !important;
+        overflow-y: auto !important; /* Si la tabla es larga, permite scroll */
+    }
+}

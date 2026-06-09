@@ -707,3 +707,14 @@ if (sidebarReservas) {
         renderReservasEnLateral(reservas); 
     });
 }
+
+// Al final de tu app.js
+window.toggleSidebar = function(idSidebar) {
+    const sidebar = document.getElementById(idSidebar);
+    if (sidebar) {
+        sidebar.classList.toggle('open');
+        console.log("Cambiando estado de:", idSidebar);
+    } else {
+        console.error("No se encontró ningún panel con el ID:", idSidebar);
+    }
+};

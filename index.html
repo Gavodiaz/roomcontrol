@@ -65,7 +65,16 @@
     <button id="btn-logout" class="btn-logout" style="background-color: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">
         Cerrar Sesión
     </button>
+    
 </div>
+<div class="contenedor-botones-movil">
+    <button type="button" class="btn-movil-accion btn-movil-registros" onclick="toggleSidebar('sidebar-registros-diarios')">📋 Registros</button>
+    
+    <button type="button" class="btn-movil-accion btn-movil-reservas" onclick="toggleSidebar('sidebar-reservas-diarias')">📅 Reservas</button>
+    
+    <button type="button" class="btn-movil-accion btn-movil-equipos" onclick="toggleSidebar('sidebar-equipos-uso')">💻 Equipos</button>
+</div>
+
         </header>
 
         <div class="card">
@@ -164,6 +173,7 @@
         💻 <span>Equipos en Uso</span>
     </div>
     <div class="sidebar-contenido">
+        <button type="button" class="btn-cerrar-sidebar" onclick="toggleSidebar('sidebar-equipos-uso')">✕ Cerrar</button>
         <button id="btn-fijar" class="btn-pin">📌</button>
         <h2>Equipos en Uso</h2>
         
@@ -343,6 +353,7 @@
         </div>
         <div class="sidebar-contenido">
             <div id="seccion-lateral-diaria">
+               <button type="button" class="btn-cerrar-sidebar" onclick="toggleSidebar('sidebar-registros-diarios')">✕ Cerrar</button>
                 <button id="btn-fijar-registro" class="btn-pin">📌</button>
                 <h2>Movimientos del Día de Hoy</h2>
                 <div class="table-responsive">
@@ -371,6 +382,7 @@
         </div>
         <div class="sidebar-contenido">
             <div id="seccion-lateral-diaria">
+               <button type="button" class="btn-cerrar-sidebar" onclick="toggleSidebar('sidebar-reservas-diarias')">✕ Cerrar</button>
                  <button id="btn-fijar-reserva" class="btn-pin">📌</button>
                 <h2>Reservas del Día de Hoy</h2>
                 <div class="table-responsive">
