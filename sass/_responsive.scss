@@ -13,8 +13,9 @@
    ========================================================================== */
 @media (max-width: 768px) {
 
-    /* 1. 🚫 OCULTAR PESTAÑAS VERTICALES VIEJAS */
+    /* 1. 🚫 OCULTAR PESTAÑAS VERTICALES VIEJAS (Incluido Reservas Diarias) */
     #sidebar-registros-diarios .sidebar-pestana-izq,
+    #sidebar-reservas-diarias .sidebar-pestana-izq, /* 🔥 Agregado para que no tape la pantalla en el celu */
     #sidebar-equipos-uso .sidebar-pestana {
         display: none !important;
     }
@@ -55,43 +56,40 @@
         left: auto !important;
     }
 
-    /* 4. 💅 BOTONES SUPERIORES DE ACCESO RÁPIDO */
+    /* 4. 💅 BOTONES SUPERIORES DE ACCESO RÁPIDO (Estructura Fluida Base) */
     .contenedor-botones-movil {
         display: flex !important;
-        gap: 12px;
+        gap: 8px !important; /* Un poco más compacto para prevenir desbordes */
         margin: 15px 0;
         width: 100%;
     }
 
     .btn-movil-accion {
-        flex: 1;
+        flex: 1; /* Se estiran y achican solos en base al ancho del celu */
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 8px;
-        padding: 12px 10px;
-        font-size: 0.85rem;
+        gap: 6px;
+        padding: 12px 6px; /* Relleno equilibrado */
+        font-size: 0.82rem; /* Letra óptima para pantallas estándar */
         font-weight: bold;
         color: white;
         border: none;
         border-radius: 8px;
         box-shadow: 0 2px 5px rgba(0,0,0,0.15);
         cursor: pointer;
+        white-space: nowrap; /* Evita que el texto se parta en dos renglones */
     }
 
+    /* Colores únicos de botones móviles sin duplicados */
     .btn-movil-registros { background-color: #6c757d !important; }
     .btn-movil-equipos { background-color: #007bff !important; }
-
     
-    
-    /* 📅 Botón de reservas con fondo verde y texto bien oscuro */
+    /* 📅 Botón de reservas con el fondo verde oscuro de tu paleta para contraste legible */
     .btn-movil-reservas { 
-        background-color: #6c757d !important; ; 
-        color: white !important; /* 🔥 Esto hace la palabra "Reservas" bien oscura */
+        background-color: #16a34a !important; /* Tu verde success corporativo */
+        color: white !important; 
     }
-    
-    .btn-movil-equipos { background-color: #007bff !important; }
-
 
     /* 5. ❌ ENCABEZADO Y BOTÓN DE CERRAR ADENTRO DEL PANEL */
     .header-sidebar-movil {
@@ -117,5 +115,20 @@
         padding: 20px !important;
         height: calc(100vh - 60px) !important;
         overflow-y: auto !important; /* Si la tabla es larga, permite scroll */
+    }
+
+    /* ==========================================================================
+       🛡️ ESCUDO DEFENSIVO PARA PANTALLAS MUY CHICAS (Menores a 400px de ancho)
+       ========================================================================== */
+    @media (max-width: 400px) {
+        .contenedor-botones-movil {
+            gap: 4px !important; /* Espacio mínimo entre botones */
+        }
+
+        .btn-movil-accion {
+            padding: 10px 2px !important; /* Comprime los botones hacia los costados */
+            font-size: 0.72rem !important;  /* Achica la letra lo justo para que no se caiga nada */
+            gap: 3px !important;           /* Junta el emoji/icono con la palabra */
+        }
     }
 }

@@ -1,10 +1,11 @@
 // modules/ui.js
-import { getDocentes, 
-    getEquipos, 
-    getPrestamosActivos, 
-    getDetallesDePrestamo, 
+import {
+    getDocentes,
+    getEquipos,
+    getPrestamosActivos,
+    getDetallesDePrestamo,
     getRegistrosDelDia,
-    getReservasDeHoy 
+    getReservasDeHoy
 } from './api.js';
 import { supabaseClient } from './supabase.js';
 
@@ -36,49 +37,62 @@ export async function renderDocentes() {
     }
 }
 
-// 2. PINTAR LOS BOTONES DE EQUIPOS EN EL MODAL
-// 📄 Funcion actualizada que bloquea los equipos reservados
-// 📄 src/modules/ui.js
+
+
+// 2. PINTAR LOS BOTONES DE EQUIPOS EN EL MODAL (Filtrado preciso por hora_catedra)
 export async function renderEquipos(state) {
     const contenedor = document.getElementById('contenedor-equipos');
     if (!contenedor) return;
 
     try {
-        const equipos = await getEquipos(); 
+        const equipos = await getEquipos();
         contenedor.innerHTML = '';
 
         let reservasHoy = [];
         try {
-            const hoy = new Date().toLocaleDateString('en-CA'); 
+            const hoy = new Date().toLocaleDateString('en-CA');
             reservasHoy = await getReservasDeHoy(hoy);
             console.log("📅 Reservas de hoy traídas de Supabase:", reservasHoy);
         } catch (reservaErr) {
             console.warn("Error al traer reservas:", reservaErr);
         }
 
+        // 🔍 Obtenemos las horas tildadas en el formulario principal (ej: [5, 6])
+        // 🔍 Obtenemos las horas tildadas desde la ventana principal (siempre buscando la función global)
+        const horasTildadas = typeof window.obtenerHorasCatedraSeleccionadas === 'function'
+            ? window.obtenerHorasCatedraSeleccionadas()
+            : (typeof obtenerHorasCatedraSeleccionadas === 'function' ? obtenerHorasCatedraSeleccionadas() : []);
+
         state.idsSeleccionados = [];
         state.nombresSeleccionados = [];
 
         equipos.forEach(eq => {
             const btn = document.createElement('button');
-            
-            // 🌟 Agregamos el ícono acá:
             btn.innerHTML = `💻 ${eq.nombre}`;
             btn.type = "button";
 
-            // 🌟 PASO EN MODO FÁCIL: Ignoramos la hora. 
-            // Si el equipo aparece en alguna reserva de hoy, se tiene que bloquear.
+            // 🎯 CRUCE HORARIO CON LA COLUMNA DE SUPABASE (Versión limpia)
             const estaReservadoHoy = reservasHoy.some(reserva => {
-                // Prueba 1: Por ID directo (si es que la tabla guarda un ID numérico por fila)
-                const coincidenciaPorId = reserva.equipo_id === eq.id;
-                
-                // Prueba 2: Por texto (por si guardó el renglón con muchos nombres juntos, ej: "Netbook 04")
-                const coincidenciaPorTexto = JSON.stringify(reserva).toLowerCase().includes(eq.nombre.toLowerCase());
+                // 1. Validamos que la reserva sea estrictamente de este equipo
+                const esMismoEquipo = Number(reserva.equipo_id) === Number(eq.id);
+                if (!esMismoEquipo) return false;
 
-                return coincidenciaPorId || coincidenciaPorTexto;
+                // 2. Si hay horas tildadas en la grilla principal
+                if (horasTildadas.length > 0) {
+                    const horaBaseDatos = parseInt(reserva.hora_catedra, 10);
+
+                    // Imprime el rastro en la consola para auditar los filtros
+                    console.log(`🔎 Evaluando ${eq.nombre}: Interfaz pide:`, horasTildadas, `| Supabase tiene:`, horaBaseDatos);
+
+                    // Si la hora de Supabase está entre las que pide el preceptor, se bloquea (true)
+                    return horasTildadas.includes(horaBaseDatos);
+                }
+
+                // 3. Si no hay horas seleccionadas (pantalla general de reservas), bloquea todo el día
+                return true;
             });
 
-            // Si está reservado hoy, le clavamos la clase 'prestado' (rojo)
+            // Definimos el color del botón (Rojo si coincide el horario, original si está libre)
             const estadoVisual = estaReservadoHoy ? 'prestado' : eq.estado.toLowerCase();
             btn.className = `btn-equipo ${estadoVisual}`;
 
@@ -95,11 +109,12 @@ export async function renderEquipos(state) {
                     }
                 });
             } else {
-                btn.disabled = true; // Deshabilitado si ya está reservado
+                btn.disabled = true; // Queda deshabilitado si coincide la hora de la reserva
             }
-            
+
             contenedor.appendChild(btn);
         });
+
     } catch (err) {
         console.error("Error crítico al renderizar equipos:", err);
     }
@@ -107,102 +122,202 @@ export async function renderEquipos(state) {
 
 
 
-// 3. PINTAR LA TABLA PRINCIPAL DE PRÉSTAMOS ACTIVOS
+// 3. PINTAR EL PANEL DE PRÉSTAMOS ACTIVOS EN FORMATO TARJETAS (DATOS ARRIBA / NETBOOKS ABAJO)
 export async function renderTablaPrestamos() {
-    const tabla = document.getElementById('tabla-prestamos');
-    if (!tabla) return;
+    // Apuntamos al nuevo contenedor DIV que pusimos en el HTML
+    const contenedor = document.getElementById('contenedor-tarjetas-prestamos');
+    if (!contenedor) return;
 
-    // FORZAMOS LA LIMPIEZA TOTAL: Esto asegura que no quede nada de la ejecución anterior
-    tabla.innerHTML = '';
+    // FORZAMOS LA LIMPIEZA TOTAL
+    contenedor.innerHTML = '';
 
     try {
         const listaPrestamos = await getPrestamosActivos();
 
-        // 2. Limpiamos la tabla ANTES de empezar a iterar
-        tabla.innerHTML = '';
-
         if (listaPrestamos.length === 0) {
-            tabla.innerHTML = `<tr><td colspan="5" style="text-align: center; color: #64748b;">No hay equipos prestados en este momento.</td></tr>`;
+            contenedor.innerHTML = `
+                <div style="text-align: center; color: #64748b; padding: 20px; background: #ffffff; border-radius: 8px; border: 1px solid #dee2e6;">
+                    No hay equipos prestados en este momento.
+                </div>
+            `;
             return;
         }
 
-        // Armamos las filas de la tabla mezclando la cabecera y el lote de equipos
-        console.log("Limpiando tabla. ¿Cuántos hijos tiene ahora?:", tabla.children.length);
+        // Variable temporal para acumular el diseño de todas las tarjetas
+        let htmlAcumulado = '';
+
         for (const prestamo of listaPrestamos) {
             const detalles = await getDetallesDePrestamo(prestamo.id);
-            console.log(`Préstamo ID ${prestamo.id} - Detalles que llegan a la UI:`, detalles);
-            // Mapeamos TODOS los detalles, decidiendo qué mostrar para cada uno
-            // Mapeamos los detalles dándole formato de Chips/Etiquetas horizontales con Flexbox
-            let equiposMostrados = `<div style="display: flex; flex-wrap: wrap; gap: 6px; max-width: 450px; justify-content: flex-start; vertical-align: middle;">`;
 
+            // 🔍 1. AGRUPAMOS LOS DETALLES POR EQUIPO FÍSICO ÚNICO
+            const equiposMap = new Map();
             if (detalles && detalles.length > 0) {
-                equiposMostrados += detalles.map(d => {
-                    // Si TIENE fecha de devolución, lo dejamos tachado de forma discreta o lo ocultás si preferís
-                    if (d.fecha_devolucion) {
-                        return `
-                        <div style="display: inline-flex; align-items: center; background-color: #e9ecef; border: 1px dashed #ced4da; border-radius: 16px; padding: 4px 10px; font-size: 12px; color: #6c757d; text-decoration: line-through; opacity: 0.7; white-space: nowrap;">
-                            <span>${d.equipos?.nombre || 'Equipo'}</span>
-                            <span style="font-size: 10px; margin-left: 5px; font-style: italic; text-decoration: none;">(Devuelto)</span>
-                        </div>
-                    `;
-                    } else {
-                        // Si NO tiene fecha, dibujamos la etiqueta activa con la ✕ roja minimalista
-                        return `
-                        <div style="display: inline-flex; align-items: center; background-color: #f1f3f5; border: 1px solid #ced4da; border-radius: 16px; padding: 4px 10px; font-size: 12px; font-weight: bold; color: #495057; white-space: nowrap;">
-                            <span>${d.equipos?.nombre || 'Equipo'}</span>
-                            <button class="btn-devolver-uno" 
-                                    data-prestamo="${d.prestamo_id}" 
-                                    data-equipo="${d.equipo_id}" 
-                                    style="background: none; border: none; color: #dc3545; font-weight: bold; margin-left: 8px; cursor: pointer; font-size: 13px; padding: 0 2px; line-height: 1;"
-                                    title="Devolver este equipo">
-                                ✕
-                            </button>
-                        </div>
-                    `;
+                detalles.forEach(d => {
+                    if (!equiposMap.has(d.equipo_id)) {
+                        equiposMap.set(d.equipo_id, {
+                            equipo_id: d.equipo_id,
+                            prestamo_id: d.prestamo_id,
+                            nombre: d.equipos?.nombre || 'Equipo',
+                            registrosHoras: []
+                        });
                     }
-                }).join('');
-            } else {
-                equiposMostrados += `<span style="color: #6c757d; font-style: italic;">Sin equipos</span>`;
+                    equiposMap.get(d.equipo_id).registrosHoras.push(d);
+                });
             }
 
+            // 🌐 MAPEO DE EQUIPOS EN FORMATO GRILLA COMPACTA FLUIDA (Fila de Abajo - Ancho Completo)
+            let equiposMostrados = `
+                <div style="
+                    display: grid; 
+                    grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)); 
+                    gap: 5px; 
+                    width: 100%; 
+                    background-color: #f8f9fc; 
+                    border: 1px solid #eaecf4; 
+                    border-radius: 6px; 
+                    padding: 10px;
+                    max-height: 115px;
+                    overflow-y: auto;
+                ">
+            `;
+
+            if (equiposMap.size > 0) {
+                // 👇 Convertimos a array y ordenamos numéricamente por el nombre del equipo antes del .map()
+                equiposMostrados += Array.from(equiposMap.values())
+                    .sort((a, b) => a.nombre.localeCompare(b.nombre, undefined, { numeric: true, sensitivity: 'base' }))
+                    .map(eq => {
+                        const estaDevueltoPorCompleto = eq.registrosHoras.every(r => r.fecha_devolucion);
+                        
+                        if (estaDevueltoPorCompleto) {
+                            return `
+                                <div style="display: inline-flex; align-items: center; justify-content: space-between; background-color: #e9ecef; border: 1px dashed #ced4da; border-radius: 4px; padding: 3px 6px; font-size: 11px; color: #6c757d; text-decoration: line-through; opacity: 0.6; white-space: nowrap;" title="${eq.nombre} (Devuelto)">
+                                    <span>Net ${eq.nombre.replace(/[^0-9]/g, '')}</span>
+                                    <span style="font-size: 9px; margin-left: 2px; text-decoration: none;">✔</span>
+                                </div>
+                            `;
+                        } else {
+                            return `
+                                <div style="display: inline-flex; align-items: center; justify-content: space-between; background-color: #ffffff; border: 1px solid #d1d3e2; border-radius: 4px; padding: 3px 6px; font-size: 11px; font-weight: bold; color: #495057; box-shadow: 0 1px 2px rgba(0,0,0,0.02);">
+                                    <span>Net ${eq.nombre.replace(/[^0-9]/g, '')}</span>
+                                    <button class="btn-devolver-uno" 
+                                            data-prestamo="${eq.prestamo_id}" 
+                                            data-equipo="${eq.equipo_id}" 
+                                            style="background: none; border: none; color: #dc3545; font-weight: bold; margin-left: 6px; cursor: pointer; font-size: 11px; padding: 0 2px; line-height: 1;"
+                                            title="Devolver ${eq.nombre}">
+                                        ✕
+                                    </button>
+                                </div>
+                            `;
+                        }
+                    }).join('');
+            } else {
+                equiposMostrados += `<span style="color: #6c757d; font-style: italic; font-size: 11px;">Sin equipos asignados</span>`;
+            }
             equiposMostrados += `</div>`;
 
-            // Creamos la fila siempre
-            const fila = document.createElement('tr');
-            const fechaFormateada = new Date(prestamo.fecha_salida).toLocaleString('es-AR');
+            // --- ⏱️ LÓGICA DE TRADUCCIÓN DE HORARIOS ---
+            let rangoHorasTexto = 'Sin hora';
+            if (detalles && detalles.length > 0) {
+                const horasOrdenadas = Array.from(new Set(detalles.map(d => d.hora_catedra)))
+                    .filter(h => h !== undefined && h !== null)
+                    .sort((a, b) => a - b);
 
-            fila.innerHTML = `
-        <td style="vertical-align: middle; text-align: left;">${prestamo.usuarios?.nombre_completo || 'N/A'}</td>
-        <td style="vertical-align: middle; text-align: center;">${equiposMostrados}</td>
-        
-        <td style="vertical-align: middle; font-weight: bold; color: #4b5563; text-align: center;">
-            ${prestamo.observaciones || '---'}
-        </td>
-        
-        <td style="vertical-align: middle; white-space: nowrap; text-align: center;">${fechaFormateada}</td>
-        
-        <td style="vertical-align: middle; text-align: center;">
-            <div style="display: flex; flex-direction: column; gap: 6px; justify-content: center; align-items: center; width: 100%;">
-                <button class="btn-agregar-parcial" data-id="${prestamo.id}" style="background-color: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; width: 90px;">
-                    Agregar
-                </button>
-                <button class="btn-devolver" data-id="${prestamo.id}" style="background-color: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; width: 90px;">
-                    Cerrar Lote
-                </button>
-            </div>
-        </td>
-    `;
+                if (horasOrdenadas.length > 0) {
+                    const primera = horasOrdenadas[0];
+                    const ultima = horasOrdenadas[horasOrdenadas.length - 1];
 
-            tabla.appendChild(fila);
-           
+                    const inicio = MAPA_HORARIOS[String(primera)]
+                        ? MAPA_HORARIOS[String(primera)].split(' a ')[0]
+                        : `Mód. ${primera}`;
+
+                    const fin = MAPA_HORARIOS[String(ultima)]
+                        ? MAPA_HORARIOS[String(ultima)].split(' a ')[1]
+                        : `Mód. ${ultima}`;
+
+                    rangoHorasTexto = `${inicio} a ${fin}`;
+                }
+            }
+
+            // Formateo de fecha y estado igual al tuyo
+            const fechaDiaMes = prestamo.fecha_salida
+                ? new Date(prestamo.fecha_salida).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit' })
+                : '---';
+
+            const devolucionFormateada = prestamo.fecha_devolucion
+                ? new Date(prestamo.fecha_devolucion).toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+                : '<span style="display: inline-block; background-color: #fff3cd; color: #856404; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;">⏳ En uso</span>';
+
+            // 📦 CONSTRUIMOS LA ESTRUCTURA DE LA TARJETA INTERACTIVA
+            htmlAcumulado += `
+                <div class="tarjeta-prestamo" style="
+                    background-color: #ffffff; 
+                    border: 1px solid #dee2e6; 
+                    border-radius: 8px; 
+                    padding: 14px; 
+                    margin-bottom: 15px; 
+                    box-shadow: 0 2px 5px rgba(0,0,0,0.04);
+                ">
+                    
+                    <div style="
+                        display: flex; 
+                        align-items: center; 
+                        justify-content: space-between; 
+                        padding-bottom: 12px;
+                        border-bottom: 1px dashed #e9ecef;
+                        flex-wrap: wrap;
+                        gap: 12px;
+                    ">
+                        <div style="flex: 1; min-width: 150px;">
+                            <span style="font-size: 10px; color: #6c757d; text-transform: uppercase; letter-spacing: 0.5px; display: block;">Docente</span>
+                            <strong style="font-size: 14px; color: #212529;">${prestamo.usuarios?.nombre_completo || 'N/A'}</strong>
+                        </div>
+
+                        <div style="width: 85px; text-align: center;">
+                            <span style="font-size: 10px; color: #6c757d; text-transform: uppercase; display: block;">Curso</span>
+                            <span style="font-size: 13px; font-weight: bold; color: #495057;">${prestamo.observaciones || '---'}</span>
+                        </div>
+
+                        <div style="flex: 1; min-width: 160px;">
+                            <span style="font-size: 10px; color: #6c757d; text-transform: uppercase; display: block;">Entrega / Horas</span>
+                            <span style="font-size: 12.5px; color: #495057; font-weight: 500;">
+                                📅 ${fechaDiaMes} <span style="margin-left: 4px; color: #4e73df; background: #e8f0fe; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold;">⏱️ ${rangoHorasTexto} hs</span>
+                            </span>
+                        </div>
+
+                        <div style="width: 90px; text-align: center;">
+                            <span style="font-size: 10px; color: #6c757d; text-transform: uppercase; display: block; margin-bottom: 2px;">Estado</span>
+                            ${devolucionFormateada}
+                        </div>
+
+                        <div style="display: flex; gap: 8px; justify-content: flex-end; min-width: 170px;">
+                            <button class="btn-agregar-parcial" data-id="${prestamo.id}" style="background-color: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 11.5px; font-weight: bold; cursor: pointer; width: 90px;">
+                                Agregar
+                            </button>
+                            <button class="btn-devolver" data-id="${prestamo.id}" style="background-color: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 11.5px; font-weight: bold; cursor: pointer; width: 90px;">
+                                Cerrar Lote
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 10px;">
+                        <div style="font-size: 10.5px; font-weight: bold; color: #4e73df; margin-bottom: 6px; display: flex; align-items: center; gap: 4px; text-transform: uppercase;">
+                            💻 Lote de Equipos Asignados <span style="background: #4e73df; color: white; border-radius: 10px; padding: 1px 6px; font-size: 10px;">${equiposMap.size}</span>
+                        </div>
+                        ${equiposMostrados}
+                    </div>
+
+                </div>
+            `;
         }
+
+        // Inyectamos todo el bloque de tarjetas junto en el contenedor
+        contenedor.innerHTML = htmlAcumulado;
+
     } catch (err) {
         console.error("Error UI Tabla Préstamos:", err);
-        tabla.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red;">Error de sincronización.</td></tr>';
+        contenedor.innerHTML = '<div style="text-align:center; color:red; padding:20px;">Error de sincronización en el panel.</div>';
     }
 }
-
-
 
 
 // 4. PINTAR LA TABLA DEL HISTORIAL DIARIO
@@ -514,30 +629,30 @@ export function renderReservasEnLateral(reservas) {
     // 1. AGRUPACIÓN: Recolectamos nombres, horas, IDs de reservas e IDs de equipos
     const agrupado = reservas.reduce((acc, res) => {
         const nombreDocente = res.usuarios?.nombre_completo || 'Sin nombre';
-        
+
         if (!acc[nombreDocente]) {
             acc[nombreDocente] = {
                 nombre: nombreDocente,
                 usuario_id: res.usuario_id || null,
                 equipos: new Set(),
                 horas: new Set(),
-                reservaIds: [],    
-                equiposIds: [],    
-                curso: res.curso || '1° 1°', 
+                reservaIds: [],
+                equiposIds: [],
+                curso: res.curso || '1° 1°',
                 estado: res.estado || 'Confirmada'
             };
         }
-        
+
         acc[nombreDocente].equipos.add(res.equipos?.nombre);
         acc[nombreDocente].horas.add(res.hora_catedra);
-        
+
         if (res.id && !acc[nombreDocente].reservaIds.includes(res.id)) {
             acc[nombreDocente].reservaIds.push(res.id);
         }
         if (res.equipo_id && !acc[nombreDocente].equiposIds.includes(res.equipo_id)) {
             acc[nombreDocente].equiposIds.push(res.equipo_id);
         }
-        
+
         if (res.estado) {
             acc[nombreDocente].estado = res.estado;
         }
@@ -557,21 +672,21 @@ export function renderReservasEnLateral(reservas) {
         // --- ⏱️ NUEVA LÓGICA DE TRADUCCIÓN DE HORARIOS ---
         const horasOrdenadas = Array.from(res.horas).sort((a, b) => a - b);
         let rangoFinal = '';
-        
+
         if (horasOrdenadas.length > 0) {
             const primera = horasOrdenadas[0];
             const ultima = horasOrdenadas[horasOrdenadas.length - 1];
-            
+
             // Extrae la hora de entrada de la primera materia (ej: "18:30")
             const inicio = MAPA_HORARIOS[String(primera)]
                 ? MAPA_HORARIOS[String(primera)].split(' a ')[0]
                 : `Bloque ${primera}`;
-                
+
             // Extrae la hora de salida de la última materia (ej: "19:50")
             const fin = MAPA_HORARIOS[String(ultima)]
                 ? MAPA_HORARIOS[String(ultima)].split(' a ')[1]
                 : `Bloque ${ultima}`;
-                
+
             rangoFinal = `${inicio} a ${fin}`;
         } else {
             rangoFinal = 'Sin hora';
@@ -612,24 +727,26 @@ export function renderReservasEnLateral(reservas) {
     });
 }
 
-// 🌐 FUNCIÓN CORREGIDA (SIN EL TYPO DE VARIABLE)
+
+// 🌐 FUNCIÓN DE TRASPASO DEFINITIVA (COLUMNA EN SINGULAR)
 async function ejecutarTraspasoReservaAUso(datosAgrupados) {
     console.log("📊 [DIAGNÓSTICO] Iniciando traspaso para:", datosAgrupados.nombre);
-    
+    console.log("📦 Datos agrupados recibidos en la UI:", datosAgrupados);
+
     try {
         // 1️⃣ RESCATE DEL ID DEL DOCENTE
         let idUsuario = datosAgrupados.usuario_id || null;
-        
+
         if (!idUsuario) {
             console.log("⚠️ El usuario_id vino vacío. Buscando coincidencia por nombre...");
             const { data: usuarios } = await supabaseClient
                 .from('usuarios')
                 .select('id, nombre_completo');
-            
+
             if (usuarios) {
                 const deDocente = datosAgrupados.nombre.toLowerCase().trim();
-                const encontrado = usuarios.find(u => 
-                    u.nombre_completo.toLowerCase().trim().includes(deDocente) || 
+                const encontrado = usuarios.find(u =>
+                    u.nombre_completo.toLowerCase().trim().includes(deDocente) ||
                     deDocente.includes(u.nombre_completo.toLowerCase().trim())
                 );
                 if (encontrado) {
@@ -641,16 +758,13 @@ async function ejecutarTraspasoReservaAUso(datosAgrupados) {
 
         // 2️⃣ RESCATE INFALIBLE DE LOS IDs DE NETBOOKS
         let listaEquiposIds = [];
-        
-        // Intento A: Si ya venían IDs físicos en el array, los usamos
         if (datosAgrupados.equiposIds && datosAgrupados.equiposIds.length > 0) {
             listaEquiposIds = datosAgrupados.equiposIds;
-        } 
-        // Intento B: Si venían como texto en el Set (ej: "Netbook 04"), buscamos sus IDs correspondientes
+        }
         else if (datosAgrupados.equipos && datosAgrupados.equipos.size > 0) {
-            console.log("🔍 'equiposIds' estaba vacío. Buscando correspondencias en BD para el Set:", Array.from(datosAgrupados.equipos));
+            console.log("🔍 'equiposIds' estaba vacío. Buscando en BD para el Set:", Array.from(datosAgrupados.equipos));
             const { data: tablaEquipos } = await supabaseClient.from('equipos').select('id, nombre');
-            
+
             if (tablaEquipos) {
                 const nombresSet = Array.from(datosAgrupados.equipos);
                 listaEquiposIds = nombresSet.map(nom => {
@@ -664,9 +778,21 @@ async function ejecutarTraspasoReservaAUso(datosAgrupados) {
         console.log("🎯 IDs finales de netbooks listos para impactar:", listaEquiposIds);
 
         if (listaEquiposIds.length === 0) {
-            alert("No se pudieron determinar los IDs de las netbooks. Proceso detenido para evitar registros vacíos.");
+            alert("No se pudieron determinar los IDs de las netbooks. Proceso detenido.");
             return;
         }
+
+        // 2️⃣.5️⃣ RESCATE DE LAS HORAS VINCULADAS A LA RESERVA
+        let listaHorasIds = [];
+        if (datosAgrupados.horasIds && datosAgrupados.horasIds.length > 0) {
+            listaHorasIds = datosAgrupados.horasIds;
+        } else if (datosAgrupados.horas) {
+            listaHorasIds = Array.from(datosAgrupados.horas);
+        } else if (datosAgrupados.hora_catedra) {
+            listaHorasIds = [datosAgrupados.hora_catedra];
+        }
+
+        console.log("⏰ Horas detectadas para las filas de detalle:", listaHorasIds);
 
         // 3️⃣ INSERCIÓN MAESTRA EN LA TABLA 'PRESTAMOS'
         const { data: prestamoCreado, error: errorPrestamo } = await supabaseClient
@@ -681,13 +807,30 @@ async function ejecutarTraspasoReservaAUso(datosAgrupados) {
         if (errorPrestamo) throw errorPrestamo;
 
         const idDelPrestamoMaestro = prestamoCreado[0].id;
-        console.log("✅ Registro maestro asentado en 'prestamos'. ID asignado:", idDelPrestamoMaestro);
+        console.log("✅ Registro maestro asentado en 'prestamos'. ID:", idDelPrestamoMaestro);
 
-        // 4️⃣ INSERCIÓN EN 'DETALLE_PRESTAMOS' (Relación Muchos a Muchos)
-        const filasDetalle = listaEquiposIds.map(idEquipo => ({
-            prestamo_id: idDelPrestamoMaestro,
-            equipo_id: idEquipo
-        }));
+        // 4️⃣ INSERCIÓN EN 'DETALLE_PRESTAMOS' (¡Ahora sí con hora_catedra!)
+        const filasDetalle = [];
+
+        listaEquiposIds.forEach(idEquipo => {
+            if (listaHorasIds.length > 0) {
+                listaHorasIds.forEach(idHora => {
+                    filasDetalle.push({
+                        prestamo_id: idDelPrestamoMaestro,
+                        equipo_id: idEquipo,
+                        hora_catedra: idHora // 💡 CAMBIADO A SINGULAR: nombre exacto de la columna
+                    });
+                });
+            } else {
+                filasDetalle.push({
+                    prestamo_id: idDelPrestamoMaestro,
+                    equipo_id: idEquipo,
+                    hora_catedra: null
+                });
+            }
+        });
+
+        console.log("🚀 Enviando filas estructuradas a 'detalle_prestamos':", filasDetalle);
 
         const { error: errorDetalle } = await supabaseClient
             .from('detalle_prestamos')
@@ -710,13 +853,14 @@ async function ejecutarTraspasoReservaAUso(datosAgrupados) {
 
         // 6️⃣ REFRESCO DE INTERFAZ EN TIEMPO REAL
         alert(`¡Préstamo para ${datosAgrupados.nombre} procesado con éxito absoluto!`);
-        window.location.reload(); // Recarga la app para limpiar los paneles y actualizar las pestañas lateral/central
+        window.location.reload();
 
     } catch (error) {
         console.error("❌ Error crítico en el flujo de traspaso:", error);
-        alert("Ocurrió un error al guardar el préstamo. Revisá los detalles en la consola de desarrollador.");
+        alert(`Error de Supabase: ${error.message || error.details || JSON.stringify(error)}`);
     }
 }
+
 
 
 // constantes.js o al inicio de ui.js
@@ -737,3 +881,36 @@ const MAPA_HORARIOS = {
     14: "17:50 a 18:30"
 
 };
+
+
+// Función para calcular el rango de horas de un préstamo en base a sus detalles individuales
+function obtenerRangoDesdeDetalles(detalles) {
+    if (!detalles || detalles.length === 0) return 'Sin hora';
+
+    // 1. Recolectamos todas las horas únicas de este conjunto de detalles
+    const horasSet = new Set();
+    detalles.forEach(d => {
+        // Buscamos tanto 'hora' como 'hora_catedra' por si las moscas según tu esquema
+        if (d.hora !== undefined) horasSet.add(d.hora);
+        else if (d.hora_catedra !== undefined) horasSet.add(d.hora_catedra);
+    });
+
+    const horasOrdenadas = Array.from(horasSet).sort((a, b) => a - b);
+
+    if (horasOrdenadas.length === 0) return 'Sin hora';
+
+    // 2. Obtenemos extremos
+    const primera = horasOrdenadas[0];
+    const ultima = horasOrdenadas[horasOrdenadas.length - 1];
+
+    // 3. Tu misma lógica exacta de división con split (' a ')
+    const inicio = MAPA_HORARIOS[String(primera)]
+        ? MAPA_HORARIOS[String(primera)].split(' a ')[0]
+        : `Bloque ${primera}`;
+
+    const fin = MAPA_HORARIOS[String(ultima)]
+        ? MAPA_HORARIOS[String(ultima)].split(' a ')[1]
+        : `Bloque ${ultima}`;
+
+    return `${inicio} a ${fin}`;
+}

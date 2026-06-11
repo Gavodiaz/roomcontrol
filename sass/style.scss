@@ -442,4 +442,11 @@ tr:hover {
     transition: all 0.2s ease;
 }
 
+
+/* Oculta la columna de botones por completo en pantallas de computadoras (Web) */
+// Oculta el botón de cerrar en la versión de escritorio
+.btn-cerrar-sidebar {
+    display: none !important;
+}
+
 @import 'responsive';

@@ -10,7 +10,8 @@ import {
     renderTablaProfesores,
     mostrarNotificacion,
     renderRegistrosEnLateral,
-    renderReservasEnLateral
+    renderReservasEnLateral,
+    
 } from './modules/ui.js';
 import {
     insertarPrestamoCabecera,
@@ -26,7 +27,8 @@ import {
     insertUsuario,
     updateUsuario,
     deleteUsuario,
-    getReservasDelDia
+    getReservasDelDia,
+    obtenerDisponibilidadEquipos
 } from './modules/api.js';
 
 
@@ -84,54 +86,78 @@ document.getElementById('btn-logout').addEventListener('click', async () => {
 
 
 
+
 // Un objeto "estado" temporal para compartir la selección de equipos entre el modal y el guardado
 const appState = {
     idsSeleccionados: [],
-    nombresSeleccionados: []
+    nombresSeleccionados: [],
+    disponibilidadActual: null // 👈 Dejamos este espacio listo para guardar el filtro de reservas
 };
 let prestamoSeleccionadoId = null;
 
 
-// 1. INICIALIZACIÓN: Cuando se abre la página, mandamos a pintar todo
-document.addEventListener('DOMContentLoaded', async () => {
-    await renderDocentes();
-    await renderEquipos(appState);
-    await renderTablaPrestamos();
-});
 
+// =========================================================================
+// 🔍 FUNCIÓN AUXILIAR: Captura las horas cátedra tildadas de la grilla
+// =========================================================================
+function obtenerHorasCatedraSeleccionadas() {
+    // Buscamos de forma directa los inputs de la grilla que tengan name="hora" y estén tildados
+    const checkboxesTildados = document.querySelectorAll('input[name="hora"]:checked');
+
+    // Convertimos esos elementos en un array con sus valores numéricos puros (usando el atributo value)
+    const horas = Array.from(checkboxesTildados).map(cb => parseInt(cb.value, 10));
+
+    console.log("🎯 Horas detectadas en tiempo real por la función:", horas);
+    return horas;
+}
+
+
+// 1. INICIALIZACIÓN: Mandamos a pintar todo en paralelo (¡Mucho más rápido!)
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        // Dispara las 3 funciones al mismo tiempo en lugar de hacerlas esperar en fila
+        await Promise.all([
+            renderDocentes(),
+            renderEquipos(appState),
+            renderTablaPrestamos()
+        ]);
+    } catch (err) {
+        console.error("Error al inicializar los datos de la app:", err);
+    }
+});
 
 //Esto permite que las pestañas se queden fija o moviles
 // Asegurate de seleccionar el contenedor principal que tiene la clase .sidebar-flotante
-const panelEquipos = document.querySelector('.sidebar-flotante'); 
-const btnFijar = document.getElementById('btn-fijar'); 
+const panelEquipos = document.querySelector('.sidebar-flotante');
+const btnFijar = document.getElementById('btn-fijar');
 
 btnFijar.addEventListener('click', () => {
     // Alternamos la clase 'fija'
     panelEquipos.classList.toggle('fija');
-    
+
     // Cambiamos el texto del botón (opcional)
     btnFijar.textContent = panelEquipos.classList.contains('fija') ? '❌' : '📌';
 });
 
 
-const panelRegistrosDiarios = document.querySelector('.sidebar-flotante-izq'); 
-const btnFijarDiarios = document.getElementById('btn-fijar-registro'); 
+const panelRegistrosDiarios = document.querySelector('.sidebar-flotante-izq');
+const btnFijarDiarios = document.getElementById('btn-fijar-registro');
 
 btnFijarDiarios.addEventListener('click', () => {
     // Alternamos la clase 'fija'
     panelRegistrosDiarios.classList.toggle('fija');
-    
+
     // Cambiamos el texto del botón (opcional)
     btnFijarDiarios.textContent = panelRegistrosDiarios.classList.contains('fija') ? '❌' : '📌';
 });
 
 const panelReservas = document.getElementById('sidebar-reservas-diarias');
-const btnFijarReservas = document.getElementById('btn-fijar-reserva'); 
+const btnFijarReservas = document.getElementById('btn-fijar-reserva');
 
 btnFijarReservas.addEventListener('click', () => {
     // Alternamos la clase 'fija'
     panelReservas.classList.toggle('fija');
-    
+
     // Cambiamos el texto del botón (opcional)
     btnFijarReservas.textContent = panelReservas.classList.contains('fija') ? '❌' : '📌';
 });
@@ -139,40 +165,53 @@ btnFijarReservas.addEventListener('click', () => {
 
 
 
-// 🎯 AUTOMATIZACIÓN: Al elegir docente de la lista, abrir modal de equipos
-    const inputBuscarDocente = document.getElementById('docente');
+// =========================================================================
+// 👤 CONTROL DEL BUSCADOR DE DOCENTES (Sin apertura automática de modal)
+// =========================================================================
+const inputBuscarDocente = document.getElementById('docente');
 
-    if (inputBuscarDocente) {
-        inputBuscarDocente.addEventListener('input', (e) => {
-            const valorInput = e.target.value.trim();
+if (inputBuscarDocente) {
+    inputBuscarDocente.addEventListener('input', (e) => {
+        const valorInput = e.target.value.trim();
 
-            // 1. Buscamos todas las opciones en el datalist
-            const opcionesDatalist = document.querySelectorAll('#lista-docentes option');
-            let docenteValidoElegido = false;
+        // 1. Buscamos todas las opciones en el datalist para validar
+        const opcionesDatalist = document.querySelectorAll('#lista-docentes option');
+        let docenteValidoElegido = false;
 
-            opcionesDatalist.forEach(option => {
-                if (option.value === valorInput) {
-                    docenteValidoElegido = true;
-                }
-            });
-
-            // 2. Si coincide con un docente real, disparamos el modal automático
-            if (docenteValidoElegido) {
-                console.log("🚀 Docente válido seleccionado:", valorInput);
-                
-                // Usamos el ID real de tu línea 101
-                const botonEquipos = document.getElementById('btn-abrir-modal');
-                if (botonEquipos) {
-                    botonEquipos.click(); // 🔥 Simula el clic y abre el panel de netbooks
-                }
+        opcionesDatalist.forEach(option => {
+            if (option.value === valorInput) {
+                docenteValidoElegido = true;
             }
-
-            
         });
-    }
+
+        // 2. Si coincide con un docente real, ya no abrimos el modal.
+        // En su lugar, dejamos que el preceptor elija las horas tranquilo.
+        if (docenteValidoElegido) {
+            console.log("👤 Docente válido seleccionado:", valorInput);
+
+            // OPCIONAL: Podés mandar el foco visual directamente al formulario de abajo 
+            // para que empiece a marcar las horas cátedra de inmediato.
+            mostrarNotificacion("✅ Docente seleccionado. Ahora elija las horas cátedra.");
+        }
+    });
+}
 
 // 2. EVENTOS DEL MODAL DE EQUIPOS
-document.getElementById('btn-abrir-modal').addEventListener('click', abrirModal);
+// // 2. EVENTOS DEL MODAL DE EQUIPOS
+// Cambiamos el listener directo por uno asíncrono para que repinte las netbooks en vivo
+const botonModalEquipos = document.getElementById('btn-abrir-modal');
+if (botonModalEquipos) {
+    botonModalEquipos.addEventListener('click', async () => {
+        // 🔄 Forzamos a ui.js a leer los checkboxes actuales y filtrar por hora_catedra
+        await renderEquipos(appState);
+
+        // 🔓 Una vez que los botones se pintaron con los colores reales, abrimos el modal
+        abrirModal();
+    });
+}
+
+// Cancelar/Cerrar del Modal (Esto dejalo tal cual lo tenés abajo...)
+document.querySelector('.btn-historial[onclick="cerrarModal()"]')?.removeAttribute('onclick');
 
 // Cancelar/Cerrar del Modal (Limpiamos cualquier onclick viejo del HTML)
 document.querySelector('.btn-historial[onclick="cerrarModal()"]')?.removeAttribute('onclick');
@@ -182,6 +221,8 @@ document.querySelector('.btn-historial')?.addEventListener('click', () => {
     appState.idsSeleccionados = [];
     appState.nombresSeleccionados = [];
     cerrarModal(); // Ejecuta la función visual original que viene de ui.js
+
+
 });
 
 // Confirmar la selección adentro del modal
@@ -203,7 +244,7 @@ document.getElementById('btn-confirmar-seleccion-modal').addEventListener('click
                 await actualizarEstadoEquipo(equipoId, 'Prestado');
             }
             mostrarNotificacion("✅ ¡Equipo(s) agregado(s) con éxito al lote!");
-            
+
 
             // Limpiamos el estado para que no interfiera en futuros préstamos
             prestamoSeleccionadoId = null;
@@ -218,7 +259,7 @@ document.getElementById('btn-confirmar-seleccion-modal').addEventListener('click
             await renderEquipos(appState);
 
         } catch (error) {
-            
+
             alert("Hubo un error al agregar el equipo a la base de datos.");
         }
     } else {
@@ -241,15 +282,15 @@ document.getElementById('btn-confirmar-seleccion-modal').addEventListener('click
 
     // 🔥 AUTOMATIZACIÓN: Foco y despliegue automático del datalist de cursos
     const inputCurso = document.getElementById('observaciones'); // 👈 ID real de tu HTML
-    
+
     if (inputCurso) {
         setTimeout(() => {
             inputCurso.focus(); // Le da el foco a la caja de texto
-            
+
             // Forzamos un valor vacío temporal para que el navegador 
             // despliegue la persiana completa con las opciones (1°1°, 1°2°...)
             const valorOriginal = inputCurso.value;
-            inputCurso.value = ''; 
+            inputCurso.value = '';
             inputCurso.value = valorOriginal;
 
             // Compatibilidad moderna: si el navegador soporta showPicker en inputs, lo ejecuta
@@ -265,13 +306,17 @@ document.getElementById('btn-confirmar-seleccion-modal').addEventListener('click
 
 });
 
-// 3. EVENTO PARA GUARDAR EL PRÉSTAMO (Clic en Registrar)
 
+
+// 3. EVENTO PARA GUARDAR EL PRÉSTAMO (Clic en Registrar)
 const btnRegistrar = document.getElementById('btn-registrar-prestamo');
 
 if (btnRegistrar) {
     btnRegistrar.addEventListener('click', async () => {
 
+        // =========================================================================
+        // 🎯 CONTROL DE SEGURIDAD 1: EL DOCENTE
+        // =========================================================================
         const inputDocente = document.getElementById('docente');
         const datalistProfes = document.getElementById('lista-docentes');
         let usuarioId = null;
@@ -288,17 +333,6 @@ if (btnRegistrar) {
             }
         }
 
-        const inputEquiposOculto = document.getElementById('input-equipo-oculto');
-        const inputObservaciones = document.getElementById('observaciones');
-       
-        
-
-        const equiposTexto = inputEquiposOculto ? inputEquiposOculto.value : '';
-        const observaciones = inputObservaciones ? inputObservaciones.value.trim() : '';
-
-        // =========================================================================
-        // 🎯 CONTROL DE SEGURIDAD 1: EL DOCENTE
-        // =========================================================================
         if (!usuarioId) {
             mostrarNotificacion("❌ Por favor, seleccione un docente válido de la lista antes de confirmar.", 'error');
             return;
@@ -307,14 +341,19 @@ if (btnRegistrar) {
         // =========================================================================
         // 🎯 CONTROL DE SEGURIDAD 2: LOS EQUIPOS
         // =========================================================================
+        const inputEquiposOculto = document.getElementById('input-equipo-oculto');
+        const equiposTexto = inputEquiposOculto ? inputEquiposOculto.value : '';
+
         if (!equiposTexto) {
             mostrarNotificacion("❌ Por favor, seleccione al menos un equipo antes de confirmar.", 'error');
             return;
         }
 
         // =========================================================================
-        // 🎯 CONTROL DE SEGURIDAD 3: EL CURSO (¡Acá va el bloque nuevo!)
+        // 🎯 CONTROL DE SEGURIDAD 3: EL CURSO (Observaciones)
         // =========================================================================
+        const inputObservaciones = document.getElementById('observaciones');
+        const observaciones = inputObservaciones ? inputObservaciones.value.trim() : '';
         const datalistCursos = document.getElementById('lista-cursos');
         let cursoValido = false;
 
@@ -330,86 +369,116 @@ if (btnRegistrar) {
 
         if (!cursoValido) {
             mostrarNotificacion("❌ Por favor, seleccione un curso válido de la lista desplegable.", 'error');
-            return; // Frena acá si el curso no es correcto
+            return; 
         }
+
+        // =========================================================================
+        // 🎯 CONTROL DE SEGURIDAD 4: LAS HORAS CÁTEDRA
+        // =========================================================================
+        const horasParaGuardar = obtenerHorasCatedraSeleccionadas(); 
+
+        if (horasParaGuardar.length === 0) {
+            mostrarNotificacion("⚠️ Por favor, seleccione al menos una hora cátedra antes de guardar.", "error");
+            return;
+        }
+
+       // =========================================================================
+        // 💾 PROCESO DE GUARDADO OPTIMIZADO COMPLETO Y REPARADO
+        // =========================================================================
         const arrayEquiposIds = equiposTexto.split(',');
 
         try {
-            const primerEquipoId = parseInt(arrayEquiposIds[0]);
+            // 🎯 PASO 1: Insertar la Cabecera del préstamo UNA SOLA VEZ
+            console.log("📝 Insertando cabecera única de préstamo...");
+            const prestamoId = await insertarPrestamoCabecera(usuarioId, observaciones);
+            console.log(`✅ Cabecera creada exitosamente con ID: ${prestamoId}`);
 
-            // PASO 1: Insertar la Cabecera del préstamo
-            const prestamoId = await insertarPrestamoCabecera(usuarioId, primerEquipoId, observaciones);
-
-            // PASO 2: Insertar cada equipo en el Detalle y cambiarle el estado
-            for (const equipoIdStr of arrayEquiposIds) {
-                const equipoIdNum = parseInt(equipoIdStr);
-                await insertarPrestamoDetalle(prestamoId, equipoIdNum);
-                await actualizarEstadoEquipo(equipoIdNum, 'Prestado');
-                await renderTablaPrestamos();
+            // 🔄 PASO 2: Guardar los detalles en lote por cada módulo horario
+            for (const horaModulo of horasParaGuardar) {
+                console.log(`💾 Guardando Lote Completo -> Préstamo ID: ${prestamoId} | Módulo Hora: ${horaModulo}`);
+                await insertarPrestamoDetalle(prestamoId, arrayEquiposIds, horaModulo);
             }
 
-            // =========================================================================
-            // 🎉 AVISO DE ÉXITO Y LIMPIEZA TOTAL (INCLUYENDO MODAL)
-            // =========================================================================
+            // ⚡ PASO 3: Cambiar el estado de los equipos usando la palabra que admite Supabase
+            console.log("🔄 Actualizando estados de todo el lote de equipos a 'Prestado'...");
+            await actualizarEstadoEquipo(arrayEquiposIds, 'Prestado'); // 👈 ¡ACÁ ESTÁ EL CAMBIO CLAVE!
 
-            // 1. Avisamos que se guardó todo joya
+            // =========================================================================
+            // 🎉 AVISO DE ÉXITO Y LIMPIEZA TOTAL DE INTERFAZ
+            // =========================================================================
             mostrarNotificacion("✅ ¡Préstamo registrado con éxito!");
 
-            // 2. Limpiamos los campos visuales del formulario principal
+            // 1. Limpiamos los campos visuales del formulario principal
             if (inputDocente) inputDocente.value = '';
             if (inputObservaciones) inputObservaciones.value = '';
             if (inputEquiposOculto) inputEquiposOculto.value = '';
 
-            // 3. Restauramos el texto del botón azul largo
-            const botonEquipos = document.getElementById('btn-abrir-modal'); //
+            // 2. Restauramos el texto del botón del modal
+            const botonEquipos = document.getElementById('btn-abrir-modal'); 
             if (botonEquipos) {
-                botonEquipos.textContent = "Cambiar / Seleccionar Equipo"; //
+                botonEquipos.textContent = "Cambiar / Seleccionar Equipo"; 
             }
 
-            // 🎯 4. ¡LO NUEVO!: Limpiamos la memoria del Modal para el próximo préstamo
+            // 3. Limpiamos la memoria del Modal para el próximo préstamo
             appState.idsSeleccionados = [];
             appState.nombresSeleccionados = [];
 
-            // 🔄 5. Refrescamos la tabla de abajo y RE-RENDERIZAMOS los botones del modal
-            await renderTablaPrestamos(); // Actualiza la grilla "Equipos en Uso"
+            // 4. 🔥 REFRESCO AUTOMÁTICO
+            console.log("⏱️ Refrescando interfaz...");
+            await renderTablaPrestamos(); 
 
             if (typeof renderEquipos === 'function') {
-                await renderEquipos(appState); // 💥 Esto vuelve a pintar las netbooks en el modal con sus estados reales actuales
+                await renderEquipos(appState); 
             }
+            
+            console.log("🚀 ¡Proceso finalizado con éxito total!");
 
         } catch (error) {
-            
-            alert("❌ Hubo un error al registrar el préstamo en la base de datos.");
+            console.error("❌ Error fatal durante el registro del préstamo:", error);
+            mostrarNotificacion("❌ Hubo un problema al guardar el préstamo en la base de datos.", "error");
         }
     });
 }
 
 
-// 4. ESCUCHADOR DE DEVOLUCIONES (Captura el clic en los botones de la tabla)
-document.getElementById('tabla-prestamos').addEventListener('click', async (e) => {
 
-    // A) CASO: Devolver UN solo equipo (Botón nuevo)
-    if (e.target && e.target.classList.contains('btn-devolver-uno')) {
-        const pId = e.target.getAttribute('data-prestamo');
-        const eId = e.target.getAttribute('data-equipo');
+// 4. ESCUCHADOR DE DEVOLUCIONES Y AGREGADOS (Adaptado al nuevo panel de tarjetas)
+document.getElementById('contenedor-tarjetas-prestamos')?.addEventListener('click', async (e) => {
+
+    // Buscamos el elemento con la clase correspondiente por si hicieron clic en el texto o icono interno
+    const botonDevolverUno = e.target.closest('.btn-devolver-uno');
+    const botonCerrarLote = e.target.closest('.btn-devolver');
+    const botonAgregarParcial = e.target.closest('.btn-agregar-parcial');
+
+    // A) CASO: Devolver UN solo equipo (Botón de la "✕" en la netbook)
+    if (botonDevolverUno) {
+        const pId = botonDevolverUno.getAttribute('data-prestamo');
+        const eId = botonDevolverUno.getAttribute('data-equipo');
 
         if (confirm("¿Seguro querés devolver esta máquina específica?")) {
             try {
+                // 1. Procesa la devolución en la base de datos
                 await devolverEquipoIndividual(pId, eId);
                 mostrarNotificacion("✅ Equipo devuelto al inventario");
-                await renderEquipos(appState);
-                await renderTablaPrestamos();
+                
+                // 2. 🔥 REFRESCO SÓNICO EN PARALELO: Actualiza los cuadraditos y las tarjetas juntas
+                console.log("⏱️ Actualizando inventario y panel de tarjetas en paralelo...");
+                await Promise.all([
+                    renderEquipos(appState),
+                    renderTablaPrestamos()
+                ]);
+
             } catch (err) {
                 console.error("Error al devolver individual:", err);
                 mostrarNotificacion("No se pudo procesar la devolución!!!");
             }
         }
-        return; // IMPORTANTE: Cortamos acá para que no siga al otro botón
+        return; 
     }
 
-    // B) CASO: Devolver TODO el lote (Botón viejo)
-    if (e.target && e.target.classList.contains('btn-devolver')) {
-        const idPrestamo = e.target.getAttribute('data-id');
+    // B) CASO: Devolver TODO el lote (Botón rojo "Cerrar Lote")
+    if (botonCerrarLote) {
+        const idPrestamo = botonCerrarLote.getAttribute('data-id');
 
         if (confirm("¿Seguro querés cerrar todo el préstamo y devolver todas las máquinas?")) {
             try {
@@ -422,20 +491,20 @@ document.getElementById('tabla-prestamos').addEventListener('click', async (e) =
                     }
                 }
                 mostrarNotificacion("✅ ¡Lote de equipos devuelto y disponible!");
-                
+
                 await renderEquipos(appState);
                 await renderTablaPrestamos();
             } catch (err) {
-                
-                mostrarNotificacion("✅ ¡Préstamo registrado con éxito!");
+                console.error("Error al cerrar lote completo:", err);
+                mostrarNotificacion("No se pudo procesar el cierre del lote.");
             }
         }
         return;
     }
 
-    // Caso C agregar un equipo parcial al registro (botón agregar)
-    else if (e.target && e.target.classList.contains('btn-agregar-parcial')) {
-        const prestamoId = e.target.getAttribute('data-id');
+    // C) CASO: Agregar un equipo parcial al registro (Botón verde "Agregar")
+    if (botonAgregarParcial) {
+        const prestamoId = botonAgregarParcial.getAttribute('data-id');
 
         // 1. Guardamos el ID del préstamo en la variable global
         prestamoSeleccionadoId = prestamoId;
@@ -445,6 +514,7 @@ document.getElementById('tabla-prestamos').addEventListener('click', async (e) =
 
         // 3. ¡Ejecutamos tu función nativa para abrir la ventana emergente!
         abrirModal();
+        return;
     }
 });
 
@@ -560,12 +630,12 @@ if (formProfesor) {
                 // ✏️ MODO MODIFICACIÓN: Si el ID oculto tiene valor, actualizamos
                 await updateUsuario(idActual, datosProfe);
                 mostrarNotificacion("✅ ¡Profesor actualizado con éxito!");
-                
+
             } else {
                 // ➕ MODO ALTA: Si no hay ID, es un profesor nuevo
                 await insertUsuario(datosProfe);
                 mostrarNotificacion("✅ ¡Profesor registrado con éxito!");
-                
+
             }
 
             resetearFormularioProfe();
@@ -576,7 +646,7 @@ if (formProfesor) {
 
         } catch (error) {
             mostrarNotificacion("❌ Por favor, seleccione un curso válido de la lista desplegable.", 'error');
-            
+
             console.error(error);
         }
     });
@@ -655,7 +725,7 @@ const btnLimpiarDocente = document.getElementById('btn-limpiar-busqueda');
 if (btnLimpiarDocente && inputDocente) {
     btnLimpiarDocente.addEventListener('click', () => {
         inputDocente.value = ''; // Borra el texto escrito
-        
+
         // 🔥 Limpiamos también el input de los cursos
         const inputCurso = document.getElementById('observaciones');
         if (inputCurso) {
@@ -664,12 +734,12 @@ if (btnLimpiarDocente && inputDocente) {
 
         // 🎯 FOCUS CORRECTO: Buscamos el botón de confirmación mediante su ID real para que no tire error
         // Cambiá 'btn-registrar-prestamo' por el ID real que tenga en tu HTML si es que difiere
-        const btnConfirmar = document.getElementById('btn-registrar-prestamo') 
-                        
+        const btnConfirmar = document.getElementById('btn-registrar-prestamo')
+
 
         if (btnConfirmar) {
-           btnConfirmar.focus({ preventScroll: true }); // 👈 Le agregamos esto adentro
-    console.log("💥 Foco enviado sin mover la pantalla");
+            btnConfirmar.focus({ preventScroll: true }); // 👈 Le agregamos esto adentro
+            console.log("💥 Foco enviado sin mover la pantalla");
         }
 
         console.log("🧹 Formulario limpio y foco en Confirmar");
@@ -704,12 +774,12 @@ if (sidebarReservas) {
     sidebarReservas.addEventListener('mouseenter', async () => {
         const hoy = new Date().toLocaleDateString('sv');
         const reservas = await getReservasDelDia(hoy); // Asegurate que esta función exista en api.js
-        renderReservasEnLateral(reservas); 
+        renderReservasEnLateral(reservas);
     });
 }
 
 // Al final de tu app.js
-window.toggleSidebar = function(idSidebar) {
+window.toggleSidebar = function (idSidebar) {
     const sidebar = document.getElementById(idSidebar);
     if (sidebar) {
         sidebar.classList.toggle('open');
@@ -718,3 +788,6 @@ window.toggleSidebar = function(idSidebar) {
         console.error("No se encontró ningún panel con el ID:", idSidebar);
     }
 };
+
+// Exponemos la función a la ventana global para que ui.js la use sin problemas de módulos
+window.obtenerHorasCatedraSeleccionadas = obtenerHorasCatedraSeleccionadas;
