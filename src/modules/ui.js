@@ -557,55 +557,172 @@ export function mostrarNotificacion(mensaje, tipo = 'exito') {
 }
 
 
-// Funcion para pintar la barra lateral izquierda con regitros diarios
+// 1. FUNCIÓN PARA PINTAR LAS TARJETAS EN EL LATERAL IZQUIERDO
 export function renderRegistrosEnLateral(registros) {
-    const tbodyLateral = document.getElementById('tabla-registros-lateral');
-    if (!tbodyLateral) return;
+    const contenedorLateral = document.getElementById('tabla-registros-lateral');
+    if (!contenedorLateral) return;
 
-    tbodyLateral.innerHTML = '';
+    contenedorLateral.innerHTML = '';
 
+    // Si no hay movimientos hoy, mostramos el aviso estético de tarjeta vacía
     if (!registros || registros.length === 0) {
-        tbodyLateral.innerHTML = `<tr><td colspan="5">No hay movimientos hoy.</td></tr>`;
+        contenedorLateral.innerHTML = `
+            <div style="
+                text-align: center; 
+                color: #6c757d; 
+                font-style: italic; 
+                padding: 30px 15px; 
+                font-size: 13px;
+                background-color: #f8f9fc;
+                border: 1px dashed #ced4da;
+                border-radius: 8px;
+                width: 100%;
+            ">
+                📅 No hay movimientos registrados hoy.
+            </div>
+        `;
         return;
     }
 
+    let htmlAcumulado = '';
+
     registros.forEach(reg => {
-        const fila = document.createElement('tr');
-
-        // Extraemos el nombre del docente de la relación directa
-        const docente = reg.usuarios?.nombre_completo || 'Sin datos';
-
-        // 🔥 RECORREMOS TODOS LOS EQUIPOS DEL PRÉSTAMO Y ARMAMOS LOS BADGES
-        let equiposHTML = '';
-        if (reg.detalle_prestamos && reg.detalle_prestamos.length > 0) {
-            // Iteramos por cada equipo del array y le clavamos la estructura visual
-            equiposHTML = reg.detalle_prestamos.map(dp => {
-                const nombreEquipo = dp.equipos?.nombre || 'Desconocido';
-                // Usamos las clases nativas de tus burbujas de equipos
-                return `<span class="badge-equipo-item" style="display: inline-block; background-color: #fffbeb; color: #b45309; border: 1px solid #fcd34d; padding: 2px 8px; border-radius: 12px; font-size: 0.85em; margin: 2px;">${nombreEquipo}</span>`;
-            }).join(' '); // Los une dejando un espacio entre burbujas
-        } else {
-            equiposHTML = `<span style="color: #6c757d;">Sin equipos</span>`;
-        }
-
-        // Recortamos los strings de fecha para mostrar HH:MM de forma prolija
-        const salida = reg.fecha_salida ? reg.fecha_salida.substring(11, 16) : '—';
-        const devolucion = reg.fecha_devolucion ? reg.fecha_devolucion.substring(11, 16) : '—';
+        
+        const docente = reg.usuarios?.nombre_completo || 'Desconocido';
+        const curso = reg.observaciones || '---';
+        
+        // Formateo de horas nativo
+        const horaSalida = reg.fecha_salida ? new Date(reg.fecha_salida).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }) : '—';
+        const horaDevolucion = reg.fecha_devolucion
+            ? new Date(reg.fecha_devolucion).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }) + ' hs'
+            : '—';
 
         const tieneDevolucion = reg.fecha_devolucion !== null;
-        const claseEstado = tieneDevolucion ? 'badge-devuelto' : 'badge-en-uso';
+        const claseEstado = tieneDevolucion ? 'badge-devuelto' : 'badge-uso'; // Usa tus clases de CSS
         const textoEstado = tieneDevolucion ? 'Devuelto' : 'En Uso';
 
-        fila.innerHTML = `
-                            <td><strong>${docente}</strong></td>
-                            <td><div style="display: flex; flex-wrap: wrap; gap: 4px;">${equiposHTML}</div></td>
-                            <td>⏱️ ${salida} hs</td>
-                            <td>⏱️ ${devolucion} hs</td>
-                            <td><span class="${claseEstado}">${textoEstado}</span></td>
-                        `;
+        // Procesamos los equipos del préstamo
+        const detalles = reg.detalle_prestamos || [];
+        let equiposHTML = '';
+        let cantidadEquipos = 0;
 
-        tbodyLateral.appendChild(fila);
+        if (detalles && detalles.length > 0) {
+            const nombresSucios = detalles
+                .map(d => d.equipos?.nombre)
+                .filter(nom => nom !== undefined && nom !== null);
+
+            const nombresUnicosOrdenados = Array.from(new Set(nombresSucios))
+                .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+
+            cantidadEquipos = nombresUnicosOrdenados.length;
+
+            // Grilla fluida idéntica al panel derecho
+            equiposHTML = `
+                <div style="
+                    display: grid; 
+                    grid-template-columns: repeat(auto-fill, minmax(68px, 1fr)); 
+                    gap: 4px; 
+                    width: 100%; 
+                    max-height: 100px; 
+                    overflow-y: auto; 
+                    background-color: #fffdf5; 
+                    border: 1px solid #fef3c7; 
+                    border-radius: 6px; 
+                    padding: 8px;
+                ">
+            `;
+
+            equiposHTML += nombresUnicosOrdenados.map(nombreEquipo => {
+                const numeroLimpio = nombreEquipo.replace(/[^0-9]/g, '');
+                const textoMostrar = numeroLimpio ? `Net ${numeroLimpio}` : nombreEquipo;
+                return `
+                    <div style="
+                        display: inline-flex; 
+                        align-items: center; 
+                        justify-content: center; 
+                        background-color: #fffbeb; 
+                        color: #b45309; 
+                        border: 1px solid #fcd34d; 
+                        padding: 2px 4px; 
+                        border-radius: 4px; 
+                        font-size: 11px; 
+                        font-weight: bold;
+                        white-space: nowrap;
+                    }">
+                        <span>${textoMostrar}</span>
+                    </div>
+                `;
+            }).join('');
+
+            equiposHTML += `</div>`;
+        } else {
+            equiposHTML = `<div style="color: #6c757d; font-style: italic; font-size: 11px; padding: 4px;">Sin equipos asignados</div>`;
+        }
+
+        // Diseño de la Tarjeta Informativa Bento
+        htmlAcumulado += `
+            <div class="tarjeta-movimiento-diario" style="
+                background-color: #ffffff; 
+                border: 1px solid #dee2e6; 
+                border-radius: 8px; 
+                padding: 12px; 
+                box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+                text-align: left;
+                width: 100%;
+            ">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; gap: 8px;">
+                    <div style="flex: 1;">
+                        <span style="font-size: 9px; color: #6c757d; text-transform: uppercase; letter-spacing: 0.5px; display: block;">Docente</span>
+                        <strong style="font-size: 13px; color: #212529; display: block; line-height: 1.2;">${docente}</strong>
+                    </div>
+                    <div style="text-align: right;">
+                        <span class="${claseEstado}" style="font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px;">${textoEstado}</span>
+                    </div>
+                </div>
+
+                <div style="display: flex; background: #f8f9fc; border-radius: 6px; padding: 6px 8px; margin-bottom: 8px; justify-content: space-between; font-size: 11.5px; color: #495057;">
+                    <div><strong>Curso:</strong> ${curso}</div>
+                    <div style="display: flex; gap: 8px;">
+                        <span>🛫 ${horaSalida} hs</span>
+                        <span>🛬 ${horaDevolucion}</span>
+                    </div>
+                </div>
+
+                <div>
+                    <div style="font-size: 10px; font-weight: bold; color: #b45309; margin-bottom: 4px; text-transform: uppercase; display: flex; align-items: center; gap: 4px;">
+                        💻 Equipos <span style="background: #b45309; color: white; border-radius: 10px; padding: 0px 5px; font-size: 9px;">${cantidadEquipos}</span>
+                    </div>
+                    ${equiposHTML}
+                </div>
+            </div>
+        `;
     });
+
+    contenedorLateral.innerHTML = htmlAcumulado;
+}
+
+// 2. FUNCIÓN AUXILIAR COLECTORA DE DATOS
+async function cargarYRenderizarLateral() {
+    try {
+        const hoy = new Date().toLocaleDateString('sv'); // Mantiene tu formato 'sv' que funciona con Supabase
+        const registros = await getRegistrosDelDia(hoy);
+        renderRegistrosEnLateral(registros);
+    } catch (error) {
+        console.error("Error al cargar movimientos laterales:", error);
+    }
+}
+
+// 3. LISTENERS: Carga automática + Refresco al pasar el mouse
+const sidebarIzquierda = document.getElementById('sidebar-registros-diarios');
+
+if (sidebarIzquierda) {
+    // 🚀 CARGA AUTOMÁTICA AL LEVANTAR LA PÁGINA (Esto evita que quede vacío de entrada!)
+    document.addEventListener('DOMContentLoaded', cargarYRenderizarLateral);
+    // Por las dudas si ya se cargó el DOM, tiramos una ejecución directa:
+    cargarYRenderizarLateral();
+
+    // Mantiene tu comportamiento original para refrescar cuando pasan el mouse
+    sidebarIzquierda.addEventListener('mouseenter', cargarYRenderizarLateral);
 }
 
 

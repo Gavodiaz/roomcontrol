@@ -211,7 +211,6 @@ export async function devolverLoteCompleto(prestamoId, equiposIds) {
 
 
 // 9. Traer los movimientos que ocurrieron hoy para el Historial Diario
-// 9. Traer los movimientos que ocurrieron hoy para el Historial Diario
 export async function getRegistrosDelDia(stringInicioHoy) {
   const { data, error } = await supabaseClient
     .from("prestamos")
@@ -220,6 +219,7 @@ export async function getRegistrosDelDia(stringInicioHoy) {
             id,
             fecha_salida,
             fecha_devolucion,
+            observaciones,
             usuarios ( nombre_completo ),
             detalle_prestamos (
                 id,
