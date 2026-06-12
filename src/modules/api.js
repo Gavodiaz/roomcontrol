@@ -171,15 +171,44 @@ export async function getDetallesDePrestamo(prestamoId) {
   return data;
 }
 
-// 8. Marcar la fecha y hora de devolución en la cabecera
-export async function registrarFechaDevolucion(prestamoId) {
-  const horaActual = new Date().toISOString();
-  const { error } = await supabaseClient
-    .from("prestamos")
-    .update({ fecha_devolucion: horaActual })
-    .eq("id", prestamoId);
-  if (error) throw error;
+
+
+
+// 8🔥 FUNCIÓN MASIVA PARA CERRAR LOTES EN UN SOLO VIAJE
+export async function devolverLoteCompleto(prestamoId, equiposIds) {
+  try {
+    const horaActual = new Date().toISOString();
+
+    console.log(`🚀 Iniciando devolución masiva para el Préstamo ID: ${prestamoId}`);
+
+    // Ejecutamos ambas actualizaciones en paralelo para la máxima velocidad posible
+    const [resCabecera, resEquipos] = await Promise.all([
+      // 1. Ponemos la fecha de devolución en la cabecera del préstamo
+      supabaseClient
+        .from("prestamos")
+        .update({ fecha_devolucion: horaActual })
+        .eq("id", prestamoId),
+
+      // 2. Pasamos TODAS las netbooks del lote a 'Disponible' de un solo tiro
+      supabaseClient
+        .from("equipos")
+        .update({ estado: "Disponible" })
+        .in("id", equiposIds)
+    ]);
+
+    // Si hubo errores en alguna de las dos operaciones, los tiramos al catch
+    if (resCabecera.error) throw resCabecera.error;
+    if (resEquipos.error) throw resEquipos.error;
+
+    console.log("✅ Lote devuelto y equipos liberados en Supabase con éxito total.");
+    return { success: true };
+
+  } catch (error) {
+    console.error("❌ Error en devolverLoteCompleto (api.js):", error);
+    throw error;
+  }
 }
+
 
 // 9. Traer los movimientos que ocurrieron hoy para el Historial Diario
 // 9. Traer los movimientos que ocurrieron hoy para el Historial Diario
@@ -222,6 +251,9 @@ export async function devolverEquipoIndividual(prestamoId, equipoId) {
 
   if (error) throw error;
 }
+
+
+
 
 //Agrega equipos parciales al lote
 export async function agregarEquipoAlDetalle(prestamoId, equipoId) {

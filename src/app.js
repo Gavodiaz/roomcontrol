@@ -17,7 +17,6 @@ import {
     insertarPrestamoCabecera,
     insertarPrestamoDetalle,
     actualizarEstadoEquipo,
-    registrarFechaDevolucion,
     getDetallesDePrestamo,
     devolverEquipoIndividual,
     agregarEquipoAlDetalle,
@@ -28,7 +27,8 @@ import {
     updateUsuario,
     deleteUsuario,
     getReservasDelDia,
-    obtenerDisponibilidadEquipos
+    obtenerDisponibilidadEquipos,
+    devolverLoteCompleto
 } from './modules/api.js';
 
 
@@ -423,6 +423,15 @@ if (btnRegistrar) {
             appState.idsSeleccionados = [];
             appState.nombresSeleccionados = [];
 
+
+            // 🔥 NUEVO: Desmarcar físicamente todos los checkboxes del modal en la interfaz
+            // Buscamos cualquier input tipo checkbox que haya quedado tildado
+            const checkboxesModal = document.querySelectorAll('input[type="checkbox"]');
+            checkboxesModal.forEach(cb => {
+                cb.checked = false;
+            });
+            console.log("🧹 Checkboxes del modal desmarcados visualmente.");
+
             // 4. 🔥 REFRESCO AUTOMÁTICO
             console.log("⏱️ Refrescando interfaz...");
             await renderTablaPrestamos(); 
@@ -482,21 +491,50 @@ document.getElementById('contenedor-tarjetas-prestamos')?.addEventListener('clic
 
         if (confirm("¿Seguro querés cerrar todo el préstamo y devolver todas las máquinas?")) {
             try {
+                // 1. Deshabilitamos el botón para evitar doble clics ansiosos
+                botonCerrarLote.disabled = true;
+                botonCerrarLote.innerText = "Cerrando...";
+
+                // 2. Buscamos de un solo tiro los detalles para extraer los IDs de los equipos
                 const detalles = await getDetallesDePrestamo(idPrestamo);
-                await registrarFechaDevolucion(idPrestamo);
-
+                
                 if (detalles && detalles.length > 0) {
-                    for (const d of detalles) {
-                        await actualizarEstadoEquipo(d.equipo_id, 'Disponible');
-                    }
-                }
-                mostrarNotificacion("✅ ¡Lote de equipos devuelto y disponible!");
+                    // Extraemos los IDs de las netbooks en un array plano limpio (ej: [1, 2, 3, 4])
+                    const equiposIds = detalles.map(d => d.equipo_id).filter(id => id !== null);
 
-                await renderEquipos(appState);
-                await renderTablaPrestamos();
+                    // 3. 🔥 ¡EL VIAJE ULTRA VELOZ EN PARALELO!
+                    // Llama a la nueva función de api.js que asienta la fecha y libera TODOS los equipos juntos
+                    if (typeof devolverLoteCompleto === 'function') {
+                        await devolverLoteCompleto(idPrestamo, equiposIds);
+                    } else {
+                        // Plan B de emergencia por si no se importó devolverLoteCompleto:
+                        await registrarFechaDevolucion(idPrestamo);
+                        const { error: errMasivo } = await supabaseClient
+                            .from("equipos")
+                            .update({ estado: "Disponible" })
+                            .in("id", equiposIds);
+                        if (errMasivo) throw errMasivo;
+                    }
+                } else {
+                    // Si el préstamo no tenía detalles pero hay que cerrarlo igual:
+                    await registrarFechaDevolucion(idPrestamo);
+                }
+
+                mostrarNotificacion("✅ ¡Lote de equipos devuelto y disponible a máxima velocidad!");
+
+                // 4. Refresco instantáneo de las grillas en paralelo
+                await Promise.all([
+                    renderEquipos(appState),
+                    renderTablaPrestamos()
+                ]);
+
             } catch (err) {
-                console.error("Error al cerrar lote completo:", err);
+                console.error("❌ Error crítico al cerrar lote completo:", err);
                 mostrarNotificacion("No se pudo procesar el cierre del lote.");
+                
+                // Si falla, le devolvemos la vida al botón para que puedas reintentar
+                botonCerrarLote.disabled = false;
+                botonCerrarLote.innerText = "Cerrar Lote";
             }
         }
         return;

@@ -777,10 +777,28 @@ async function ejecutarTraspasoReservaAUso(datosAgrupados) {
 
         console.log("🎯 IDs finales de netbooks listos para impactar:", listaEquiposIds);
 
+        // 🛑 VALIDACIÓN DE SEGURIDAD
         if (listaEquiposIds.length === 0) {
             alert("No se pudieron determinar los IDs de las netbooks. Proceso detenido.");
             return;
         }
+
+        // =========================================================================
+        // 🔥 ACTUALIZACIÓN DIRECTA DE LAS NETBOOKS A 'PRESTADO'
+        // =========================================================================
+        console.log("⚡ [PROCESO] Actualizando estado de los equipos en Supabase...", listaEquiposIds);
+        const { error: errorCambioEstado } = await supabaseClient
+            .from('equipos')
+            .update({ estado: 'Prestado' })
+            .in('id', listaEquiposIds);
+
+        if (errorCambioEstado) {
+            console.error("❌ Error al actualizar estado físico de equipos:", errorCambioEstado);
+            // No tiramos throw para que no congele el registro del préstamo si falla
+        } else {
+            console.log("✅ Equipos bloqueados como 'Prestado' correctamente.");
+        }
+        // =========================================================================
 
         // 2️⃣.5️⃣ RESCATE DE LAS HORAS VINCULADAS A LA RESERVA
         let listaHorasIds = [];
@@ -839,17 +857,31 @@ async function ejecutarTraspasoReservaAUso(datosAgrupados) {
         if (errorDetalle) throw errorDetalle;
         console.log("✅ Relaciones guardadas con éxito en 'detalle_prestamos'.");
 
-        // 5️⃣ MUTACIÓN DE ESTADO: DE 'Confirmada' A 'En Uso' EN LA TABLA 'RESERVAS'
+       // 5️⃣ MUTACIÓN DE ESTADO: ELIMINAR REGISTROS DE LA TABLA 'RESERVAS'
         if (datosAgrupados.reservaIds && datosAgrupados.reservaIds.length > 0) {
-            console.log("🔄 Actualizando estado de reservas vinculadas en Supabase...", datosAgrupados.reservaIds);
-            const { error: errorReservas } = await supabaseClient
-                .from('reservas')
-                .update({ estado: 'En Uso' })
-                .in('id', datosAgrupados.reservaIds);
+            console.log("🔄 Eliminando reservas vinculadas en Supabase ya entregadas...", datosAgrupados.reservaIds);
+            
+            try {
+                // 🔥 Reutilizamos tu función infalible pasándole el array de IDs
+                if (typeof eliminarReservasMasivas === 'function') {
+                    await eliminarReservasMasivas(datosAgrupados.reservaIds);
+                    console.log("✅ Reservas eliminadas con éxito de la base de datos a través de eliminarReservasMasivas.");
+                } else {
+                    // Por si la función vive en otro archivo y necesitas llamarla por cliente directo:
+                    const { error: errorReservas } = await supabaseClient
+                        .from('reservas')
+                        .delete()
+                        .in('id', datosAgrupados.reservaIds);
 
-            if (errorReservas) throw errorReservas;
-            console.log("✅ Reservas actualizadas a 'En Uso' en la base de datos.");
+                    if (errorReservas) throw errorReservas;
+                    console.log("✅ Reservas eliminadas con éxito vía cliente directo.");
+                }
+            } catch (errBorrado) {
+                console.error("⚠️ Error no crítico al borrar reservas:", errBorrado);
+                // No cortamos el flujo con un throw para que la UI se refresque igual
+            }
         }
+       
 
         // 6️⃣ REFRESCO DE INTERFAZ EN TIEMPO REAL
         alert(`¡Préstamo para ${datosAgrupados.nombre} procesado con éxito absoluto!`);
