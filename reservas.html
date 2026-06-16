@@ -14,7 +14,8 @@
     <!-- El truco del emoji para el logo de la pestaña -->
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📅</text></svg>">
-</head>
+
+    </head>
 
 <body class="bg-light">
 
@@ -24,6 +25,15 @@
                 <h4 class="mb-0">📅 Reservar Equipamiento</h4>
             </div>
             <div class="card-body p-4">
+
+                <div class="user-session-container" style="display: flex; align-items: center; gap: 15px; margin-left: auto;">
+    <span id="docente-display-nombre" style="font-weight: 500; color: #333;">Cargando usuario...</span>
+    
+    <button id="btn-logout-docente" class="btn-logout"
+        style="background-color: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">
+        Cerrar Sesión
+    </button>
+</div>
 
                 <form id="form-reservas">
                     <!-- 1. Selección de Docente -->
@@ -106,7 +116,7 @@
                     <!-- Botones de Acción -->
                     <div class="d-grid gap-2">
                         <button type="submit" class="btn btn-success">Confirmar Reserva</button>
-                        <a href="index.html" class="btn btn-outline-secondary">Volver al Inicio</a>
+                       <a id="btn-volver-inicio" href="index.html" class="btn btn-outline-secondary">Volver al Inicio</a>
                     </div>
                 </form>
 

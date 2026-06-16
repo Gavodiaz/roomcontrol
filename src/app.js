@@ -38,52 +38,71 @@ import {
 import { supabaseClient } from './modules/supabase.js'; // Tu cliente clásico que ya funciona
 import { cerrarSesion } from './modules/auth.js'; // Importamos la función de salida
 
-// 🚀 Función para controlar la sesión al cargar el index
 // 📄 src/app.js
+
+// 🛡️ REGLA DE ORO DE SEGURIDAD: Control de sesión inmediato y ultra veloz
 async function controlarSesion() {
+    // 1. Obtenemos la sesión activa de Supabase
     const { data: { session }, error: authError } = await supabaseClient.auth.getSession();
 
     if (authError || !session) {
-        window.location.href = './login.html'; // 👈 Asegurás el rebote correcto en GitHub Pages
+        window.location.href = './login.html';
         return;
     }
 
     try {
-        // 🎯 Buscamos en tu tabla por la nueva columna compañera 'user_id'
+        // 2. Consultamos en paralelo el nombre y el rol en tu tabla pública
         const { data: usuarioDb, error: dbError } = await supabaseClient
             .from('usuarios')
-            .select('nombre_completo') // Nombre exacto de tu columna
-            .eq('user_id', session.user.id) // 👈 Filtra comparando tu UID con la columna nueva
+            .select('nombre_completo, rol')
+            .eq('user_id', session.user.id)
             .single();
 
+        if (dbError) throw dbError;
+
+        // 🔀 ESCUDO INVISIBLE: Si es Docente, lo desviamos en el acto sin mostrar nada
+        if (usuarioDb && usuarioDb.rol === 'Docente') {
+            console.log("Acceso denegado a administración. Desviando a módulo de reservas...");
+            window.location.href = './reservas.html'; 
+            return; // 🛑 Freno de mano: Evita que se siga ejecutando cualquier otra lógica del index
+        }
+
+        // 3. Si no es Docente (es administrador), permitimos que use el panel y pintamos el nombre
         if (usuarioDb && usuarioDb.nombre_completo) {
             document.getElementById('user-display-email').textContent = `👤 ${usuarioDb.nombre_completo}`;
         } else {
             document.getElementById('user-display-email').textContent = `👤 ${session.user.email}`;
         }
 
+        // 🔓 ¡ACTIVALO ACÁ!: Como ya confirmamos que es Admin, le hacemos visible la pantalla
+        const bodyIndex = document.getElementById('body-index');
+        if (bodyIndex) {
+            bodyIndex.style.display = 'block';
+        }
+
     } catch (err) {
-        console.error("Error al traer el nombre desde la tabla usuarios:", err);
+        console.error("Error en la comprobación de privilegios de usuario:", err);
+        // Si hay una falla grave de conexión con la base de datos, lo dejamos ver su mail por resguardo
         document.getElementById('user-display-email').textContent = `👤 ${session.user.email}`;
     }
 }
 
-// Ejecutamos el control apenas arranca la página
+// 🎬 Ejecutamos la validación de forma prioritaria
 controlarSesion();
-
 // 🛑 Configuración del botón de Cerrar Sesión
-document.getElementById('btn-logout').addEventListener('click', async () => {
-    if (confirm("¿Estás seguro de que querés cerrar sesión?")) {
-        try {
-            await cerrarSesion(); // Llama a tu función original que hace el signOut() y redirige
-        } catch (error) {
-            console.error("Error al cerrar sesión:", error.message);
-            // Por si las moscas falla la red, forzamos la salida igual
-            window.location.href = 'login.html';
+const btnLogout = document.getElementById('btn-logout');
+if (btnLogout) {
+    btnLogout.addEventListener('click', async () => {
+        if (confirm("¿Estás seguro de que querés cerrar sesión?")) {
+            try {
+                await cerrarSesion(); // Llama a tu función original que hace el signOut() y redirige
+            } catch (error) {
+                console.error("Error al cerrar sesión:", error.message);
+                window.location.href = 'login.html';
+            }
         }
-    }
-});
-
+    });
+}
 
 
 

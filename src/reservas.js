@@ -4,12 +4,118 @@ import { obtenerDisponibilidadEquipos,
     getDocentes, 
     getReservasDelMes,
     eliminarReservasMasivas } from './modules/api.js';
-import { renderDocentes } from './modules/ui.js';
+import { renderDocentes, } from './modules/ui.js';
+import { supabaseClient } from './modules/supabase.js'; // O la ruta donde tengas tu cliente
+import { cerrarSesion } from './modules/auth.js';
 
 const appState = {
     idsSeleccionados: [],
     nombresSeleccionados: []
 };
+
+
+/**
+ * 🚀 Controla la sesión del docente y pinta su nombre real en la interfaz
+ */
+// 📄 En tu archivo de lógica de reservas (ej: reservasApp.js o similar)
+
+async function controlarSesionDocente() {
+    const { data: { session }, error: authError } = await supabaseClient.auth.getSession();
+
+    if (authError || !session) {
+        window.location.href = './login.html';
+        return;
+    }
+
+    try {
+        // 🎯 Traemos el nombre completo Y el rol del usuario logueado desde la DB
+        const { data: usuarioDb, error: dbError } = await supabaseClient
+            .from('usuarios')
+            .select('nombre_completo, rol')
+            .eq('user_id', session.user.id)
+            .single();
+
+        if (dbError) throw dbError;
+
+        // Establecemos el texto de bienvenida arriba
+        const nombreUsuario = usuarioDb?.nombre_completo || session.user.email;
+        document.getElementById('docente-display-nombre').textContent = `👤 ${nombreUsuario}`;
+
+        // 🔍 Capturamos los elementos de la interfaz usando tus IDs y atributos reales
+        const inputDocente = document.querySelector('input[placeholder*="Tipeá nombre"]');
+        const btnLimpiar = document.getElementById('btn-limpiar-docente') || document.querySelector('button.btn-limpiar') || document.evaluate("//button[contains(text(),'Limpiar')]", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue; 
+        const sidebarHistorial = document.getElementById('sidebar-historial'); // 👈 Tu ID real de la línea 157
+        const btnVolverInicio = document.getElementById('btn-volver-inicio'); // 👈 Capturamos el botón nuevo
+        // 🎀 CAPA DE ADAPTACIÓN SEGÚN EL ROL
+        if (usuarioDb && usuarioDb.rol === 'Docente') {
+            console.log("Configurando interfaz restrictiva para rol Docente.");
+
+            // 1. Inyectamos su nombre en el input y lo bloqueamos por completo
+            if (inputDocente) {
+                inputDocente.value = nombreUsuario;
+                inputDocente.disabled = true; // 🔒 No puede escribir ni buscar a otros
+                inputDocente.style.backgroundColor = '#e9ecef'; // Color gris de campo deshabilitado
+                inputDocente.style.cursor = 'not-allowed';
+            }
+
+            // 2. Buscamos el botón 'Limpiar' al lado del input y lo ocultamos
+            // Si no tiene ID asignado aún, intentamos ocultar el hermano siguiente del input
+            if (btnLimpiar) {
+                btnLimpiar.style.display = 'none';
+            } else if (inputDocente && inputDocente.nextElementSibling) {
+                // Por si las dudas, si el botón está justo al lado en el HTML
+                inputDocente.nextElementSibling.style.display = 'none';
+            }
+
+            // 3. Ocultamos por completo la pestaña lateral azul del Historial
+            if (sidebarHistorial) {
+                sidebarHistorial.style.display = 'none';
+            }
+            // 🚀 4. ¡LA NUEVA REGLA!: Escondemos el botón para que el Docente no intente ir al index
+            if (btnVolverInicio) {
+                btnVolverInicio.style.display = 'none';
+            }
+
+        } else if (usuarioDb && usuarioDb.rol === 'administrador') {
+            console.log("Configurando interfaz completa para Administrador.");
+            
+            // Si sos vos (Admin), todo queda libre para usar a gusto
+            if (inputDocente) {
+                inputDocente.disabled = false;
+                inputDocente.value = ''; // Vacío para que busques libremente
+                inputDocente.style.backgroundColor = '#ffffff';
+                inputDocente.style.cursor = 'text';
+            }
+            if (btnLimpiar) btnLimpiar.style.display = 'inline-block';
+            if (sidebarHistorial) sidebarHistorial.style.display = 'block';
+        }
+
+    } catch (err) {
+        console.error("Error al adaptar la interfaz de reservas:", err);
+        document.getElementById('docente-display-nombre').textContent = `👤 ${session.user.email}`;
+    }
+}
+
+// 🎬 Ejecutamos el control apenas arranca la página de reservas
+controlarSesionDocente();
+
+// 🛑 Configuración del botón de Cerrar Sesión para Docentes
+const btnLogoutDocente = document.getElementById('btn-logout-docente');
+if (btnLogoutDocente) {
+    btnLogoutDocente.addEventListener('click', async () => {
+        if (confirm("¿Estás seguro de que querés cerrar sesión?")) {
+            try {
+                await cerrarSesion(); // Limpia Supabase y te manda al login.html
+            } catch (error) {
+                console.error("Error al cerrar sesión:", error.message);
+                window.location.href = 'login.html'; // Forzado por las dudas
+            }
+        }
+    });
+}
+
+
+
 
 document.addEventListener('DOMContentLoaded', async () => {
     
@@ -339,4 +445,5 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 });
+
 

@@ -188,6 +188,41 @@
                 
                 <button type="submit" class="btn-login">Ingresar al Sistema</button>
             </form>
+
+
+            <form id="form-registro" style="display: none;">
+                <div class="form-group">
+                    <label for="registro-nombre">Nombre Completo</label>
+                    <div class="input-icon-wrapper">
+                        <input type="text" id="registro-nombre" placeholder="Prof. Juan Pérez">
+                        <i class="fas fa-user"></i>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="registro-email">Correo Institucional / Personal</label>
+                    <div class="input-icon-wrapper">
+                        <input type="email" id="registro-email" placeholder="profesor@escuela.com">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="registro-password">Crear Contraseña</label>
+                    <div class="input-icon-wrapper">
+                        <input type="password" id="registro-password" placeholder="Mínimo 6 caracteres">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn-login" style="background-color: #10b981;">Crear mi Cuenta de Docente</button>
+            </form>
+
+            <div style="text-align: center; margin-top: 20px; font-size: 12.5px; color: var(--text-color-secondary);">
+                <span id="switch-texto">¿Sos docente y no tenés cuenta?</span>
+                <a href="#" id="btn-switch-auth" style="color: var(--primary-color); font-weight: 600; text-decoration: none; margin-left: 4px;">Registrate acá</a>
+            </div>
+
         </div>
     </div>
 
