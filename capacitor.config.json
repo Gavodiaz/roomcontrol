@@ -1,5 +1,5 @@
 {
   "appId": "com.escuela.roomcontrol",
   "appName": "RoomControl",
-  "webDir": "www"
+  "webDir": "docs"
 }
