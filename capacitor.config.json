@@ -1,5 +1,10 @@
 {
-  "appId": "com.escuela.roomcontrol",
+
+ "appId": "com.escuela.roomcontrol",
   "appName": "RoomControl",
-  "webDir": "docs"
+  "webDir": "docs",
+  "server": {
+    "url": "https://gavodiaz.github.io/roomcontrol/",
+    "cleartext": true
+  }
 }

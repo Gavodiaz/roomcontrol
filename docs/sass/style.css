@@ -537,25 +537,25 @@ tr:hover {
   /* 4. 💅 BOTONES SUPERIORES DE ACCESO RÁPIDO (Estructura Fluida Base) */
   .contenedor-botones-movil {
     display: flex !important;
-    gap: 8px !important; /* Un poco más compacto para prevenir desbordes */
+    gap: 8px !important;
     margin: 15px 0;
     width: 100%;
   }
   .btn-movil-accion {
-    flex: 1; /* Se estiran y achican solos en base al ancho del celu */
+    flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
-    padding: 12px 6px; /* Relleno equilibrado */
-    font-size: 0.82rem; /* Letra óptima para pantallas estándar */
+    padding: 12px 6px;
+    font-size: 0.82rem;
     font-weight: bold;
     color: white;
     border: none;
     border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
     cursor: pointer;
-    white-space: nowrap; /* Evita que el texto se parta en dos renglones */
+    white-space: nowrap;
   }
   /* Colores únicos de botones móviles sin duplicados */
   .btn-movil-registros {
@@ -566,31 +566,53 @@ tr:hover {
   }
   /* 📅 Botón de reservas con el fondo verde oscuro de tu paleta para contraste legible */
   .btn-movil-reservas {
-    background-color: #16a34a !important; /* Tu verde success corporativo */
+    background-color: #16a34a !important;
     color: white !important;
   }
   /* 5. ❌ ENCABEZADO Y BOTÓN DE CERRAR ADENTRO DEL PANEL */
   .header-sidebar-movil {
-    display: flex !important;
-    justify-content: flex-end;
-    padding: 12px;
-    border-bottom: 1px solid #e2e8f0;
-    background-color: #f8fafc;
+    display: flex !important; /* Cambiado a flex para controlar la alineación */
+    justify-content: flex-end !important; /* Empuja el botón 'X Cerrar' a la derecha */
+    align-items: center !important;
+    background-color: #f8fafc !important; /* Color gris limpio de fondo para la barra superior */
+    padding: 10px 15px !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    position: relative !important;
+    z-index: 10000 !important; /* Siempre por encima del contenido */
   }
   .btn-cerrar-sidebar {
-    background-color: #dc2626 !important; /* Rojo */
+    display: inline-block !important; /* Cambiado de 'block' a 'inline-block' para que no ocupe todo el ancho */
+    width: auto !important; /* Se adapta solo al tamaño del texto 'X Cerrar' */
+    max-width: 100px !important; /* Le ponemos un límite para que no quede enorme */
+    background-color: #dc2626 !important;
     color: white !important;
-    border: none;
-    padding: 8px 16px;
-    font-size: 0.9rem;
-    font-weight: bold;
-    border-radius: 6px;
-    cursor: pointer;
+    border: none !important;
+    padding: 6px 12px !important; /* Achicamos un poco el relleno interno */
+    font-size: 0.78rem !important; /* Una letra un toque más chica y sutil */
+    font-weight: bold !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    z-index: 10001 !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+    /* 📍 Alineación y Márgenes de seguridad */
+    margin-right: 15px !important; /* Lo separa un poquito del borde derecho */
+    margin-top: 10px !important; /* Lo separa del techo de la tarjeta */
+    margin-bottom: 5px !important;
   }
+  /* 🔥 MODIFICACIÓN CLAVE: Bajamos los títulos y pines para que no tapen la X */
   .sidebar-contenido {
     padding: 20px !important;
     height: calc(100vh - 60px) !important;
-    overflow-y: auto !important; /* Si la tabla es larga, permite scroll */
+    overflow-y: auto !important;
+    position: relative !important;
+  }
+  .sidebar-contenido h2 {
+    margin-top: 35px !important; /* Le da el espacio limpio hacia abajo al título del día y equipos */
+  }
+  .btn-pin {
+    top: 30px !important; /* Baja el pinche rojo para alinearse armónicamente con el nuevo h2 */
   }
   /* ==========================================================================
      🛡️ ESCUDO DEFENSIVO PARA PANTALLAS MUY CHICAS (Menores a 400px de ancho)
@@ -598,11 +620,11 @@ tr:hover {
 }
 @media (max-width: 768px) and (max-width: 400px) {
   .contenedor-botones-movil {
-    gap: 4px !important; /* Espacio mínimo entre botones */
+    gap: 4px !important;
   }
   .btn-movil-accion {
-    padding: 10px 2px !important; /* Comprime los botones hacia los costados */
-    font-size: 0.72rem !important; /* Achica la letra lo justo para que no se caiga nada */
-    gap: 3px !important; /* Junta el emoji/icono con la palabra */
+    padding: 10px 2px !important;
+    font-size: 0.72rem !important;
+    gap: 3px !important;
   }
 }/*# sourceMappingURL=style.css.map */
