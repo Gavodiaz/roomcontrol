@@ -485,6 +485,120 @@ tr:hover {
 }
 
 /* ==========================================================================
+   🧱 ESTRUCTURA GENERAL DE TURNOS (MAÑANA / TARDE)
+   ========================================================================== */
+.turnos-container {
+  display: flex !important;
+  flex-direction: column !important; /* En celu se apilan uno abajo del otro */
+  gap: 16px !important;
+  width: 100% !important;
+  margin-top: 15px !important;
+}
+
+/* En pantallas grandes (Compu), se ponen en 2 columnas perfectas */
+@media (min-width: 768px) {
+  .turnos-container {
+    flex-direction: row !important;
+  }
+  .turno-bloque {
+    flex: 1 !important; /* 50% de ancho cada uno */
+  }
+}
+.turno-bloque {
+  background-color: #fcfcfc !important;
+  border: 1px dashed #cbd5e1 !important; /* Recuadro sutil decorativo */
+  border-radius: 8px !important;
+  padding: 14px !important;
+}
+
+.turno-titulo {
+  font-size: 0.95rem !important;
+  color: #475569 !important;
+  font-weight: bold !important;
+  margin-top: 0 !important;
+  margin-bottom: 12px !important;
+  border-bottom: 2px solid #e2e8f0 !important;
+  padding-bottom: 6px !important;
+}
+
+.grilla-horas {
+  display: grid !important;
+  /* Por defecto en móvil/pantallas chicas, mantiene columnas automáticas para que no se encimen */
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)) !important;
+  gap: 5px !important; /* Espacio más compacto */
+  width: 100% !important;
+}
+
+/* 💻 Cuando la pantalla sea de escritorio (más de 992px), forzamos las 6 columnas perfectas */
+@media (min-width: 992px) {
+  .grilla-horas {
+    grid-template-columns: repeat(6, 1fr) !important; /* Clava las 6 horas en una sola línea */
+  }
+}
+/* ==========================================================================
+   🔥 EL TRUCO MAGISTRAL DEL BOTÓN (Independiente de la estructura)
+   ========================================================================== */
+.control-hora-chip {
+  width: 100% !important;
+  display: block !important;
+}
+
+/* Forzamos a ocultar el cuadradito nativo de Windows que apareció en tu captura */
+input[type=checkbox].check-moderno {
+  display: none !important;
+  visibility: hidden !important;
+  position: absolute !important;
+}
+
+/* Diseñamos la tarjeta táctil compacta */
+label.label-check-moderno {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  padding: 6px 2px !important; /* Achicamos el relleno lateral al mínimo */
+  background-color: #f8fafc !important;
+  border: 1.5px solid #e2e8f0 !important;
+  border-radius: 6px !important;
+  color: #334155 !important;
+  font-weight: bold !important;
+  font-size: 0.75rem !important; /* Bajamos a 0.75rem para que entre cómodo "1° Hora" */
+  cursor: pointer !important;
+  transition: all 0.15s ease-in-out !important;
+  -webkit-user-select: none !important;
+     -moz-user-select: none !important;
+          user-select: none !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02) !important;
+  min-height: 48px !important; /* Reducimos la altura general de la tarjeta */
+}
+
+/* Detalle sutil para achicar aún más el rango de los números */
+/* 🟢 INTERACCIÓN: Cuando se selecciona, se pinta de verde éxito corporativo */
+input[type=checkbox].check-moderno:checked + label.label-check-moderno {
+  background-color: #16a34a !important;
+  border-color: #15803d !important;
+  color: white !important;
+  box-shadow: 0 2px 4px rgba(22, 163, 74, 0.2) !important;
+  transform: scale(0.96) !important; /* Efecto de hundimiento */
+}
+
+/* Ajustes finos de los textos de la hora */
+.numero-hora {
+  font-size: 0.8rem !important; /* Letra un toque más chica */
+  display: block !important;
+  white-space: nowrap !important; /* Evita que "Hora" se vaya al renglón de abajo si queda justo */
+}
+
+.rango-hora {
+  font-size: 0.62rem !important; /* Horario bien compacto abajo */
+  font-weight: normal !important;
+  opacity: 0.75 !important;
+  display: block !important;
+  white-space: nowrap !important;
+}
+
+/* ==========================================================================
    ESTILOS GLOBALES (Se leen en cualquier tamaño de pantalla)
    ========================================================================== */
 /* El botón de cerrar solo debe existir en celulares, lo ocultamos en la compu */
