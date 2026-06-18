@@ -523,16 +523,21 @@ tr:hover {
 
 .grilla-horas {
   display: grid !important;
-  /* Por defecto en móvil/pantallas chicas, mantiene columnas automáticas para que no se encimen */
-  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)) !important;
-  gap: 5px !important; /* Espacio más compacto */
+  gap: 4px !important; /* Espacio mínimo entre botones */
   width: 100% !important;
+  /* Comportamiento automático para celular por defecto */
+  grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)) !important;
 }
 
-/* 💻 Cuando la pantalla sea de escritorio (más de 992px), forzamos las 6 columnas perfectas */
+/* 💻 Computadora (A partir de 992px): Forzamos filas perfectas de 7 elementos */
 @media (min-width: 992px) {
-  .grilla-horas {
-    grid-template-columns: repeat(6, 1fr) !important; /* Clava las 6 horas en una sola línea */
+  /* El bloque de la mañana ahora se divide en 7 columnas perfectas */
+  .turno-bloque:first-child .grilla-horas {
+    grid-template-columns: repeat(7, 1fr) !important;
+  }
+  /* El bloque de la tarde también se divide en 7 columnas perfectas */
+  .turno-bloque:last-child .grilla-horas {
+    grid-template-columns: repeat(7, 1fr) !important;
   }
 }
 /* ==========================================================================
@@ -550,27 +555,42 @@ input[type=checkbox].check-moderno {
   position: absolute !important;
 }
 
-/* Diseñamos la tarjeta táctil compacta */
+/* ==========================================================================
+   ⚡ REDUCCIÓN DE MICRO-ESPACIOS PARA EVITAR REBOSAMIENTO
+   ========================================================================== */
 label.label-check-moderno {
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
   justify-content: center !important;
   text-align: center !important;
-  padding: 6px 2px !important; /* Achicamos el relleno lateral al mínimo */
+  padding: 6px 1px !important; /* Padding lateral casi en cero */
   background-color: #f8fafc !important;
   border: 1.5px solid #e2e8f0 !important;
-  border-radius: 6px !important;
+  border-radius: 5px !important;
   color: #334155 !important;
   font-weight: bold !important;
-  font-size: 0.75rem !important; /* Bajamos a 0.75rem para que entre cómodo "1° Hora" */
+  font-size: 0.72rem !important; /* Achicamos un pelito la letra general */
   cursor: pointer !important;
   transition: all 0.15s ease-in-out !important;
   -webkit-user-select: none !important;
      -moz-user-select: none !important;
           user-select: none !important;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02) !important;
-  min-height: 48px !important; /* Reducimos la altura general de la tarjeta */
+  min-height: 44px !important; /* Más chato para que no ocupe lugar */
+}
+
+.numero-hora {
+  font-size: 0.78rem !important;
+  display: block !important;
+  white-space: nowrap !important; /* Prohibido quebrarse en dos líneas */
+}
+
+.rango-hora {
+  font-size: 0.58rem !important; /* El horario bien chiquito abajo para que no empuje */
+  font-weight: normal !important;
+  opacity: 0.75 !important;
+  display: block !important;
+  white-space: nowrap !important; /* Obliga a mantener el rango en una línea */
 }
 
 /* Detalle sutil para achicar aún más el rango de los números */
@@ -740,5 +760,125 @@ input[type=checkbox].check-moderno:checked + label.label-check-moderno {
     padding: 10px 2px !important;
     font-size: 0.72rem !important;
     gap: 3px !important;
+  }
+}
+.page-reservas .container.my-5 {
+  max-width: 1100px;
+}
+.page-reservas .card {
+  border-radius: 8px;
+}
+.page-reservas .card .card-header {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+.page-reservas .turnos-container-reservas {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.page-reservas .turno-bloque {
+  background-color: #ffffff;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  padding: 15px;
+}
+.page-reservas .turno-titulo {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+.page-reservas .grilla-horas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.page-reservas .numero-hora {
+  font-size: 0.85rem !important;
+  font-weight: 600;
+  display: block !important;
+  white-space: nowrap !important;
+}
+.page-reservas .rango-hora {
+  font-size: 0.68rem !important;
+  font-weight: normal !important;
+  opacity: 0.8 !important;
+  display: block !important;
+  white-space: nowrap !important;
+}
+@media (max-width: 576px) {
+  .page-reservas {
+    padding: 6px !important;
+  }
+  .page-reservas .container.my-5 {
+    margin-top: 4px !important;
+    margin-bottom: 4px !important;
+  }
+  .page-reservas .card-header {
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+  }
+  .page-reservas .card-header h4 {
+    font-size: 1.15rem !important;
+  }
+  .page-reservas .card-body {
+    padding: 10px !important;
+  }
+  .page-reservas .user-session-container {
+    margin-bottom: 10px !important;
+    gap: 10px !important;
+    font-size: 0.85rem;
+  }
+  .page-reservas .user-session-container .btn-logout {
+    padding: 4px 8px !important;
+    font-size: 0.8rem;
+  }
+  .page-reservas .mb-4, .page-reservas .row.g-3 {
+    margin-bottom: 10px !important;
+  }
+  .page-reservas label.form-label,
+  .page-reservas .form-group label {
+    margin-bottom: 4px !important;
+    font-size: 0.88rem !important;
+  }
+  .page-reservas input[type=text]#docente,
+  .page-reservas input[type=date]#input-fecha,
+  .page-reservas #btn-limpiar-busqueda {
+    padding: 8px !important;
+    font-size: 0.85rem !important;
+  }
+  .page-reservas .turno-bloque {
+    padding: 8px !important;
+    margin-bottom: 5px;
+  }
+  .page-reservas .turno-titulo {
+    font-size: 0.9rem !important;
+    margin-bottom: 6px !important;
+  }
+  .page-reservas .grilla-horas {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 5px !important;
+  }
+  .page-reservas .control-hora-chip {
+    width: 100%;
+  }
+  .page-reservas .control-hora-chip .label-check-moderno {
+    padding: 5px 2px !important;
+    text-align: center;
+  }
+  .page-reservas #btn-abrir-modal {
+    padding: 8px !important;
+    font-size: 0.9rem !important;
+  }
+  .page-reservas .row.g-2.mt-2 {
+    margin-top: 5px !important;
+  }
+  .page-reservas .row.g-2.mt-2 .btn {
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+    font-size: 0.9rem !important;
   }
 }/*# sourceMappingURL=style.css.map */

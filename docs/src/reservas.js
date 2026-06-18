@@ -13,7 +13,7 @@ const appState = {
     nombresSeleccionados: []
 };
 
-
+let usuarioId = null;
 /**
  * 🚀 Controla la sesión del docente y pinta su nombre real en la interfaz
  */
@@ -53,6 +53,7 @@ async function controlarSesionDocente() {
             // 1. Inyectamos su nombre en el input y lo bloqueamos por completo
             if (inputDocente) {
                 inputDocente.value = nombreUsuario;
+                usuarioId = usuarioDb.id; // Asigna el ID real del docente de la sesión a tu variable global
                 inputDocente.disabled = true; // 🔒 No puede escribir ni buscar a otros
                 inputDocente.style.backgroundColor = '#e9ecef'; // Color gris de campo deshabilitado
                 inputDocente.style.cursor = 'not-allowed';
@@ -315,15 +316,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    const contenedorHoras = document.getElementById('contenedor-horas');
-    if (contenedorHoras) {
-        contenedorHoras.addEventListener('change', (e) => {
-            if (e.target.name === 'hora') {
-                validarRequisitosModal();
-                resetearSeleccionEquipos(); 
-            }
-        });
+   // Captura el cambio de horas usando el documento de forma directa
+document.addEventListener('change', (e) => {
+    if (e.target && e.target.name === 'hora') {
+        validarRequisitosModal();
+        if (typeof resetearSeleccionEquipos === 'function') {
+            resetearSeleccionEquipos();
+        }
     }
+});
 
     if (btnAbrirModal) {
         btnAbrirModal.addEventListener('click', () => {
@@ -409,7 +410,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const fechaSelected = inputFecha.value;
             const horasSelected = obtenerHorasSeleccionadas();
-
+console.log("El ID del usuario actual es:", usuarioId);
             if (!usuarioId || appState.idsSeleccionados.length === 0 || horasSelected.length === 0) {
                 alert("Por favor, selecciona un docente válido de la lista y completa los datos.");
                 return;

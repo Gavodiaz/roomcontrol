@@ -6,117 +6,190 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RoomControl - Reservas</title>
 
-    <!-- Bootstrap CSS (Usa la misma versión que tengas en tu index) -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Tus estilos SASS compilados -->
     <link rel="stylesheet" href="sass/style.css">
 
-    <!-- El truco del emoji para el logo de la pestaña -->
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📅</text></svg>">
+</head>
 
-    </head>
+<body class="bg-light page-reservas">
 
-<body class="bg-light">
-
-    <div class="container my-5" style="max-width: 500px;">
+    <div class="container my-5" style="max-width: 1100px;">
         <div class="card shadow-sm">
             <div class="card-header bg-success text-white text-center py-3">
                 <h4 class="mb-0">📅 Reservar Equipamiento</h4>
             </div>
             <div class="card-body p-4">
 
-                <div class="user-session-container" style="display: flex; align-items: center; gap: 15px; margin-left: auto;">
-    <span id="docente-display-nombre" style="font-weight: 500; color: #333;">Cargando usuario...</span>
-    
-    <button id="btn-logout-docente" class="btn-logout"
-        style="background-color: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">
-        Cerrar Sesión
-    </button>
-</div>
-
-                <form id="form-reservas">
-                    <!-- 1. Selección de Docente -->
-
-
-                    <div class="form-group">
-                    <label for="docente">Seleccionar Docente:</label>
-
-                    <div style="display: flex; gap: 10px;">
-                        <input type="text" id="docente" list="lista-docentes"
-                            placeholder="🔍 Tipeá nombre, apellido o DNI..." required autocomplete="off"
-                            style="padding: 10px; flex-grow: 1; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;">
-
-                        <button type="button" id="btn-limpiar-busqueda"
-                            style="background: #6c757d; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold;">
-                            Limpiar
-                        </button>
-                    </div>
-
-                    <datalist id="lista-docentes">
-                    </datalist>
+                <div class="user-session-container mb-4"
+                    style="display: flex; align-items: center; justify-content: flex-end; gap: 15px;">
+                    <span id="docente-display-nombre" style="font-weight: 500; color: #333;">Cargando usuario...</span>
+                    <button id="btn-logout-docente" class="btn-logout"
+                        style="background-color: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">
+                        Cerrar Sesión
+                    </button>
                 </div>
 
-                    <!-- 2. Selección de Fecha -->
-                    <div class="mb-4">
-                        <label for="input-fecha" class="form-label">Fecha de la Reserva:</label>
-                        <input type="date" id="input-fecha" class="form-control" required>
-                    </div>
+                <form id="form-reservas">
+                    
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-8">
+                            <label for="docente" class="form-label" style="font-weight: 500; color: #475569;">Seleccionar Docente:</label>
+                            <div style="display: flex; gap: 10px;">
+                                <input type="text" id="docente" list="lista-docentes"
+                                    placeholder="🔍 Tipeá nombre, apellido o DNI..." required autocomplete="off"
+                                    style="padding: 10px; flex-grow: 1; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;">
 
-                    <!-- 3. Selección de Fecha -->
-                    <div class="form-group" style="margin-top: 20px; margin-bottom: 20px;">
-                        <label style="font-weight: bold; color: #334155; margin-bottom: 10px; display: block;">
-                            🕒 Seleccione las Horas Cátedra:
-                        </label>
+                                <button type="button" id="btn-limpiar-busqueda"
+                                    style="background: #6c757d; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold;">
+                                    Limpiar
+                                </button>
+                            </div>
+                            <datalist id="lista-docentes"></datalist>
+                        </div>
 
-                        <div class="grilla-horas" id="contenedor-horas">
-                            <label class="hora-item"><input type="checkbox" name="hora" value="1"> 1° (8:00 a
-                                8:40)</label>
-                            <label class="hora-item"><input type="checkbox" name="hora" value="2"> 2° (8:40 a
-                                9:20)</label>
-                            <label class="hora-item"><input type="checkbox" name="hora" value="3"> 3° (9:30 a
-                                10:10)</label>
-                            <label class="hora-item"><input type="checkbox" name="hora" value="4"> 4° (10:10 a
-                                10:50)</label>
-                            <label class="hora-item"><input type="checkbox" name="hora" value="5"> 5° (10:50 a
-                                11:30)</label>
-                            <label class="hora-item"><input type="checkbox" name="hora" value="6"> 6° (11:40 a
-                                12:20)</label>
-                            <label class="hora-item"><input type="checkbox" name="hora" value="7"> 7° (12:20 a
-                                13:00)</label>
-                            <label class="hora-item"><input type="checkbox" name="hora" value="8"> 8° (13:30 a
-                                14:10)</label>
-                            <label class="hora-item"><input type="checkbox" name="hora" value="9"> 9° (14:10 a
-                                14:50)</label>
-                            <label class="hora-item"><input type="checkbox" name="hora" value="10"> 10° (14:50 a
-                                15:30)</label>
-                            <label class="hora-item"><input type="checkbox" name="hora" value="11"> 11° (15:40 a
-                                16:20)</label>
-                            <label class="hora-item"><input type="checkbox" name="hora" value="12"> 12° (16:20 a
-                                17:00)</label>
-                            <label class="hora-item"><input type="checkbox" name="hora" value="13"> 13° (17:10 a
-                                17:50)</label>
-                            <label class="hora-item"><input type="checkbox" name="hora" value="14"> 14° (17:50 a
-                                18:30)</label>
+                        <div class="col-md-4">
+                            <label for="input-fecha" class="form-label" style="font-weight: 500; color: #475569;">Fecha de la Reserva:</label>
+                            <input type="date" id="input-fecha" class="form-control" style="padding: 10px;" required>
                         </div>
                     </div>
 
+                    <div class="form-group mb-4">
+                        <label style="font-weight: bold; color: #334155; margin-bottom: 12px; display: block;">
+                            🕒 Seleccione las Horas Cátedra:
+                        </label>
 
-                    <!-- 4. Selección de Equipo -->
-                    <div class="mb-3">
-                        <label class="form-label font-weight-bold">Seleccionar Equipo / Aula:</label>
+                        <div class="turnos-container-reservas">
+
+                            <div class="turno-bloque">
+                                <h3 class="turno-titulo">🌅 Turno Mañana</h3>
+                                <div class="grilla-horas">
+                                    <div class="control-hora-chip">
+                                        <input type="checkbox" id="res-hora-1" class="check-moderno" name="hora" value="1">
+                                        <label for="res-hora-1" class="label-check-moderno">
+                                            <span class="numero-hora">1° Hora</span>
+                                            <span class="rango-hora">(8:00 a 8:40)</span>
+                                        </label>
+                                    </div>
+                                    <div class="control-hora-chip">
+                                        <input type="checkbox" id="res-hora-2" class="check-moderno" name="hora" value="2">
+                                        <label for="res-hora-2" class="label-check-moderno">
+                                            <span class="numero-hora">2° Hora</span>
+                                            <span class="rango-hora">(8:40 a 9:20)</span>
+                                        </label>
+                                    </div>
+                                    <div class="control-hora-chip">
+                                        <input type="checkbox" id="res-hora-3" class="check-moderno" name="hora" value="3">
+                                        <label for="res-hora-3" class="label-check-moderno">
+                                            <span class="numero-hora">3° Hora</span>
+                                            <span class="rango-hora">(9:30 a 10:10)</span>
+                                        </label>
+                                    </div>
+                                    <div class="control-hora-chip">
+                                        <input type="checkbox" id="res-hora-4" class="check-moderno" name="hora" value="4">
+                                        <label for="res-hora-4" class="label-check-moderno">
+                                            <span class="numero-hora">4° Hora</span>
+                                            <span class="rango-hora">(10:10 a 10:50)</span>
+                                        </label>
+                                    </div>
+                                    <div class="control-hora-chip">
+                                        <input type="checkbox" id="res-hora-5" class="check-moderno" name="hora" value="5">
+                                        <label for="res-hora-5" class="label-check-moderno">
+                                            <span class="numero-hora">5° Hora</span>
+                                            <span class="rango-hora">(10:50 a 11:30)</span>
+                                        </label>
+                                    </div>
+                                    <div class="control-hora-chip">
+                                        <input type="checkbox" id="res-hora-6" class="check-moderno" name="hora" value="6">
+                                        <label for="res-hora-6" class="label-check-moderno">
+                                            <span class="numero-hora">6° Hora</span>
+                                            <span class="rango-hora">(11:40 a 12:20)</span>
+                                        </label>
+                                    </div>
+                                    <div class="control-hora-chip">
+                                        <input type="checkbox" id="res-hora-7" class="check-moderno" name="hora" value="7">
+                                        <label for="res-hora-7" class="label-check-moderno">
+                                            <span class="numero-hora">7° Hora</span>
+                                            <span class="rango-hora">(12:20 a 13:00)</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="turno-bloque">
+                                <h3 class="turno-titulo">🌇 Turno Tarde / Vespertino</h3>
+                                <div class="grilla-horas">
+                                    <div class="control-hora-chip">
+                                        <input type="checkbox" id="res-hora-8" class="check-moderno" name="hora" value="8">
+                                        <label for="res-hora-8" class="label-check-moderno">
+                                            <span class="numero-hora">8° Hora</span>
+                                            <span class="rango-hora">(13:30 a 14:10)</span>
+                                        </label>
+                                    </div>
+                                    <div class="control-hora-chip">
+                                        <input type="checkbox" id="res-hora-9" class="check-moderno" name="hora" value="9">
+                                        <label for="res-hora-9" class="label-check-moderno">
+                                            <span class="numero-hora">9° Hora</span>
+                                            <span class="rango-hora">(14:10 a 14:50)</span>
+                                        </label>
+                                    </div>
+                                    <div class="control-hora-chip">
+                                        <input type="checkbox" id="res-hora-10" class="check-moderno" name="hora" value="10">
+                                        <label for="res-hora-10" class="label-check-moderno">
+                                            <span class="numero-hora">10° Hora</span>
+                                            <span class="rango-hora">(14:50 a 15:30)</span>
+                                        </label>
+                                    </div>
+                                    <div class="control-hora-chip">
+                                        <input type="checkbox" id="res-hora-11" class="check-moderno" name="hora" value="11">
+                                        <label for="res-hora-11" class="label-check-moderno">
+                                            <span class="numero-hora">11° Hora</span>
+                                            <span class="rango-hora">(15:40 a 16:20)</span>
+                                        </label>
+                                    </div>
+                                    <div class="control-hora-chip">
+                                        <input type="checkbox" id="res-hora-12" class="check-moderno" name="hora" value="12">
+                                        <label for="res-hora-12" class="label-check-moderno">
+                                            <span class="numero-hora">12° Hora</span>
+                                            <span class="rango-hora">(16:20 a 17:00)</span>
+                                        </label>
+                                    </div>
+                                    <div class="control-hora-chip">
+                                        <input type="checkbox" id="res-hora-13" class="check-moderno" name="hora" value="13">
+                                        <label for="res-hora-13" class="label-check-moderno">
+                                            <span class="numero-hora">13° Hora</span>
+                                            <span class="rango-hora">(17:10 a 17:50)</span>
+                                        </label>
+                                    </div>
+                                    <div class="control-hora-chip">
+                                        <input type="checkbox" id="res-hora-14" class="check-moderno" name="hora" value="14">
+                                        <label for="res-hora-14" class="label-check-moderno">
+                                            <span class="numero-hora">14° Hora</span>
+                                            <span class="rango-hora">(17:50 a 18:30)</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label" style="font-weight: 500; color: #475569;">Seleccionar Equipo / Aula:</label>
                         <button type="button" id="btn-abrir-modal" class="btn btn-primary w-100"
-                            style="padding: 10px; font-weight: bold; background-color: #2563eb; border: none; color: white;">
+                            style="padding: 12px; font-weight: bold; background-color: #2563eb; border: none; color: white; border-radius: 6px;">
                             Seleccionar Equipos Masivos
                         </button>
                     </div>
 
-
-
-                    <!-- Botones de Acción -->
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-success">Confirmar Reserva</button>
-                       <a id="btn-volver-inicio" href="index.html" class="btn btn-outline-secondary">Volver al Inicio</a>
+                    <div class="row g-2 mt-2">
+                        <div class="col-sm-6">
+                            <button type="submit" class="btn btn-success w-100 py-2 font-weight-bold" style="font-weight: bold;">Confirmar Reserva</button>
+                        </div>
+                        <div class="col-sm-6">
+                            <a id="btn-volver-inicio" href="index.html" class="btn btn-outline-secondary w-100 py-2">Volver al Inicio</a>
+                        </div>
                     </div>
                 </form>
 
@@ -132,8 +205,7 @@
                 Selección de Equipos / Aulas
             </h3>
             <p style="text-align: center; color: #64748b; font-size: 0.9em; margin-bottom: 20px;">
-                Los equipos en <span style="color: #dc3545; font-weight: bold;">rojo</span> ya están reservados para la
-                fecha elegida.
+                Los equipos en <span style="color: #dc3545; font-weight: bold;">rojo</span> ya están reservados para la fecha elegida.
             </p>
 
             <div id="contenedor-equipos"
@@ -150,40 +222,33 @@
                     Confirmar Selección
                 </button>
             </div>
-
         </div>
     </div>
 
-   <div id="sidebar-historial" class="sidebar-flotante" tabindex="0">
-    <div class="sidebar-pestana">
-        📅 <span>Historial Reservas</span>
-    </div>
-    <div class="sidebar-contenido">
-        <h2>Historial del Mes</h2>
-        <div class="table-responsive">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th style="text-align: left; padding: 10px;">Docente</th>
-                        <th style="text-align: left; padding: 10px;">Equipo</th>
-                        <th style="text-align: center; padding: 10px;">Fecha</th>
-                    </tr>
-                </thead>
-                <tbody id="tabla-historial-body">
-                    </tbody>
-            </table>
+    <div id="sidebar-historial" class="sidebar-flotante" tabindex="0">
+        <div class="sidebar-pestana">
+            📅 <span>Historial Reservas</span>
+        </div>
+        <div class="sidebar-contenido">
+            <h2>Historial del Mes</h2>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th style="text-align: left; padding: 10px;">Docente</th>
+                            <th style="text-align: left; padding: 10px;">Equipo</th>
+                            <th style="text-align: center; padding: 10px;">Fecha</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-historial-body"></tbody>
+                </table>
+            </div>
         </div>
     </div>
-</div>
 
-    <!-- 📚 LIBRERÍAS -->
-    <!-- Supabase CDN (Asegurate de que sea la misma versión que usás en app.js) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
-    <!-- 🧠 LÓGICA MODULARIZADA -->
-    <!-- Creamos un archivo JS exclusivo para esta pantalla -->
     <script type="module" src="src/reservas.js"></script>
-    
-</body>
 
+</body>
 </html>
