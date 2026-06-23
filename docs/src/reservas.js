@@ -1,9 +1,11 @@
 // 📄 src/reservas.js
-import { obtenerDisponibilidadEquipos, 
-    guardarReservaMasiva, 
-    getDocentes, 
+import {
+    obtenerDisponibilidadEquipos,
+    guardarReservaMasiva,
+    getDocentes,
     getReservasDelMes,
-    eliminarReservasMasivas } from './modules/api.js';
+    eliminarReservasMasivas
+} from './modules/api.js';
 import { renderDocentes, } from './modules/ui.js';
 import { supabaseClient } from './modules/supabase.js'; // O la ruta donde tengas tu cliente
 import { cerrarSesion } from './modules/auth.js';
@@ -43,7 +45,7 @@ async function controlarSesionDocente() {
 
         // 🔍 Capturamos los elementos de la interfaz usando tus IDs y atributos reales
         const inputDocente = document.querySelector('input[placeholder*="Tipeá nombre"]');
-        const btnLimpiar = document.getElementById('btn-limpiar-docente') || document.querySelector('button.btn-limpiar') || document.evaluate("//button[contains(text(),'Limpiar')]", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue; 
+        const btnLimpiar = document.getElementById('btn-limpiar-docente') || document.querySelector('button.btn-limpiar') || document.evaluate("//button[contains(text(),'Limpiar')]", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
         const sidebarHistorial = document.getElementById('sidebar-historial'); // 👈 Tu ID real de la línea 157
         const btnVolverInicio = document.getElementById('btn-volver-inicio'); // 👈 Capturamos el botón nuevo
         // 🎀 CAPA DE ADAPTACIÓN SEGÚN EL ROL
@@ -79,7 +81,7 @@ async function controlarSesionDocente() {
 
         } else if (usuarioDb && usuarioDb.rol === 'administrador') {
             console.log("Configurando interfaz completa para Administrador.");
-            
+
             // Si sos vos (Admin), todo queda libre para usar a gusto
             if (inputDocente) {
                 inputDocente.disabled = false;
@@ -119,30 +121,46 @@ if (btnLogoutDocente) {
 
 
 document.addEventListener('DOMContentLoaded', async () => {
-    
-    const inputFecha = document.getElementById('input-fecha');
+
+    //Esto permite que las pestañas se queden fija o moviles
+// Asegurate de seleccionar el contenedor principal que tiene la clase .sidebar-flotante
+const panelEquipos = document.querySelector('.sidebar-flotante');
+const btnFijar = document.getElementById('btn-fijar');
+
+btnFijar.addEventListener('click', () => {
+    // Alternamos la clase 'fija'
+    panelEquipos.classList.toggle('fija');
+
+    // Cambiamos el texto del botón (opcional)
+    btnFijar.textContent = panelEquipos.classList.contains('fija') ? '❌' : '📌';
+});
+
+
+
+
+const inputFecha = document.getElementById('input-fecha');
     const formReservas = document.getElementById('form-reservas');
-    
+
     const btnAbrirModal = document.getElementById('btn-abrir-modal');
     const modalEquipos = document.getElementById('modal-equipos');
     const contenedorEquipos = document.getElementById('contenedor-equipos');
     const btnConfirmarModal = document.getElementById('btn-confirmar-seleccion-modal');
 
-    if (inputFecha) inputFecha.value = ""; 
+    if (inputFecha) inputFecha.value = "";
     if (btnAbrirModal) btnAbrirModal.disabled = true;
 
     // =========================================================
     // 1. CARGA INICIAL DE DATOS (Docentes e Historial)
     // =========================================================
-    
+
     // Cargar Docentes en el Datalist
     try {
         console.log("Intentando traer docentes...");
         const docentes = await getDocentes();
         console.log("Docentes recibidos:", docentes);
-        
+
         if (docentes && docentes.length > 0) {
-            await renderDocentes(); 
+            await renderDocentes();
             console.log("renderDocentes ejecutado con éxito.");
         } else {
             console.warn("La lista de docentes está vacía.");
@@ -154,57 +172,85 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Cargar el historial en el sidebar
     await renderizarHistorial();
 
-    // =========================================================
-    // 2. LOGICA DEL HISTORIAL Y CANCELACIONES
-    // =========================================================
+    // =========================================================================
+    // 2. LOGICA DEL HISTORIAL ACTUALIZADA (CON CURSO Y FECHA FORMATEADA)
+    // =========================================================================
     async function renderizarHistorial() {
-        const tbody = document.getElementById('tabla-historial-body'); 
+        const tbody = document.getElementById('tabla-historial-body');
         if (!tbody) {
             console.warn("No se encuentra el elemento con ID 'tabla-historial-body'");
             return;
         }
 
+        // 📅 Función interna rápida para formatear la fecha a formato local ("Vie, 19 Jun")
+        function formatearFechaBonita(fechaStr) {
+            if (!fechaStr) return 'Sin fecha';
+            // Dividimos por '-' para evitar problemas de zona horaria con New Date(str)
+            const partes = fechaStr.split('-');
+            if (partes.length !== 3) return fechaStr;
+
+            // Creamos la fecha local con los datos provistos
+            const fechaLocal = new Date(partes[0], partes[1] - 1, partes[2]);
+
+            // Opciones para el formato: día de la semana corto, día numérico y mes corto
+            const opciones = { weekday: 'short', day: 'numeric', month: 'short' };
+            let resultado = fechaLocal.toLocaleDateString('es-AR', opciones);
+
+            // Capitalizamos la primera letra (ej: "vie, 19 jun" -> "Vie, 19 Jun")
+            return resultado.replace(/(^\w|\s\w)/g, m => m.toUpperCase());
+        }
+
         try {
             const reservas = await getReservasDelMes();
-            
+
             const reservasAgrupadas = reservas.reduce((acc, r) => {
                 const nombreDocente = r.docentes?.nombre_completo || 'Sin nombre';
                 const nombreEquipo = r.equipos?.nombre || 'ID: ' + r.equipo_id;
                 const fecha = r.fecha_reserva;
+                // 🏫 Capturamos el curso de la reserva (si viene vacío, ponemos '-')
+                const curso = r.curso || '-';
 
                 if (!acc[nombreDocente]) {
-                    acc[nombreDocente] = { equipos: new Set(), fecha: fecha, ids: [] };
+                    acc[nombreDocente] = { equipos: new Set(), fecha: fecha, curso: curso, ids: [] };
                 }
                 acc[nombreDocente].equipos.add(nombreEquipo);
-                acc[nombreDocente].ids.push(r.id); 
+                acc[nombreDocente].ids.push(r.id);
                 return acc;
             }, {});
 
             tbody.innerHTML = '';
             Object.keys(reservasAgrupadas).forEach(docente => {
                 const datos = reservasAgrupadas[docente];
-                const listaEquipos = Array.from(datos.equipos).join(', '); 
-                const cadenaIds = datos.ids.join(','); 
+
+                const badgesEquipos = Array.from(datos.equipos)
+                    .map(equipo => `<span class="badge-equipo-historial">${equipo.trim()}</span>`)
+                    .join(' ');
+
+                const cadenaIds = datos.ids.join(',');
+
+                // 🌟 Aplicamos el formateador de fecha bonita
+                const fechaFormateada = formatearFechaBonita(datos.fecha);
 
                 tbody.innerHTML += `
-                    <tr>
-                        <td style="padding: 10px;">${docente}</td>
-                        <td style="padding: 10px;">${listaEquipos}</td>
-                        <td style="padding: 10px;">${datos.fecha}</td>
-                        <td style="padding: 10px; text-align: center;">
-                            <button class="btn-cancelar" data-ids="${cadenaIds}" style="background:none; border:none; cursor:pointer;">
-                                ❌
-                            </button>
-                        </td>
-                    </tr>`;
+                <tr>
+                    <td class="td-docente"><strong>${docente}</strong></td>
+                    <td class="td-equipos"><div class="badge-lista-contenedor">${badgesEquipos}</div></td>
+                    <td class="td-curso"><span class="badge-curso-historial">${datos.curso}</span></td>
+                    <td class="td-fecha">📅 ${fechaFormateada}</td>
+                    <td class="td-acciones" style="text-align: center;">
+                        <button type="button" class="btn-cancelar" data-ids="${cadenaIds}">
+                            <span class="btn-icon">❌</span> Cancelar
+                        </button>
+                    </td>
+                </tr>`;
             });
 
             // Escuchador para cancelar reservas agrupadas
             tbody.onclick = async (e) => {
                 const boton = e.target.closest('.btn-cancelar');
-                if (!boton) return; 
+                if (!boton) return;
 
-                const idsTexto = boton.dataset.ids; 
+                const idsTexto = boton.dataset.ids;
                 const idsArray = idsTexto.split(',').map(id => parseInt(id));
 
                 const seguro = confirm(`¿Estás seguro de que deseas cancelar estas reservas agrupadas?`);
@@ -213,7 +259,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 try {
                     await eliminarReservasMasivas(idsArray);
                     alert("¡Reservas canceladas con éxito!");
-                    await renderizarHistorial(); 
+                    await renderizarHistorial();
                 } catch (error) {
                     console.error("Error al intentar cancelar:", error);
                     alert("Hubo un error al intentar cancelar las reservas.");
@@ -230,7 +276,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // =========================================================
     function validarRequisitosModal() {
         if (!inputFecha || !btnAbrirModal) return;
-        
+
         const fechaElegida = inputFecha.value;
         const horasTildadas = document.querySelectorAll('input[name="hora"]:checked');
 
@@ -262,17 +308,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             listaEquipos.forEach(eq => {
                 const btn = document.createElement('button');
-                
+
                 btn.innerHTML = `💻 ${eq.nombre}`;
                 btn.type = "button";
 
                 if (eq.ocupado) {
-                    btn.className = "btn-equipo prestado"; 
+                    btn.className = "btn-equipo prestado";
                     btn.disabled = true;
                 } else {
                     const yaSeleccionado = appState.idsSeleccionados.includes(eq.id);
                     btn.className = yaSeleccionado ? "btn-equipo disponible seleccionado" : "btn-equipo disponible";
-                    
+
                     btn.addEventListener('click', () => {
                         if (btn.classList.contains('seleccionado')) {
                             btn.classList.remove('seleccionado');
@@ -316,15 +362,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-   // Captura el cambio de horas usando el documento de forma directa
-document.addEventListener('change', (e) => {
-    if (e.target && e.target.name === 'hora') {
-        validarRequisitosModal();
-        if (typeof resetearSeleccionEquipos === 'function') {
-            resetearSeleccionEquipos();
+    // Captura el cambio de horas usando el documento de forma directa
+    document.addEventListener('change', (e) => {
+        if (e.target && e.target.name === 'hora') {
+            validarRequisitosModal();
+            if (typeof resetearSeleccionEquipos === 'function') {
+                resetearSeleccionEquipos();
+            }
         }
-    }
-});
+    });
 
     if (btnAbrirModal) {
         btnAbrirModal.addEventListener('click', () => {
@@ -350,7 +396,7 @@ document.addEventListener('change', (e) => {
         });
     }
 
-    window.cerrarModal = function() {
+    window.cerrarModal = function () {
         if (modalEquipos) modalEquipos.classList.add('oculto');
     };
 
@@ -359,9 +405,9 @@ document.addEventListener('change', (e) => {
     if (btnLimpiar) {
         btnLimpiar.addEventListener('click', () => {
             const inputDocente = document.getElementById('docente');
-            
+
             // 1. Vaciamos los campos de texto y fecha
-            if (inputDocente) inputDocente.value = '';
+            // if (inputDocente) inputDocente.value = '';
             if (inputFecha) inputFecha.value = '';
 
             // 2. Destildamos y habilitamos todos los checkboxes de horas
@@ -387,32 +433,36 @@ document.addEventListener('change', (e) => {
         });
     }
 
-    // =========================================================
-    // 5. ENVÍO DEL FORMULARIO (Inserción Masiva)
-    // =========================================================
+    // =========================================================================
+    // 5. ENVÍO DEL FORMULARIO (Inserción Masiva) - CORREGIDO CON CURSO
+    // =========================================================================
     if (formReservas) {
         formReservas.addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const inputDocente = document.getElementById('docente');
-            const datalistProfes = document.getElementById('lista-docentes'); 
-            
+            const datalistProfes = document.getElementById('lista-docentes');
+            // 🏫 Capturamos el valor del nuevo input
+            const cursoValor = document.getElementById('input-curso').value.trim();
+
             let usuarioId = null;
             const valorEscrito = inputDocente.value.trim().toLowerCase();
             const opciones = datalistProfes.options;
 
             for (let i = 0; i < opciones.length; i++) {
                 if (opciones[i].value.trim().toLowerCase() === valorEscrito) {
-                    usuarioId = opciones[i].dataset.id; 
+                    usuarioId = opciones[i].dataset.id;
                     break;
                 }
             }
 
             const fechaSelected = inputFecha.value;
             const horasSelected = obtenerHorasSeleccionadas();
-console.log("El ID del usuario actual es:", usuarioId);
-            if (!usuarioId || appState.idsSeleccionados.length === 0 || horasSelected.length === 0) {
-                alert("Por favor, selecciona un docente válido de la lista y completa los datos.");
+            console.log("El ID del usuario actual es:", usuarioId);
+
+            // ⚠️ Podés sumar una validación opcional para el curso si querés que sea obligatorio:
+            if (!usuarioId || appState.idsSeleccionados.length === 0 || horasSelected.length === 0 || !cursoValor) {
+                alert("Por favor, completa todos los datos: selecciona un docente válido, ingresá el curso y elegí las horas.");
                 return;
             }
 
@@ -421,10 +471,11 @@ console.log("El ID del usuario actual es:", usuarioId);
                 appState.idsSeleccionados.forEach(idEquipo => {
                     horasSelected.forEach(hora => {
                         filasAInsertar.push({
-                            docente_id: parseInt(usuarioId), 
+                            docente_id: parseInt(usuarioId),
                             equipo_id: idEquipo,
                             fecha_reserva: fechaSelected,
                             hora_catedra: hora,
+                            curso: cursoValor, // 🔥 ¡AHORA SÍ! Guardamos el curso en Supabase
                             estado: 'Confirmada'
                         });
                     });
@@ -435,10 +486,15 @@ console.log("El ID del usuario actual es:", usuarioId);
 
                 await renderizarHistorial();
 
+                // Reseteo completo del formulario
                 formReservas.reset();
+
+                // 🧹 Nos aseguramos manualmente de vaciar el input del curso por si las dudas
+                document.getElementById('input-curso').value = '';
+
                 resetearSeleccionEquipos();
                 validarRequisitosModal();
-                
+
             } catch (error) {
                 console.error(error);
                 alert("Error al guardar la reserva.");
@@ -447,4 +503,30 @@ console.log("El ID del usuario actual es:", usuarioId);
     }
 });
 
+// ==========================================================================
+// 🔄 FUNCIÓN GLOBAL PARA ABRIR / CERRAR EL PANEL (TOGGLE REAL)
+// ==========================================================================
+window.toggleSidebar = function (idSidebar) {
+    const sidebar = document.getElementById(idSidebar);
 
+    if (sidebar) {
+        // 🤔 Evaluamos si ya contiene la clase 'open'
+        if (sidebar.classList.contains('open')) {
+            // ❌ Si ya está abierto, lo cerramos (Limpieza absoluta)
+            sidebar.classList.remove('fija', 'open', 'active');
+            console.log("Panel " + idSidebar + " cerrado correctamente.");
+
+            // 📌 Sincronizamos el botón del pin para que vuelva a ser un pin común
+            const pin = document.getElementById('btn-fijar');
+            if (pin) {
+                pin.textContent = '📌';
+            }
+        } else {
+            // 🟢 Si está escondido, le metemos 'open' para que el CSS responsive lo muestre (right: 0)
+            sidebar.classList.add('open');
+            console.log("Panel " + idSidebar + " abierto correctamente.");
+        }
+    } else {
+        console.error("No se encontró ningún panel con el ID:", idSidebar);
+    }
+};

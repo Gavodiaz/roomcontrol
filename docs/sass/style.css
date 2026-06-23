@@ -633,7 +633,8 @@ input[type=checkbox].check-moderno:checked + label.label-check-moderno {
   /* 1. 🚫 OCULTAR PESTAÑAS VERTICALES VIEJAS (Incluido Reservas Diarias) */
   #sidebar-registros-diarios .sidebar-pestana-izq,
   #sidebar-reservas-diarias .sidebar-pestana-izq,
-  #sidebar-equipos-uso .sidebar-pestana {
+  #sidebar-equipos-uso .sidebar-pestana,
+  .sidebar-flotante .sidebar-pestana { /* 🔥 Ocultamos también la pestaña azul de reservas en móvil */
     display: none !important;
   }
   /* 2. 📱 PANELES FLOTANTES (Escondidos por defecto a los costados) */
@@ -648,7 +649,8 @@ input[type=checkbox].check-moderno:checked + label.label-check-moderno {
     box-shadow: 5px 0 15px rgba(0, 0, 0, 0.2) !important;
     transition: left 0.3s ease-in-out !important;
   }
-  #sidebar-equipos-uso {
+  #sidebar-equipos-uso,
+  .sidebar-flotante {
     position: fixed !important;
     top: 0 !important;
     right: -100% !important; /* Escondido a la derecha */
@@ -658,13 +660,21 @@ input[type=checkbox].check-moderno:checked + label.label-check-moderno {
     background-color: white !important;
     box-shadow: -5px 0 15px rgba(0, 0, 0, 0.2) !important;
     left: auto !important; /* Rompe el left de escritorio */
+    border-radius: 0 !important; /* Bordes rectos para acoplarse al celular */
     transition: right 0.3s ease-in-out !important;
+  }
+  #sidebar-equipos-uso:hover,
+  .sidebar-flotante:hover {
+    right: auto;
   }
   /* 3. 🟢 CLASES DE APERTURA (Lo que activa el JavaScript) */
   .sidebar-flotante-izq.open {
     left: 0 !important; /* Entra a la pantalla */
   }
-  #sidebar-equipos-uso.open {
+  #sidebar-equipos-uso.open,
+  .sidebar-flotante.open,
+  .sidebar-flotante.active,
+  .sidebar-flotante.fija {
     right: 0 !important; /* Entra a la pantalla */
     left: auto !important;
   }
@@ -737,10 +747,17 @@ input[type=checkbox].check-moderno:checked + label.label-check-moderno {
   }
   /* 🔥 MODIFICACIÓN CLAVE: Bajamos los títulos y pines para que no tapen la X */
   .sidebar-contenido {
-    padding: 20px !important;
+    padding: 15px !important;
     height: calc(100vh - 60px) !important;
     overflow-y: auto !important;
     position: relative !important;
+  }
+  .sidebar-contenido h3 {
+    font-size: 16px !important;
+    margin-top: 35px !important; /* Espacio de seguridad para no chocar con la cabecera móvil */
+  }
+  .sidebar-contenido .table-responsive {
+    max-height: calc(100vh - 160px) !important;
   }
   .sidebar-contenido h2 {
     margin-top: 35px !important; /* Le da el espacio limpio hacia abajo al título del día y equipos */
@@ -808,77 +825,166 @@ input[type=checkbox].check-moderno:checked + label.label-check-moderno {
   display: block !important;
   white-space: nowrap !important;
 }
-@media (max-width: 576px) {
-  .page-reservas {
-    padding: 6px !important;
-  }
-  .page-reservas .container.my-5 {
-    margin-top: 4px !important;
-    margin-bottom: 4px !important;
-  }
-  .page-reservas .card-header {
-    padding-top: 10px !important;
-    padding-bottom: 10px !important;
-  }
-  .page-reservas .card-header h4 {
-    font-size: 1.15rem !important;
-  }
-  .page-reservas .card-body {
-    padding: 10px !important;
-  }
-  .page-reservas .user-session-container {
-    margin-bottom: 10px !important;
-    gap: 10px !important;
-    font-size: 0.85rem;
-  }
-  .page-reservas .user-session-container .btn-logout {
-    padding: 4px 8px !important;
-    font-size: 0.8rem;
-  }
-  .page-reservas .mb-4, .page-reservas .row.g-3 {
-    margin-bottom: 10px !important;
-  }
-  .page-reservas label.form-label,
-  .page-reservas .form-group label {
-    margin-bottom: 4px !important;
-    font-size: 0.88rem !important;
-  }
-  .page-reservas input[type=text]#docente,
-  .page-reservas input[type=date]#input-fecha,
-  .page-reservas #btn-limpiar-busqueda {
-    padding: 8px !important;
-    font-size: 0.85rem !important;
-  }
-  .page-reservas .turno-bloque {
-    padding: 8px !important;
-    margin-bottom: 5px;
-  }
-  .page-reservas .turno-titulo {
-    font-size: 0.9rem !important;
-    margin-bottom: 6px !important;
-  }
-  .page-reservas .grilla-horas {
-    display: grid !important;
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 5px !important;
-  }
-  .page-reservas .control-hora-chip {
-    width: 100%;
-  }
-  .page-reservas .control-hora-chip .label-check-moderno {
-    padding: 5px 2px !important;
-    text-align: center;
-  }
-  .page-reservas #btn-abrir-modal {
-    padding: 8px !important;
-    font-size: 0.9rem !important;
-  }
-  .page-reservas .row.g-2.mt-2 {
-    margin-top: 5px !important;
-  }
-  .page-reservas .row.g-2.mt-2 .btn {
-    padding-top: 8px !important;
-    padding-bottom: 8px !important;
-    font-size: 0.9rem !important;
-  }
+
+.badge-equipo-historial, .btn-equipo {
+  font-size: 12px !important;
+  padding: 6px 10px !important;
+  border-radius: 6px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  background-color: #fffbeb !important;
+  color: #d97706 !important;
+  border: 1px solid #fde68a !important;
+  white-space: nowrap !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  width: 100%;
+}
+
+#tabla-historial-body .badge-curso-historial {
+  background-color: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  padding: 4px 8px;
+  font-size: 13px;
+  font-weight: bold;
+  border-radius: 4px;
+  display: inline-block;
+}
+#tabla-historial-body .td-fecha {
+  font-weight: 500;
+  color: #1e293b;
+  white-space: nowrap;
+}
+#tabla-historial-body .badge-lista-contenedor {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(85px, 1fr)) !important;
+  gap: 6px !important;
+  max-width: 280px;
+}
+#tabla-historial-body .badge-equipo-historial {
+  background-color: #fffbeb;
+  color: #d97706;
+  border: 1px solid #fde68a;
+  padding: 4px 6px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 6px;
+  display: block;
+  text-align: center;
+  white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+#tabla-historial-body tr {
+  transition: transform 0.2s ease;
+}
+#tabla-historial-body tr:hover {
+  transform: translateY(-1px);
+}
+#tabla-historial-body td {
+  padding: 12px 14px;
+  background-color: #f8fafc;
+  border-top: 1px solid #edf2f7;
+  border-bottom: 1px solid #edf2f7;
+  color: #334155;
+  font-size: 14px;
+  vertical-align: middle;
+}
+#tabla-historial-body td:first-child {
+  border-left: 1px solid #edf2f7;
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
+#tabla-historial-body td:last-child {
+  border-right: 1px solid #edf2f7;
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+#tabla-historial-body .btn-cancelar {
+  background-color: #e11d48;
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 4px rgba(225, 29, 72, 0.15);
+  transition: all 0.2s ease-in-out;
+}
+#tabla-historial-body .btn-cancelar:hover {
+  background-color: #be123c;
+  box-shadow: 0 3px 6px rgba(225, 29, 72, 0.25);
+}
+#tabla-historial-body .btn-cancelar:active {
+  transform: scale(0.95);
+}
+#tabla-historial-body .btn-cancelar .btn-icon {
+  font-size: 11px;
+}
+
+/* =========================================================================
+    📌 SIDEBAR FLOTANTE (Estructura pura y exclusiva de PC)
+   ========================================================================= */
+.sidebar-flotante {
+  position: fixed;
+  top: 50px;
+  width: 800px;
+  right: -770px;
+  left: auto !important;
+  height: calc(100vh - 100px);
+  background-color: #ffffff;
+  box-shadow: -5px 0 15px rgba(0, 0, 0, 0.15);
+  border-radius: 8px 0 0 8px;
+  z-index: 1050;
+  transition: right 0.3s ease-in-out;
+  display: flex;
+}
+.sidebar-flotante:hover {
+  right: 0;
+}
+.sidebar-flotante.fija, .sidebar-flotante.open, .sidebar-flotante.active {
+  right: 0 !important;
+  left: auto !important;
+  transform: none !important;
+}
+
+.sidebar-pestana {
+  width: 30px;
+  background-color: #0d6efd;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 8px 0 0 8px;
+  font-weight: bold;
+  font-size: 13px;
+  padding: 10px 0;
+}
+.sidebar-pestana span {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  margin-top: 10px;
+  white-space: nowrap;
+}
+
+.sidebar-contenido {
+  flex-grow: 1;
+  padding: 15px;
+  overflow-y: auto;
+}
+.sidebar-contenido h3 {
+  margin-top: 0;
+  font-size: 18px;
+  border-bottom: 2px solid #eeeeee;
+  padding-bottom: 8px;
+  color: #333;
 }/*# sourceMappingURL=style.css.map */

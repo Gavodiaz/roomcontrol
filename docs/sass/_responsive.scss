@@ -16,7 +16,8 @@
     /* 1. 🚫 OCULTAR PESTAÑAS VERTICALES VIEJAS (Incluido Reservas Diarias) */
     #sidebar-registros-diarios .sidebar-pestana-izq,
     #sidebar-reservas-diarias .sidebar-pestana-izq, /* 🔥 Agregado para que no tape la pantalla en el celu */
-    #sidebar-equipos-uso .sidebar-pestana {
+    #sidebar-equipos-uso .sidebar-pestana,
+    .sidebar-flotante .sidebar-pestana { /* 🔥 Ocultamos también la pestaña azul de reservas en móvil */
         display: none !important;
     }
 
@@ -33,7 +34,9 @@
         transition: left 0.3s ease-in-out !important;
     }
 
-    #sidebar-equipos-uso {
+    // 💥 UNIFICADO: Tu panel de equipos y tu nuevo panel de reservas comparten comportamiento a la derecha
+    #sidebar-equipos-uso,
+    .sidebar-flotante {
         position: fixed !important;
         top: 0 !important;
         right: -100% !important; /* Escondido a la derecha */
@@ -43,7 +46,13 @@
         background-color: white !important;
         box-shadow: -5px 0 15px rgba(0,0,0,0.2) !important;
         left: auto !important; /* Rompe el left de escritorio */
+        border-radius: 0 !important; /* Bordes rectos para acoplarse al celular */
         transition: right 0.3s ease-in-out !important;
+
+        // Desactivamos el efecto hover táctil para evitar rebotes
+        &:hover {
+            right: auto;
+        }
     }
 
     /* 3. 🟢 CLASES DE APERTURA (Lo que activa el JavaScript) */
@@ -51,7 +60,11 @@
         left: 0 !important; /* Entra a la pantalla */
     }
 
-    #sidebar-equipos-uso.open {
+   // Aseguramos que si JS mete .open, .active o .fija a la barra de reservas, esta entre a la pantalla
+    #sidebar-equipos-uso.open,
+    .sidebar-flotante.open,
+    .sidebar-flotante.active,
+    .sidebar-flotante.fija {
         right: 0 !important; /* Entra a la pantalla */
         left: auto !important;
     }
@@ -102,10 +115,10 @@
         width: 100% !important;
         box-sizing: border-box !important;
         position: relative !important;
-        z-index: 10000 !important;          /* Siempre por encima del contenido */
+        z-index: 10000 !important;              /* Siempre por encima del contenido */
     }
 
-   .btn-cerrar-sidebar {
+    .btn-cerrar-sidebar {
         display: inline-block !important; /* Cambiado de 'block' a 'inline-block' para que no ocupe todo el ancho */
         width: auto !important;           /* Se adapta solo al tamaño del texto 'X Cerrar' */
         max-width: 100px !important;      /* Le ponemos un límite para que no quede enorme */
@@ -121,7 +134,6 @@
         box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
         
         /* 📍 Alineación y Márgenes de seguridad */
-    
         margin-right: 15px !important;    /* Lo separa un poquito del borde derecho */
         margin-top: 10px !important;      /* Lo separa del techo de la tarjeta */
         margin-bottom: 5px !important;
@@ -129,10 +141,20 @@
 
     /* 🔥 MODIFICACIÓN CLAVE: Bajamos los títulos y pines para que no tapen la X */
     .sidebar-contenido {
-        padding: 20px !important;
+        padding: 15px !important; // Bajamos levemente a 15px para optimizar espacio táctil
         height: calc(100vh - 60px) !important;
         overflow-y: auto !important; 
         position: relative !important;
+
+        // Ajustes específicos para las tablas/contenido del historial dentro de la barra
+        h3 {
+            font-size: 16px !important;
+            margin-top: 35px !important; /* Espacio de seguridad para no chocar con la cabecera móvil */
+        }
+        
+        .table-responsive {
+            max-height: calc(100vh - 160px) !important; 
+        }
     }
 
     .sidebar-contenido h2 {
@@ -157,9 +179,4 @@
             gap: 3px !important;           
         }
     }
-
-
-
-
-    
 }

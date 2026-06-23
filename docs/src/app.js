@@ -216,7 +216,6 @@ if (inputBuscarDocente) {
 }
 
 // 2. EVENTOS DEL MODAL DE EQUIPOS
-// // 2. EVENTOS DEL MODAL DE EQUIPOS
 // Cambiamos el listener directo por uno asíncrono para que repinte las netbooks en vivo
 const botonModalEquipos = document.getElementById('btn-abrir-modal');
 if (botonModalEquipos) {
@@ -669,10 +668,14 @@ if (btnCloseModalProfes) {
     });
 }
 
-// 5. Escuchar el envío del Formulario (Alta o Modificación)
-if (formProfesor) {
-    formProfesor.addEventListener('submit', async (e) => {
-        e.preventDefault(); // Evita que la página se recargue
+// =========================================================================
+// 5. Escuchar el CLIC del Botón (Alta o Modificación de forma aislada)
+// =========================================================================
+const btnGuardarProfe = document.getElementById('btn-guardar-profe'); // 👈 Capturamos el botón directo
+
+if (btnGuardarProfe) {
+    btnGuardarProfe.addEventListener('click', async (e) => {
+        e.preventDefault(); // 🔥 CLAVE: Evita que el navegador intente validar o enviar el formulario del fondo
 
         const idActual = inputProfeId.value;
         const datosProfe = {
@@ -682,28 +685,30 @@ if (formProfesor) {
             celular: inputProfeCelular.value.trim() || null
         };
 
+        // 🛑 VALIDACIÓN MANUAL (Opcional pero recomendada):
+        // Como desactivamos la validación nativa del navegador, nos aseguramos acá de que al menos pongan el nombre.
+        if (!datosProfe.nombre_completo) {
+            alert("Por favor, ingrese el nombre completo del profesor.");
+            inputProfeNombre.focus();
+            return;
+        }
+
         try {
             if (idActual) {
-                // ✏️ MODO MODIFICACIÓN: Si el ID oculto tiene valor, actualizamos
+                // ✏️ MODO MODIFICACIÓN
                 await updateUsuario(idActual, datosProfe);
-                mostrarNotificacion("✅ ¡Profesor actualizado con éxito!");
-
+                alert("✅ ¡Profesor actualizado con éxito!"); // Usamos alert común por si acaso
             } else {
-                // ➕ MODO ALTA: Si no hay ID, es un profesor nuevo
+                // ➕ MODO ALTA
                 await insertUsuario(datosProfe);
-                mostrarNotificacion("✅ ¡Profesor registrado con éxito!");
-
+                alert("✅ ¡Profesor registrado con éxito!");
             }
 
             resetearFormularioProfe();
             await cargarYMostrarProfesores(); // Recarga la tabla con los cambios
 
-            // Opcional: Si en tu pantalla principal tenés un select de profesores para los préstamos,
-            // acá podrías llamar a la función que lo llena para que aparezca el nuevo profe al instante.
-
         } catch (error) {
-            mostrarNotificacion("❌ Por favor, seleccione un curso válido de la lista desplegable.", 'error');
-
+            alert("❌ Hubo un error al guardar los datos del profesor.");
             console.error(error);
         }
     });

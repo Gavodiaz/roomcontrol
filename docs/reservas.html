@@ -31,11 +31,20 @@
                     </button>
                 </div>
 
+
+                <div class="contenedor-botones-movil">
+                    <button type="button" class="btn-movil-accion btn-movil-reservas"
+                        onclick="toggleSidebar('sidebar-historial')">
+                        📋 Ver Historial
+                    </button>
+                </div>
+
                 <form id="form-reservas">
-                    
+
                     <div class="row g-3 mb-4">
                         <div class="col-md-8">
-                            <label for="docente" class="form-label" style="font-weight: 500; color: #475569;">Seleccionar Docente:</label>
+                            <label for="docente" class="form-label"
+                                style="font-weight: 500; color: #475569;">Seleccionar Docente:</label>
                             <div style="display: flex; gap: 10px;">
                                 <input type="text" id="docente" list="lista-docentes"
                                     placeholder="🔍 Tipeá nombre, apellido o DNI..." required autocomplete="off"
@@ -49,8 +58,40 @@
                             <datalist id="lista-docentes"></datalist>
                         </div>
 
+
+                        <div class="form-group">
+                            <label for="input-curso" class="form-label fw-bold" style="color: #1e293b;">Curso /
+                                Ubicación:</label>
+
+                            <input type="text" id="input-curso" list="lista-cursos-reservas" class="form-control"
+                                placeholder="Ej: 1° 1° o tipee para buscar...">
+
+                            <datalist id="lista-cursos-reservas">
+                                <option value="1°1°"></option>
+                                <option value="1°2°"></option>
+                                <option value="1°3°"></option>
+                                <option value="1°4°"></option>
+                                <option value="1°5°"></option>
+                                <option value="2°1°"></option>
+                                <option value="2°2°"></option>
+                                <option value="2°3°"></option>
+                                <option value="2°4°"></option>
+                                <option value="3°1°"></option>
+                                <option value="3°2°"></option>
+                                <option value="3°3°"></option>
+                                <option value="3°4°"></option>
+                                <option value="4°1°"></option>
+                                <option value="4°2°"></option>
+                                <option value="4°3°"></option>
+                                <option value="4°4°"></option>
+                            </datalist>
+                        </div>
+
+
+
                         <div class="col-md-4">
-                            <label for="input-fecha" class="form-label" style="font-weight: 500; color: #475569;">Fecha de la Reserva:</label>
+                            <label for="input-fecha" class="form-label" style="font-weight: 500; color: #475569;">Fecha
+                                de la Reserva:</label>
                             <input type="date" id="input-fecha" class="form-control" style="padding: 10px;" required>
                         </div>
                     </div>
@@ -66,49 +107,56 @@
                                 <h3 class="turno-titulo">🌅 Turno Mañana</h3>
                                 <div class="grilla-horas">
                                     <div class="control-hora-chip">
-                                        <input type="checkbox" id="res-hora-1" class="check-moderno" name="hora" value="1">
+                                        <input type="checkbox" id="res-hora-1" class="check-moderno" name="hora"
+                                            value="1">
                                         <label for="res-hora-1" class="label-check-moderno">
                                             <span class="numero-hora">1° Hora</span>
                                             <span class="rango-hora">(8:00 a 8:40)</span>
                                         </label>
                                     </div>
                                     <div class="control-hora-chip">
-                                        <input type="checkbox" id="res-hora-2" class="check-moderno" name="hora" value="2">
+                                        <input type="checkbox" id="res-hora-2" class="check-moderno" name="hora"
+                                            value="2">
                                         <label for="res-hora-2" class="label-check-moderno">
                                             <span class="numero-hora">2° Hora</span>
                                             <span class="rango-hora">(8:40 a 9:20)</span>
                                         </label>
                                     </div>
                                     <div class="control-hora-chip">
-                                        <input type="checkbox" id="res-hora-3" class="check-moderno" name="hora" value="3">
+                                        <input type="checkbox" id="res-hora-3" class="check-moderno" name="hora"
+                                            value="3">
                                         <label for="res-hora-3" class="label-check-moderno">
                                             <span class="numero-hora">3° Hora</span>
                                             <span class="rango-hora">(9:30 a 10:10)</span>
                                         </label>
                                     </div>
                                     <div class="control-hora-chip">
-                                        <input type="checkbox" id="res-hora-4" class="check-moderno" name="hora" value="4">
+                                        <input type="checkbox" id="res-hora-4" class="check-moderno" name="hora"
+                                            value="4">
                                         <label for="res-hora-4" class="label-check-moderno">
                                             <span class="numero-hora">4° Hora</span>
                                             <span class="rango-hora">(10:10 a 10:50)</span>
                                         </label>
                                     </div>
                                     <div class="control-hora-chip">
-                                        <input type="checkbox" id="res-hora-5" class="check-moderno" name="hora" value="5">
+                                        <input type="checkbox" id="res-hora-5" class="check-moderno" name="hora"
+                                            value="5">
                                         <label for="res-hora-5" class="label-check-moderno">
                                             <span class="numero-hora">5° Hora</span>
                                             <span class="rango-hora">(10:50 a 11:30)</span>
                                         </label>
                                     </div>
                                     <div class="control-hora-chip">
-                                        <input type="checkbox" id="res-hora-6" class="check-moderno" name="hora" value="6">
+                                        <input type="checkbox" id="res-hora-6" class="check-moderno" name="hora"
+                                            value="6">
                                         <label for="res-hora-6" class="label-check-moderno">
                                             <span class="numero-hora">6° Hora</span>
                                             <span class="rango-hora">(11:40 a 12:20)</span>
                                         </label>
                                     </div>
                                     <div class="control-hora-chip">
-                                        <input type="checkbox" id="res-hora-7" class="check-moderno" name="hora" value="7">
+                                        <input type="checkbox" id="res-hora-7" class="check-moderno" name="hora"
+                                            value="7">
                                         <label for="res-hora-7" class="label-check-moderno">
                                             <span class="numero-hora">7° Hora</span>
                                             <span class="rango-hora">(12:20 a 13:00)</span>
@@ -121,49 +169,56 @@
                                 <h3 class="turno-titulo">🌇 Turno Tarde / Vespertino</h3>
                                 <div class="grilla-horas">
                                     <div class="control-hora-chip">
-                                        <input type="checkbox" id="res-hora-8" class="check-moderno" name="hora" value="8">
+                                        <input type="checkbox" id="res-hora-8" class="check-moderno" name="hora"
+                                            value="8">
                                         <label for="res-hora-8" class="label-check-moderno">
                                             <span class="numero-hora">8° Hora</span>
                                             <span class="rango-hora">(13:30 a 14:10)</span>
                                         </label>
                                     </div>
                                     <div class="control-hora-chip">
-                                        <input type="checkbox" id="res-hora-9" class="check-moderno" name="hora" value="9">
+                                        <input type="checkbox" id="res-hora-9" class="check-moderno" name="hora"
+                                            value="9">
                                         <label for="res-hora-9" class="label-check-moderno">
                                             <span class="numero-hora">9° Hora</span>
                                             <span class="rango-hora">(14:10 a 14:50)</span>
                                         </label>
                                     </div>
                                     <div class="control-hora-chip">
-                                        <input type="checkbox" id="res-hora-10" class="check-moderno" name="hora" value="10">
+                                        <input type="checkbox" id="res-hora-10" class="check-moderno" name="hora"
+                                            value="10">
                                         <label for="res-hora-10" class="label-check-moderno">
                                             <span class="numero-hora">10° Hora</span>
                                             <span class="rango-hora">(14:50 a 15:30)</span>
                                         </label>
                                     </div>
                                     <div class="control-hora-chip">
-                                        <input type="checkbox" id="res-hora-11" class="check-moderno" name="hora" value="11">
+                                        <input type="checkbox" id="res-hora-11" class="check-moderno" name="hora"
+                                            value="11">
                                         <label for="res-hora-11" class="label-check-moderno">
                                             <span class="numero-hora">11° Hora</span>
                                             <span class="rango-hora">(15:40 a 16:20)</span>
                                         </label>
                                     </div>
                                     <div class="control-hora-chip">
-                                        <input type="checkbox" id="res-hora-12" class="check-moderno" name="hora" value="12">
+                                        <input type="checkbox" id="res-hora-12" class="check-moderno" name="hora"
+                                            value="12">
                                         <label for="res-hora-12" class="label-check-moderno">
                                             <span class="numero-hora">12° Hora</span>
                                             <span class="rango-hora">(16:20 a 17:00)</span>
                                         </label>
                                     </div>
                                     <div class="control-hora-chip">
-                                        <input type="checkbox" id="res-hora-13" class="check-moderno" name="hora" value="13">
+                                        <input type="checkbox" id="res-hora-13" class="check-moderno" name="hora"
+                                            value="13">
                                         <label for="res-hora-13" class="label-check-moderno">
                                             <span class="numero-hora">13° Hora</span>
                                             <span class="rango-hora">(17:10 a 17:50)</span>
                                         </label>
                                     </div>
                                     <div class="control-hora-chip">
-                                        <input type="checkbox" id="res-hora-14" class="check-moderno" name="hora" value="14">
+                                        <input type="checkbox" id="res-hora-14" class="check-moderno" name="hora"
+                                            value="14">
                                         <label for="res-hora-14" class="label-check-moderno">
                                             <span class="numero-hora">14° Hora</span>
                                             <span class="rango-hora">(17:50 a 18:30)</span>
@@ -176,7 +231,8 @@
                     </div>
 
                     <div class="mb-4">
-                        <label class="form-label" style="font-weight: 500; color: #475569;">Seleccionar Equipo / Aula:</label>
+                        <label class="form-label" style="font-weight: 500; color: #475569;">Seleccionar Equipo /
+                            Aula:</label>
                         <button type="button" id="btn-abrir-modal" class="btn btn-primary w-100"
                             style="padding: 12px; font-weight: bold; background-color: #2563eb; border: none; color: white; border-radius: 6px;">
                             Seleccionar Equipos Masivos
@@ -185,10 +241,12 @@
 
                     <div class="row g-2 mt-2">
                         <div class="col-sm-6">
-                            <button type="submit" class="btn btn-success w-100 py-2 font-weight-bold" style="font-weight: bold;">Confirmar Reserva</button>
+                            <button type="submit" class="btn btn-success w-100 py-2 font-weight-bold"
+                                style="font-weight: bold;">Confirmar Reserva</button>
                         </div>
                         <div class="col-sm-6">
-                            <a id="btn-volver-inicio" href="index.html" class="btn btn-outline-secondary w-100 py-2">Volver al Inicio</a>
+                            <a id="btn-volver-inicio" href="index.html"
+                                class="btn btn-outline-secondary w-100 py-2">Volver al Inicio</a>
                         </div>
                     </div>
                 </form>
@@ -205,7 +263,8 @@
                 Selección de Equipos / Aulas
             </h3>
             <p style="text-align: center; color: #64748b; font-size: 0.9em; margin-bottom: 20px;">
-                Los equipos en <span style="color: #dc3545; font-weight: bold;">rojo</span> ya están reservados para la fecha elegida.
+                Los equipos en <span style="color: #dc3545; font-weight: bold;">rojo</span> ya están reservados para la
+                fecha elegida.
             </p>
 
             <div id="contenedor-equipos"
@@ -225,25 +284,42 @@
         </div>
     </div>
 
+
     <div id="sidebar-historial" class="sidebar-flotante" tabindex="0">
+
         <div class="sidebar-pestana">
             📅 <span>Historial Reservas</span>
         </div>
+
         <div class="sidebar-contenido">
-            <h2>Historial del Mes</h2>
-            <div class="table-responsive">
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <button type="button" class="btn-cerrar-sidebar" onclick="toggleSidebar('sidebar-historial')">✕
+                    Cerrar</button>
+                <button id="btn-fijar" class="btn-pin" type="button">📌</button>
+            </div>
+
+            <h3>Historial del Mes</h3>
+
+            <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
                 <table class="table">
                     <thead>
                         <tr>
                             <th style="text-align: left; padding: 10px;">Docente</th>
                             <th style="text-align: left; padding: 10px;">Equipo</th>
+                            <th>Curso</th>
                             <th style="text-align: center; padding: 10px;">Fecha</th>
                         </tr>
                     </thead>
-                    <tbody id="tabla-historial-body"></tbody>
+                    <tbody id="tabla-historial-body">
+                    </tbody>
                 </table>
             </div>
+
         </div>
+    </div>
+
+    </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
@@ -251,4 +327,5 @@
     <script type="module" src="src/reservas.js"></script>
 
 </body>
+
 </html>
